@@ -26,8 +26,13 @@ typedef enum {UP, DOWN, RIGHT, LEFT} Direction;
 
 typedef struct
 {
+    int x,y;
+} Position;
+
+typedef struct
+{
     int id;
-    int x, y;
+    Position p;
     Direction dir;
 } Entity;
 
@@ -104,7 +109,7 @@ void print_map_at(int, int);
 void print_map();
 void print_pacman(Entity);
 char get_map_at(int, int);
-void get_pac_eff_pos(int*, int*);
+Position get_pac_eff_pos(Position);
 int mod(int, int);
 
 #endif

@@ -9,7 +9,7 @@ void control_main(int pos_in, int ghost_out)
     Entity pacman = {PACMAN_ID, 27, 23, RIGHT};
     Entity tmp_pkg;
 
-    int x,y;
+    Position pos;
     int i,j;
 
     while(1)
@@ -18,16 +18,16 @@ void control_main(int pos_in, int ghost_out)
         
         for(i=-1; i<=1; i++)
         {
-            x=pacman.x+i;
-            y=pacman.y;
-            get_pac_eff_pos(&y, &x);
+            pos.x=pacman.p.x+i;
+            pos.y=pacman.p.y;
+            pos = get_pac_eff_pos(pos);
             
-            mvaddch(y, x, MAP[y][x]);
+            mvaddch(pos.y, pos.x, MAP[pos.y][pos.x]);
         }
         
         pacman = tmp_pkg;
         
-        mvprintw(0,60, "x:%d,y:%d,d:%d", pacman.x, pacman.y, pacman.dir);
+        mvprintw(0,60, "x:%d,y:%d,d:%d", pacman.p.x, pacman.p.y, pacman.dir);
         print_pacman(pacman);
         refresh();
     }

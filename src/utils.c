@@ -1,4 +1,6 @@
 #include <curses.h>
+#include <math.h>
+#include <stdlib.h>
 
 #include "utils.h"
 
@@ -20,7 +22,7 @@ void print_map_at(int x, int y)
 
 void print_map()
 {
-    int i, j;
+    int i,j;
 
     for(i=0; i<55; i++)
         for(j=0; j<31; j++)
@@ -29,33 +31,47 @@ void print_map()
 
 void print_pacman(Entity pacman)
 {
-    int x,y, i;
+    Position pos;
+    int i;
     
     attron(COLOR_PAIR(2));
     for(i=0; i<3; i++)
     {
-        x=pacman.x+(i-1);
-        y=pacman.y;
-        get_pac_eff_pos(&y, &x);
-        mvaddch(y,x, S_PAC[pacman.dir][i]);
+        pos.x=pacman.p.x+(i-1);
+        pos.y=pacman.p.y;
+        pos = get_pac_eff_pos(pos);
+        mvaddch(pos.y,pos.x, S_PAC[pacman.dir][i]);
     }
     attroff(COLOR_PAIR(2));
 }
 
-char get_map_at(int y, int x)
+char get_map_at(int x, int y)
 {
-    get_pac_eff_pos(&y, &x);
-    return MAP[y][x];
+    Position orig_pos = {x,y};
+    Position mod_pos = get_pac_eff_pos(orig_pos);
+
+    return MAP[mod_pos.y][mod_pos.x];
 }
 
-void get_pac_eff_pos(int* y, int* x)
+Position get_pac_eff_pos(Position pos)
 {
-    *x = mod(*x, MAPXMAX);
-    *y = mod(*y, MAPYMAX);
+    Position mod_pos = {mod(pos.x, MAPXMAX), mod(pos.y, MAPYMAX)};
+
+    return mod_pos;
 }
 
 int mod(int a, int b)
 {
     int r = a % b;
     return r < 0 ? r + b : r;
+}
+
+int rand_between (int min, int max)
+{
+    return min+rand()%(max-min+1);
+}
+
+int distance (Position a, Position b)
+{
+    return sqrt(pow(b.x-a.x,2) + pow(b.y-a.y,2));
 }
