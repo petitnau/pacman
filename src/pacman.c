@@ -11,27 +11,31 @@ _Bool can_cut_turn(Entity pacman, Direction direction)
     switch(direction)
     {
         case UP:
-            for(i=1; i<=3; i++)
+            for(i=0; i<4; i++)
             {
                 if(pacman.dir == UP || pacman.dir == DOWN) 
                     return true;
                 else if(pacman.dir == RIGHT)
+                {
                     if(MAP[pacman.y-1][pacman.x+i]==' ')
                         return true;
+                }
                 else
                     if(MAP[pacman.y-1][pacman.x-i]==' ')
                         return true;
             }
             break;
         case DOWN:
-            for(i=1; i<=3; i++)
+            for(i=0; i<4; i++)
             {
                 if(pacman.dir == UP || pacman.dir == DOWN) 
                     return true;
-                else if(pacman.dir == RIGHT)
+                else if(pacman.dir == RIGHT)    
+                {
                     if(MAP[pacman.y+1][pacman.x+i]==' ')
                         return true;
-                else
+                }
+                else                    
                     if(MAP[pacman.y+1][pacman.x-i]==' ')
                         return true;
             }
@@ -42,8 +46,10 @@ _Bool can_cut_turn(Entity pacman, Direction direction)
                 if(pacman.dir == RIGHT || pacman.dir == LEFT) 
                     return true;
                 else if(pacman.dir == UP)
+                {
                     if(MAP[pacman.y-i][pacman.x+2]==' ')
                         return true;
+                }
                 else
                     if(MAP[pacman.y+i][pacman.x+2]==' ')
                         return true;
@@ -55,8 +61,10 @@ _Bool can_cut_turn(Entity pacman, Direction direction)
                 if(pacman.dir == RIGHT || pacman.dir == LEFT)
                     return true;
                 else if(pacman.dir == UP)
+                {
                     if(MAP[pacman.y-i][pacman.x-2]==' ')
                         return true;
+                }
                 else
                     if(MAP[pacman.y+i][pacman.x-2]==' ')
                         return true;
@@ -81,7 +89,7 @@ _Bool can_move(Entity pacman, Direction direction)
             }
             break;
         case DOWN:
-            for(i=1; i<=3; i++)
+            for(i=-1; i<=1; i++)
             {
                 if(MAP[pacman.y+1][pacman.x+i] != ' ')
                     return false;
@@ -139,6 +147,7 @@ void pacman_main(int cmd_in, int pos_out)
                     break;
             }
         }
+
         write(pos_out, &pacman, sizeof(pacman)); //invia la posizione a control
 
         usleep(100000);

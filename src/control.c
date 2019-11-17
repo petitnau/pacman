@@ -9,10 +9,9 @@ void control_main(int pos_in, int ghost_out)
     Entity pacman = {PACMAN_ID, 27, 23, RIGHT};
     Entity tmp_pkg;
 
-    mvaddch(0,0, MAP[25][21]);
     refresh();
 
-    int i;
+    int i,j;
 
     while(1)
     {
@@ -27,7 +26,11 @@ void control_main(int pos_in, int ghost_out)
         
         mvprintw(0,60, "x:%d,y:%d,d:%d", pacman.x, pacman.y, pacman.dir);
 
+
+        attron(COLOR_PAIR(2));
         mvaddstr(pacman.y, pacman.x-1, "(*<");
+        attroff(COLOR_PAIR(2));
+        
         refresh();
     }
 }
