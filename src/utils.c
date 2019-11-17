@@ -32,14 +32,14 @@ void print_map()
 void print_pellets()
 {
     int i, j;
-    attron(COLOR_PAIR(1));
+    attron(COLOR_PAIR(2));
 
     for(i=0; i<55; i++)
         for(j=0; j<31; j++)
             if(PELLETS[j][i] != ' ')
                 mvaddch(j, i, NCURSES_ACS(PELLETS[j][i]));
         
-    attroff(COLOR_PAIR(1));
+    attroff(COLOR_PAIR(2));
 }
 
 void print_pacman(Entity pacman)
@@ -47,7 +47,7 @@ void print_pacman(Entity pacman)
     Position pos;
     int i;
     
-    attron(COLOR_PAIR(2));
+    attron(COLOR_PAIR(3));
     for(i=0; i<3; i++)
     {
         pos.x=pacman.p.x+(i-1);
@@ -55,7 +55,7 @@ void print_pacman(Entity pacman)
         pos = get_pac_eff_pos(pos);
         mvaddch(pos.y,pos.x, S_PAC[pacman.dir][i]);
     }
-    attroff(COLOR_PAIR(2));
+    attroff(COLOR_PAIR(3));
 }
 
 char get_map_at(int x, int y)
