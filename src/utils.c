@@ -88,3 +88,27 @@ int distance (Position a, Position b)
 {
     return sqrt(pow(b.x-a.x,2) + pow(b.y-a.y,2));
 }
+
+Position offset_position (Position position, Direction direction, int quantity)
+{
+    switch (direction)
+    {
+        case UP:
+#ifdef LEGACY
+            position.x -= quantity;
+#endif
+            position.y -= quantity;
+            break;
+        case LEFT:
+            position.x -= quantity;
+            break;
+        case DOWN:
+            position.y -= quantity;
+            break;
+        case RIGHT:
+            position.x += quantity;
+            break;
+    }
+
+    return position;
+}

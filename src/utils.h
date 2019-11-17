@@ -113,4 +113,10 @@ char get_map_at(int, int);
 Position get_pac_eff_pos(Position);
 int mod(int, int);
 
+int random_between(int, int);
+int distance(Position, Position);
+int minIndex(int, int *);
+Position offset_position(Position, Direction, int);
+Direction reverseDirection(Direction);
+
 #endif

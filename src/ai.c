@@ -1,38 +1,38 @@
-/*
 #include <limits.h>
 
 #include "ai.h"
+#include "utils.h"
 
-Position blinkyTarget (Character pacman)
+Position blinkyTarget (Entity pacman)
 {
-    return pacman.position;
+    return pacman.p;
 }
 
-Position pinkyTarget (Character pacman)
+Position pinkyTarget (Entity pacman)
 {
-    return offsetPosition(pacman.position, pacman.direction, PINKY_CHASE_OFFSET);
+    return offset_position(pacman.p, pacman.dir, PINKY_CHASE_OFFSET);
 }
 
-Position inkyTarget (Character pacman, Character blinky)
+Position inkyTarget (Entity pacman, Entity blinky)
 {
     Position offset, target;
 
-    offset = offsetPosition(pacman.position, pacman.direction, INKY_CHASE_OFFSET);
-    target.x = 2*offset.x - blinky.position.x; // semplificato da offset.x - (blinky.position.x - offset.x)
-    target.y = 2*offset.y - blinky.position.y;
+    offset = offset_position(pacman.p, pacman.dir, INKY_CHASE_OFFSET);
+    target.x = 2*offset.x - blinky.p.x; // semplificato da offset.x - (blinky.position.x - offset.x)
+    target.y = 2*offset.y - blinky.p.y;
 
     return target;
 }
 
-Position clydeTarget (Character pacman, Character clyde)
+Position clydeTarget (Entity pacman, Entity clyde)
 {
-    if (distance(pacman.position, clyde.position) >= 8)
-        return pacman.position;
+    if (distance(pacman.p, clyde.p) >= 8)
+        return pacman.p;
     else
-        return SCATTER[CLYDE];
+        return SCATTER[3]; //3=clyde
 }
 
-Position scatterTarget (CId id)
+Position scatterTarget (int id)
 {
     return SCATTER[id];
 }
@@ -85,4 +85,3 @@ Direction chooseDirectionTarget (Position ghost, Position target, _Bool possible
 
     return minIndex(4, dirDist);
 }
-*/
