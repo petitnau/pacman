@@ -4,7 +4,7 @@
 #include "pacman.h"
 #include "utils.h"
 
-_Bool can_cut_turn(Entity pacman, Direction direction)
+_Bool accept_turn(Entity pacman, Direction direction)
 {
     int i;
 
@@ -120,7 +120,7 @@ void pacman_main(int cmd_in, int pos_out)
     {
         if(read(cmd_in, &tmp_dir, sizeof(tmp_dir)) != -1)
         {            
-            if(can_cut_turn(pacman, tmp_dir))
+            if(accept_turn(pacman, tmp_dir))
             {
                 nextDir = tmp_dir;
             }
