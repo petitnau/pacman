@@ -5,7 +5,7 @@
 #include "utils.h"
 
 #define VERTICALCUT 6
-#define HORIZONTALCUT 3
+#define HORIZONTALCUT 4
 
 _Bool accept_turn(Entity pacman, Direction direction)
 {
@@ -19,9 +19,9 @@ _Bool accept_turn(Entity pacman, Direction direction)
             else
                 for(i=0; i<VERTICALCUT; i++)
                 {
-                    if(pacman.dir == RIGHT && get_map_at(pacman.y-1, pacman.x+i)==' ')
+                    if(pacman.dir == RIGHT && get_map_at(pacman.p.x+i, pacman.p.y-1)==' ')
                             return true;
-                    else if(pacman.dir == LEFT && get_map_at(pacman.y-1, pacman.x-i)==' ')
+                    else if(pacman.dir == LEFT && get_map_at(pacman.p.x-i, pacman.p.y-1)==' ')
                             return true;
                 }
             break;
@@ -31,9 +31,9 @@ _Bool accept_turn(Entity pacman, Direction direction)
             else
                 for(i=0; i<VERTICALCUT; i++)
                 {
-                    if(pacman.dir == RIGHT && get_map_at(pacman.y+1, pacman.x+i)==' ')
+                    if(pacman.dir == RIGHT && get_map_at(pacman.p.x+i, pacman.p.y+1)==' ')
                             return true;
-                    else if(pacman.dir == LEFT && get_map_at(pacman.y+1, pacman.x-i)==' ')
+                    else if(pacman.dir == LEFT && get_map_at(pacman.p.x-i, pacman.p.y+1)==' ')
                             return true;
                 }
             break;
@@ -43,9 +43,9 @@ _Bool accept_turn(Entity pacman, Direction direction)
             else
                 for(i=0; i<HORIZONTALCUT; i++)
                 {
-                    if(pacman.dir == UP && get_map_at(pacman.y-i, pacman.x+2)==' ')
+                    if(pacman.dir == UP && get_map_at(pacman.p.x+2, pacman.p.y-i)==' ')
                             return true;
-                    else if(pacman.dir == DOWN && get_map_at(pacman.y+i, pacman.x+2)==' ')
+                    else if(pacman.dir == DOWN && get_map_at(pacman.p.x+2, pacman.p.y+i)==' ')
                             return true;
                 }
             break;
@@ -55,9 +55,9 @@ _Bool accept_turn(Entity pacman, Direction direction)
             else
                 for(i=0; i<HORIZONTALCUT; i++)
                 {
-                    if(pacman.dir == UP && get_map_at(pacman.y-i, pacman.x-2)==' ')
+                    if(pacman.dir == UP && get_map_at(pacman.p.x-2, pacman.p.y-i)==' ')
                             return true;
-                    else if(pacman.dir == DOWN && get_map_at(pacman.y+i, pacman.x-2)==' ')
+                    else if(pacman.dir == DOWN && get_map_at(pacman.p.x-2, pacman.p.y+i)==' ')
                             return true;
                 }
             break;
@@ -75,23 +75,23 @@ _Bool can_move(Entity pacman, Direction direction)
         case UP:
             for(i=-1; i<=1; i++)
             {
-                if(get_map_at(pacman.y-1, pacman.x+i) != ' ')
+                if(get_map_at(pacman.p.x+i, pacman.p.y-1) != ' ')
                     return false;
             }
             break;
         case DOWN:
             for(i=-1; i<=1; i++)
             {
-                if(get_map_at(pacman.y+1, pacman.x+i) != ' ')
+                if(get_map_at(pacman.p.x+i, pacman.p.y+1) != ' ')
                     return false;
             }
             break;
         case RIGHT:
-            if(get_map_at(pacman.y, pacman.x+2) != ' ')
+            if(get_map_at(pacman.p.x+2, pacman.p.y) != ' ')
                 return false;
             break;
         case LEFT:
-            if(get_map_at(pacman.y, pacman.x-2) != ' ')
+            if(get_map_at(pacman.p.x-2, pacman.p.y) != ' ')
                 return false;
             break;
     }
@@ -126,24 +126,24 @@ void pacman_main(int cmd_in, int pos_out)
             switch(pacman.dir)
             {
                 case UP:
-                    pacman.y--;
+                    pacman.p.y--;
                     break;
                 case DOWN:
-                    pacman.y++;
+                    pacman.p.y++;
                     break;
                 case RIGHT:
-                    pacman.x++;
+                    pacman.p.x++;
                     break;
                 case LEFT:
-                    pacman.x--;
+                    pacman.p.x--;
                     break;
             }
         }
 
-        if(pacman.x == MAPXMIN && pacman.dir == LEFT)
-            pacman.x = MAPXMAX;
-        if(pacman.x == MAPXMAX && pacman.dir == RIGHT)
-            pacman.x = MAPXMIN;
+        if(pacman.p.x == MAPXMIN && pacman.dir == LEFT)
+            pacman.p.x = MAPXMAX;
+        if(pacman.p.x == MAPXMAX && pacman.dir == RIGHT)
+            pacman.p.x = MAPXMIN;
 
         write(pos_out, &pacman, sizeof(pacman)); //invia la posizione a control
 

@@ -26,8 +26,13 @@ typedef enum {UP, DOWN, RIGHT, LEFT} Direction;
 
 typedef struct
 {
+    int x,y;
+} Position;
+
+typedef struct
+{
     int id;
-    int x, y;
+    Position p;
     Direction dir;
 } Entity;
 
@@ -105,7 +110,13 @@ void print_map();
 void print_pellets();
 void print_pacman(Entity);
 char get_map_at(int, int);
-void get_pac_eff_pos(int*, int*);
+Position get_pac_eff_pos(Position);
 int mod(int, int);
+
+int rand_between(int, int);
+int distance(Position, Position);
+int min_index(int, int *);
+Position offset_position(Position, Direction, int);
+Direction reverse_direction(Direction);
 
 #endif
