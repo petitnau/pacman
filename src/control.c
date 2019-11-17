@@ -47,22 +47,22 @@ void score_handler(int * score, Entity tmp_pkg)
     switch (tmp_pkg.dir)
         {
             case UP:
-                next_ch = mvinch(tmp_pkg.y, tmp_pkg.x); //prende carattere a schermo nella pos y,x
+                next_ch = mvinch(tmp_pkg.p.y, tmp_pkg.p.x); //prende carattere a schermo nella pos y,x
                 if(next_ch == '~')
                     *score += 100;
                 break;
             case DOWN:
-                next_ch = mvinch(tmp_pkg.y, tmp_pkg.x);
+                next_ch = mvinch(tmp_pkg.p.y, tmp_pkg.p.x);
                 if(next_ch == '~')
                     *score += 100;
             break;
             case RIGHT:
-                next_ch = mvinch(tmp_pkg.y, tmp_pkg.x+1);
+                next_ch = mvinch(tmp_pkg.p.y, tmp_pkg.p.x+1);
                 if(next_ch == '~')
                     *score += 100;
             break;
             case LEFT:
-                next_ch = mvinch(tmp_pkg.y, tmp_pkg.x-1);
+                next_ch = mvinch(tmp_pkg.p.y, tmp_pkg.p.x-1);
                 if(next_ch == '~')
                     *score += 100;
             break;
