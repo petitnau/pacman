@@ -21,6 +21,6 @@ void player_main(int cmd_out)
                 break;
         }
 
-        write(cmd_out, &direction, sizeof(direction));
+        write(cmd_out, &direction, sizeof(direction));  //scrivo input a pacman
     }
 }

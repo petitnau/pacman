@@ -109,6 +109,7 @@ void pacman_main(int cmd_in, int pos_out)
 
     while(1)
     {
+        //Legge solo l'ultimo inserito nella pipe e controlla se è una mossa valida
         while(read(cmd_in, &tmp_dir, sizeof(tmp_dir)) != -1)
         {            
             if(accept_turn(pacman, tmp_dir))
@@ -117,7 +118,7 @@ void pacman_main(int cmd_in, int pos_out)
             }
         }
 
-        if(can_move(pacman, nextDir))
+        if(can_move(pacman, nextDir))   //controlla se può fare movimento nella nuova direzione
             pacman.dir = nextDir;
                   
         if(can_move(pacman, pacman.dir))
@@ -146,7 +147,7 @@ void pacman_main(int cmd_in, int pos_out)
 
         write(pos_out, &pacman, sizeof(pacman)); //invia la posizione a control
 
-        if(pacman.dir == UP || pacman.dir == DOWN)
+        if(pacman.dir == UP || pacman.dir == DOWN) //gestisce la velocità di pacman
             usleep(165000);
         else
             usleep(100000);
