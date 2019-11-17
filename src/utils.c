@@ -84,6 +84,17 @@ int rand_between (int min, int max)
     return min+rand()%(max-min+1);
 }
 
+int min_index (int size, int *array)
+{
+    int i, x=0;
+
+    for(i=0; i < size; i++)
+        if (array[i] < array[x]) //se uguali viene seguita la priorità up left down right
+            x = i;
+
+    return i;
+}
+
 int distance (Position a, Position b)
 {
     return sqrt(pow(b.x-a.x,2) + pow(b.y-a.y,2));
@@ -111,4 +122,15 @@ Position offset_position (Position position, Direction direction, int quantity)
     }
 
     return position;
+}
+
+Direction reverse_direction (Direction direction)
+{
+    switch (direction)
+    {
+        case UP:    return DOWN;
+        case LEFT:  return RIGHT;
+        case DOWN:  return UP;
+        case RIGHT: return LEFT;
+    }
 }

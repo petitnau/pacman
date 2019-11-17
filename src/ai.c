@@ -3,17 +3,17 @@
 #include "ai.h"
 #include "utils.h"
 
-Position blinkyTarget (Entity pacman)
+Position blinky_target (Entity pacman)
 {
     return pacman.p;
 }
 
-Position pinkyTarget (Entity pacman)
+Position pinky_target (Entity pacman)
 {
     return offset_position(pacman.p, pacman.dir, PINKY_CHASE_OFFSET);
 }
 
-Position inkyTarget (Entity pacman, Entity blinky)
+Position inky_target (Entity pacman, Entity blinky)
 {
     Position offset, target;
 
@@ -24,7 +24,7 @@ Position inkyTarget (Entity pacman, Entity blinky)
     return target;
 }
 
-Position clydeTarget (Entity pacman, Entity clyde)
+Position clyde_target (Entity pacman, Entity clyde)
 {
     if (distance(pacman.p, clyde.p) >= 8)
         return pacman.p;
@@ -32,17 +32,17 @@ Position clydeTarget (Entity pacman, Entity clyde)
         return SCATTER[3]; //3=clyde
 }
 
-Position scatterTarget (int id)
+Position scatter_target (int id)
 {
     return SCATTER[id];
 }
 
-Position eatenTarget ()
+Position eaten_target ()
 {
     return HOME_TARGET;
 }
 
-Direction chooseDirectionRandom (_Bool possibleDirections[4])
+Direction choose_direction_random (_Bool possibleDirections[4])
 {
     int i;
     int randomDirection;
@@ -52,7 +52,7 @@ Direction chooseDirectionRandom (_Bool possibleDirections[4])
         if (possibleDirections[i])
             numPossible++;
 
-    randomDirection = randomBetween(1, numPossible);
+    randomDirection = rand_between(1, numPossible);
 
     // Scorre le direzioni possibili e restituisce la numPossible-esima posizione
     for (i=0; i < 4; i++)
@@ -66,22 +66,22 @@ Direction chooseDirectionRandom (_Bool possibleDirections[4])
     }
 }
 
-Direction chooseDirectionTarget (Position ghost, Position target, _Bool possibleDirections[4])
+Direction choose_direction_target (Position ghost, Position target, _Bool possible_dirs[4])
 {
     int i;
-    int dirDist[4];
-    Position dirGhost[4] = {{ghost.x, ghost.y+1},  // up
+    int dir_dist[4];
+    Position dir_ghost[4] = {{ghost.x, ghost.y+1},  // up
                             {ghost.x-1, ghost.y},  // left
                             {ghost.x, ghost.y-1},  // down
                             {ghost.x+1, ghost.y}}; // right
 
     for (i=0; i < 4; i++)
     {
-        if (possibleDirections[i])
-            dirDist[i] = distance(dirGhost[i], target);
+        if (possible_dirs[i])
+            dir_dist[i] = distance(dir_ghost[i], target);
         else
-            dirDist[i] = INT_MAX;
+            dir_dist[i] = INT_MAX;
     }
 
-    return minIndex(4, dirDist);
+    return min_index(4, dir_dist);
 }
