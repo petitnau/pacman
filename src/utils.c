@@ -27,6 +27,19 @@ void print_map()
            print_map_at(i, j);
 }
 
+void print_pellets()
+{
+    int i, j;
+    attron(COLOR_PAIR(1));
+
+    for(i=0; i<55; i++)
+        for(j=0; j<31; j++)
+            if(PELLETS[j][i] != ' ')
+                mvaddch(j, i, NCURSES_ACS(PELLETS[j][i]));
+        
+    attroff(COLOR_PAIR(1));
+}
+
 void print_pacman(Entity pacman)
 {
     int x,y, i;

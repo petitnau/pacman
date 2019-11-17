@@ -40,6 +40,7 @@ void init()
 
     refresh();
     print_map();
+    print_pellets();
     refresh();
 }
 
