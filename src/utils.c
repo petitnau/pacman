@@ -29,7 +29,33 @@ void print_map()
 
 void print_pacman(Entity pacman)
 {
+    int x,y, i;
+    
     attron(COLOR_PAIR(2));
-    mvaddstr(pacman.y, pacman.x-1, "(*<");
+    for(i=0; i<3; i++)
+    {
+        x=pacman.x+(i-1);
+        y=pacman.y;
+        get_pac_eff_pos(&y, &x);
+        mvaddch(y,x, S_PAC[pacman.dir][i]);
+    }
     attroff(COLOR_PAIR(2));
+}
+
+char get_map_at(int y, int x)
+{
+    get_pac_eff_pos(&y, &x);
+    return MAP[y][x];
+}
+
+void get_pac_eff_pos(int* y, int* x)
+{
+    *x = mod(*x, MAPXMAX);
+    *y = mod(*y, MAPYMAX);
+}
+
+int mod(int a, int b)
+{
+    int r = a % b;
+    return r < 0 ? r + b : r;
 }

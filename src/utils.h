@@ -17,6 +17,11 @@
 #define PIPE_ERROR 16
 #define FORK_ERROR 32
 
+#define MAPXMIN 0
+#define MAPYMIN 0
+#define MAPXMAX 55
+#define MAPYMAX 31
+
 typedef enum {UP, DOWN, RIGHT, LEFT} Direction;
 
 typedef struct
@@ -25,6 +30,9 @@ typedef struct
     int x, y;
     Direction dir;
 } Entity;
+
+static const char S_PAC[4][3] = {"(*v", "^*)", "(*<", ">*)"};
+static const char S_GHST[3] = "[\"]";
 
 static const char *MAP[] = {
 "lqqqqqqqqqqqqqqqqqqqqqqqqqwqwqqqqqqqqqqqqqqqqqqqqqqqqqk",
@@ -36,8 +44,8 @@ static const char *MAP[] = {
 "x   lqqqqqk   lqk   lqqqqqqqqqqqqqk   lqk   lqqqqqk   x",
 "x   mqqqqqj   x@x   mqqqqqk@lqqqqqj   x@x   mqqqqqj   x",
 "x             x@x         x@x         x@x             x",
-"mqqqqqqqqqk   x@mqqqqk    x@x    lqqqqj@x   lqqqqqqqqqj",
-"@@@@@@@@@@x   x@lqqqqj    mqj    mqqqqk@x   x@@@@@@@@@@",
+"mqqqqqqqqqk   x@mqqqqqk   x@x   lqqqqqj@x   lqqqqqqqqqj",
+"@@@@@@@@@@x   x@lqqqqqj   mqj   mqqqqqk@x   x@@@@@@@@@@",
 "@@@@@@@@@@x   x@x                     x@x   x@@@@@@@@@@",
 "@@@@@@@@@@x   x@x   lqqqqq---qqqqqk   x@x   x@@@@@@@@@@",
 "qqqqqqqqqqj   mqj   x@@@@@@@@@@@@@x   mqj   mqqqqqqqqqq",
@@ -91,8 +99,12 @@ static const char *PELLETS[] = {
 "  ~                     ~     ~                     ~  ",
 "  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ",
 "                                                       "};
+
 void print_map_at(int, int);
 void print_map();
 void print_pacman(Entity);
+char get_map_at(int, int);
+void get_pac_eff_pos(int*, int*);
+int mod(int, int);
 
 #endif
