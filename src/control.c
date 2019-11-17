@@ -6,7 +6,7 @@
 
 void control_main(int pos_in, int ghost_out)
 {
-    Entity pacman = {PACMAN_ID, 27, 23, RIGHT};
+    Entity pacman = {PACMAN_ID, PAC_START_X, PAC_START_Y, PAC_START_DIR};
     Entity tmp_pkg;
 
     Position pos;

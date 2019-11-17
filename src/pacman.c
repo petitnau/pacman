@@ -101,7 +101,7 @@ _Bool can_move(Entity pacman, Direction direction)
 
 void pacman_main(int cmd_in, int pos_out)
 {
-    Entity pacman = {PACMAN_ID, 27, 23, UP};
+    Entity pacman = {PACMAN_ID, PAC_START_X, PAC_START_Y, PAC_START_DIR};
     Direction nextDir = UP;
 
     Direction tmp_dir;
@@ -140,10 +140,10 @@ void pacman_main(int cmd_in, int pos_out)
             }
         }
 
-        if(pacman.p.x == MAPXMIN && pacman.dir == LEFT)
-            pacman.p.x = MAPXMAX;
-        if(pacman.p.x == MAPXMAX && pacman.dir == RIGHT)
-            pacman.p.x = MAPXMIN;
+        if(pacman.p.x == 0 && pacman.dir == LEFT)
+            pacman.p.x = MAP_WIDTH;
+        if(pacman.p.x == MAP_WIDTH && pacman.dir == RIGHT)
+            pacman.p.x = 0;
 
         write(pos_out, &pacman, sizeof(pacman)); //invia la posizione a control
 

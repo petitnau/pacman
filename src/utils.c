@@ -24,8 +24,8 @@ void print_map()
 {
     int i,j;
 
-    for(i=0; i<55; i++)
-        for(j=0; j<31; j++)
+    for(i=0; i<MAP_WIDTH; i++)
+        for(j=0; j<MAP_HEIGHT; j++)
            print_map_at(i, j);
 }
 
@@ -34,8 +34,8 @@ void print_pellets()
     int i, j;
     attron(COLOR_PAIR(2));
 
-    for(i=0; i<55; i++)
-        for(j=0; j<31; j++)
+    for(i=0; i<MAP_WIDTH; i++)
+        for(j=0; j<MAP_HEIGHT; j++)
             if(PELLETS[j][i] != ' ')
                 mvaddch(j, i, NCURSES_ACS(PELLETS[j][i]));
         
@@ -68,7 +68,7 @@ char get_map_at(int x, int y)
 
 Position get_pac_eff_pos(Position pos)
 {
-    Position mod_pos = {mod(pos.x, MAPXMAX), mod(pos.y, MAPYMAX)};
+    Position mod_pos = {mod(pos.x, MAP_WIDTH), mod(pos.y, MAP_HEIGHT)};
 
     return mod_pos;
 }

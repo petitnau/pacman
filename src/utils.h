@@ -11,16 +11,18 @@
 #define PLAYER_ID 1
 #define GHOST_ID 2
 
+#define PAC_START_X 27
+#define PAC_START_Y 26
+#define PAC_START_DIR UP
+
 #define P_RD 0
 #define P_WR 1
 
 #define PIPE_ERROR 16
 #define FORK_ERROR 32
 
-#define MAPXMIN 0
-#define MAPYMIN 0
-#define MAPXMAX 55
-#define MAPYMAX 31
+#define MAP_WIDTH 55
+#define MAP_HEIGHT 36
 
 typedef enum {UP, DOWN, RIGHT, LEFT} Direction;
 
@@ -39,7 +41,10 @@ typedef struct
 static const char S_PAC[4][3] = {"(*v", "^*)", "(*<", ">*)"};
 static const char S_GHST[3] = "[\"]";
 
-static const char *MAP[] = {
+static const char MAP[MAP_HEIGHT][MAP_WIDTH] = {
+"                                                       ",
+"                                                       ",
+"                                                       ",
 "lqqqqqqqqqqqqqqqqqqqqqqqqqwqwqqqqqqqqqqqqqqqqqqqqqqqqqk",
 "x                         x@x                         x",
 "x   lqqqqqk   lqqqqqqqk   x@x   lqqqqqqqk   lqqqqqk   x",
@@ -70,9 +75,14 @@ static const char *MAP[] = {
 "x   lqqqqqqqqqj@mqqqqqk   x@x   lqqqqqj@mqqqqqqqqqk   x",
 "x   mqqqqqqqqqqqqqqqqqj   mqj   mqqqqqqqqqqqqqqqqqj   x",
 "x                                                     x",
-"mqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqj"};
+"mqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqj",
+"                                                       ",
+"                                                       "};
 
-static const char *PELLETS[] = {
+static const char PELLETS[MAP_HEIGHT][MAP_WIDTH] = {
+"                                                       ",
+"                                                       ",
+"                                                       ",
 "                                                       ",
 "  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~     ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ",
 "  ~         ~           ~     ~           ~         ~  ",
@@ -103,6 +113,8 @@ static const char *PELLETS[] = {
 "  ~                     ~     ~                     ~  ",
 "  ~                     ~     ~                     ~  ",
 "  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ",
+"                                                       ",
+"                                                       ",
 "                                                       "};
 
 void print_map_at(int, int);
