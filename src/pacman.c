@@ -146,7 +146,10 @@ void pacman_main(int cmd_in, int pos_out)
 
         write(pos_out, &pacman, sizeof(pacman)); //invia la posizione a control
 
-        usleep(100000);
+        if(pacman.dir == UP || pacman.dir == DOWN)
+            usleep(165000);
+        else
+            usleep(100000);
     }
 }
  
