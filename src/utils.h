@@ -107,6 +107,7 @@ static const char *PELLETS[] = {
 
 void print_map_at(int, int);
 void print_map();
+void print_pellets();
 void print_pacman(Entity);
 char get_map_at(int, int);
 Position get_pac_eff_pos(Position);

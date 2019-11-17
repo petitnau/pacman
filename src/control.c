@@ -14,9 +14,9 @@ void control_main(int pos_in, int ghost_out)
 
     while(1)
     {
-        read(pos_in, &tmp_pkg, sizeof(tmp_pkg));
+        read(pos_in, &tmp_pkg, sizeof(tmp_pkg));    //leggo posizione di pacman
         
-        for(i=-1; i<=1; i++)
+        for(i=-1; i<=1; i++)    //cancella pacman
         {
             pos.x=pacman.p.x+i;
             pos.y=pacman.p.y;
