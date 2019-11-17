@@ -99,9 +99,12 @@ static const char *PELLETS[] = {
 "  ~                     ~     ~                     ~  ",
 "  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ",
 "                                                       "};
+
 void print_map_at(int, int);
 void print_map();
 void print_pacman(Entity);
 char get_map_at(int, int);
+void get_pac_eff_pos(int*, int*);
+int mod(int, int);
 
 #endif
