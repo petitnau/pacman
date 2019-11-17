@@ -22,6 +22,5 @@ void player_main(int cmd_out)
         }
 
         write(cmd_out, &direction, sizeof(direction));
-
     }
 }

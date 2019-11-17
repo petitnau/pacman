@@ -26,3 +26,10 @@ void print_map()
         for(j=0; j<31; j++)
            print_map_at(i, j);
 }
+
+void print_pacman(Entity pacman)
+{
+    attron(COLOR_PAIR(2));
+    mvaddstr(pacman.y, pacman.x-1, "(*<");
+    attroff(COLOR_PAIR(2));
+}

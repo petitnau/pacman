@@ -93,5 +93,6 @@ static const char *PELLETS[] = {
 "                                                       "};
 void print_map_at(int, int);
 void print_map();
+void print_pacman(Entity);
 
 #endif

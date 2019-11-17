@@ -106,7 +106,7 @@ int main()
     
     kill(p_pacman, 1);
     kill(p_ghosts, 1);
-
+    kill(p_player, 1);
     endwin();
     return 0;
 }
