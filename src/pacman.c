@@ -4,6 +4,9 @@
 #include "pacman.h"
 #include "utils.h"
 
+#define VERTICALCUT 6
+#define HORIZONTALCUT 3
+
 _Bool accept_turn(Entity pacman, Direction direction)
 {
     int i;
@@ -14,7 +17,7 @@ _Bool accept_turn(Entity pacman, Direction direction)
             if(pacman.dir == UP || pacman.dir == DOWN) 
                 return true;
             else
-                for(i=0; i<4; i++)
+                for(i=0; i<VERTICALCUT; i++)
                 {
                     if(pacman.dir == RIGHT && get_map_at(pacman.y-1, pacman.x+i)==' ')
                             return true;
@@ -26,7 +29,7 @@ _Bool accept_turn(Entity pacman, Direction direction)
             if(pacman.dir == UP || pacman.dir == DOWN) 
                 return true;
             else
-                for(i=0; i<4; i++)
+                for(i=0; i<VERTICALCUT; i++)
                 {
                     if(pacman.dir == RIGHT && get_map_at(pacman.y+1, pacman.x+i)==' ')
                             return true;
@@ -38,7 +41,7 @@ _Bool accept_turn(Entity pacman, Direction direction)
             if(pacman.dir == RIGHT || pacman.dir == LEFT) 
                 return true;
             else
-                for(i=0; i<3; i++)
+                for(i=0; i<HORIZONTALCUT; i++)
                 {
                     if(pacman.dir == UP && get_map_at(pacman.y-i, pacman.x+2)==' ')
                             return true;
@@ -50,7 +53,7 @@ _Bool accept_turn(Entity pacman, Direction direction)
             if(pacman.dir == RIGHT || pacman.dir == LEFT)
                 return true;
             else
-                for(i=0; i<3; i++)
+                for(i=0; i<HORIZONTALCUT; i++)
                 {
                     if(pacman.dir == UP && get_map_at(pacman.y-i, pacman.x-2)==' ')
                             return true;
@@ -106,7 +109,7 @@ void pacman_main(int cmd_in, int pos_out)
 
     while(1)
     {
-        if(read(cmd_in, &tmp_dir, sizeof(tmp_dir)) != -1)
+        while(read(cmd_in, &tmp_dir, sizeof(tmp_dir)) != -1)
         {            
             if(accept_turn(pacman, tmp_dir))
             {
@@ -143,7 +146,7 @@ void pacman_main(int cmd_in, int pos_out)
 
         write(pos_out, &pacman, sizeof(pacman)); //invia la posizione a control
 
-        usleep(200000);
+        usleep(100000);
     }
 }
  
