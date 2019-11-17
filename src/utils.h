@@ -17,6 +17,11 @@
 #define PIPE_ERROR 16
 #define FORK_ERROR 32
 
+#define MAPXMIN 0
+#define MAPYMIN 0
+#define MAPXMAX 55
+#define MAPYMAX 31
+
 typedef enum {UP, DOWN, RIGHT, LEFT} Direction;
 
 typedef struct
@@ -25,6 +30,9 @@ typedef struct
     int x, y;
     Direction dir;
 } Entity;
+
+static const char S_PAC[4][3] = {"(*v", "^*)", "(*<", ">*)"};
+static const char S_GHST[3] = "[\"]";
 
 static const char *MAP[] = {
 "lqqqqqqqqqqqqqqqqqqqqqqqqqwqwqqqqqqqqqqqqqqqqqqqqqqqqqk",
@@ -94,5 +102,6 @@ static const char *PELLETS[] = {
 void print_map_at(int, int);
 void print_map();
 void print_pacman(Entity);
+char get_map_at(int, int);
 
 #endif

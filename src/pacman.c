@@ -11,64 +11,52 @@ _Bool accept_turn(Entity pacman, Direction direction)
     switch(direction)
     {
         case UP:
-            for(i=0; i<4; i++)
-            {
-                if(pacman.dir == UP || pacman.dir == DOWN) 
-                    return true;
-                else if(pacman.dir == RIGHT)
+            if(pacman.dir == UP || pacman.dir == DOWN) 
+                return true;
+            else
+                for(i=0; i<4; i++)
                 {
-                    if(MAP[pacman.y-1][pacman.x+i]==' ')
-                        return true;
+                    if(pacman.dir == RIGHT && get_map_at(pacman.y-1, pacman.x+i)==' ')
+                            return true;
+                    else if(pacman.dir == LEFT && get_map_at(pacman.y-1, pacman.x-i)==' ')
+                            return true;
                 }
-                else
-                    if(MAP[pacman.y-1][pacman.x-i]==' ')
-                        return true;
-            }
             break;
         case DOWN:
-            for(i=0; i<4; i++)
-            {
-                if(pacman.dir == UP || pacman.dir == DOWN) 
-                    return true;
-                else if(pacman.dir == RIGHT)    
+            if(pacman.dir == UP || pacman.dir == DOWN) 
+                return true;
+            else
+                for(i=0; i<4; i++)
                 {
-                    if(MAP[pacman.y+1][pacman.x+i]==' ')
-                        return true;
+                    if(pacman.dir == RIGHT && get_map_at(pacman.y+1, pacman.x+i)==' ')
+                            return true;
+                    else if(pacman.dir == LEFT && get_map_at(pacman.y+1, pacman.x-i)==' ')
+                            return true;
                 }
-                else                    
-                    if(MAP[pacman.y+1][pacman.x-i]==' ')
-                        return true;
-            }
             break;
         case RIGHT:
-            for(i=0; i<3; i++)
-            {
-                if(pacman.dir == RIGHT || pacman.dir == LEFT) 
-                    return true;
-                else if(pacman.dir == UP)
+            if(pacman.dir == RIGHT || pacman.dir == LEFT) 
+                return true;
+            else
+                for(i=0; i<3; i++)
                 {
-                    if(MAP[pacman.y-i][pacman.x+2]==' ')
-                        return true;
+                    if(pacman.dir == UP && get_map_at(pacman.y-i, pacman.x+2)==' ')
+                            return true;
+                    else if(pacman.dir == DOWN && get_map_at(pacman.y+i, pacman.x+2)==' ')
+                            return true;
                 }
-                else
-                    if(MAP[pacman.y+i][pacman.x+2]==' ')
-                        return true;
-            }
             break;
         case LEFT:
-            for(i=0; i<3; i++)
-            {
-                if(pacman.dir == RIGHT || pacman.dir == LEFT)
-                    return true;
-                else if(pacman.dir == UP)
+            if(pacman.dir == RIGHT || pacman.dir == LEFT)
+                return true;
+            else
+                for(i=0; i<3; i++)
                 {
-                    if(MAP[pacman.y-i][pacman.x-2]==' ')
-                        return true;
+                    if(pacman.dir == UP && get_map_at(pacman.y-i, pacman.x-2)==' ')
+                            return true;
+                    else if(pacman.dir == DOWN && get_map_at(pacman.y+i, pacman.x-2)==' ')
+                            return true;
                 }
-                else
-                    if(MAP[pacman.y+i][pacman.x-2]==' ')
-                        return true;
-            }
             break;
     }
 
@@ -84,23 +72,23 @@ _Bool can_move(Entity pacman, Direction direction)
         case UP:
             for(i=-1; i<=1; i++)
             {
-                if(MAP[pacman.y-1][pacman.x+i] != ' ')
+                if(get_map_at(pacman.y-1, pacman.x+i) != ' ')
                     return false;
             }
             break;
         case DOWN:
             for(i=-1; i<=1; i++)
             {
-                if(MAP[pacman.y+1][pacman.x+i] != ' ')
+                if(get_map_at(pacman.y+1, pacman.x+i) != ' ')
                     return false;
             }
             break;
         case RIGHT:
-            if(MAP[pacman.y][pacman.x+2] != ' ')
+            if(get_map_at(pacman.y, pacman.x+2) != ' ')
                 return false;
             break;
         case LEFT:
-            if(MAP[pacman.y][pacman.x-2] != ' ')
+            if(get_map_at(pacman.y, pacman.x-2) != ' ')
                 return false;
             break;
     }
@@ -148,14 +136,14 @@ void pacman_main(int cmd_in, int pos_out)
             }
         }
 
-        if(pacman.x == 1 && pacman.y == 14 && pacman.dir == LEFT)
-            pacman.x = 53;
-        if(pacman.x == 53 && pacman.y == 14 && pacman.dir == RIGHT)
-            pacman.x = 1;
+        if(pacman.x == MAPXMIN && pacman.dir == LEFT)
+            pacman.x = MAPXMAX;
+        if(pacman.x == MAPXMAX && pacman.dir == RIGHT)
+            pacman.x = MAPXMIN;
 
         write(pos_out, &pacman, sizeof(pacman)); //invia la posizione a control
 
-        usleep(100000);
+        usleep(200000);
     }
 }
  
