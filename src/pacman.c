@@ -148,8 +148,14 @@ void pacman_main(int cmd_in, int pos_out)
             }
         }
 
+        if(pacman.x == 1 && pacman.y == 14 && pacman.dir == LEFT)
+            pacman.x = 53;
+        if(pacman.x == 53 && pacman.y == 14 && pacman.dir == RIGHT)
+            pacman.x = 1;
+
         write(pos_out, &pacman, sizeof(pacman)); //invia la posizione a control
 
         usleep(100000);
     }
 }
+ 
