@@ -4,19 +4,27 @@
 #include "control.h"
 #include "utils.h"
 
+
+void score_handler(int * score, Entity tmp_pkg);
+
 void control_main(int pos_in, int ghost_out)
 {
-    Entity pacman = {PACMAN_ID, 27, 23, RIGHT};
+    Entity pacman = {PACMAN_ID, 27, 23, UP};
     Entity tmp_pkg;
 
     int x,y;
     int i,j;
 
+    int score = 0;
+    char next_ch;
     while(1)
     {
+        mvprintw(2, 60, "Score:   %d", score);
         read(pos_in, &tmp_pkg, sizeof(tmp_pkg));    //leggo posizione di pacman
         
-        for(i=-1; i<=1; i++)    //cancella pacman
+        score_handler(&score, tmp_pkg);
+
+        for(i=-1; i<=1/* code */; i++)    //cancella pacman
         {
             x=pacman.x+i;
             y=pacman.y;
@@ -31,4 +39,32 @@ void control_main(int pos_in, int ghost_out)
         print_pacman(pacman);
         refresh();
     }
+}
+
+void score_handler(int * score, Entity tmp_pkg)
+{
+    char next_ch;
+    switch (tmp_pkg.dir)
+        {
+            case UP:
+                next_ch = mvinch(tmp_pkg.y, tmp_pkg.x); //prende carattere a schermo nella pos y,x
+                if(next_ch == '~')
+                    *score += 100;
+                break;
+            case DOWN:
+                next_ch = mvinch(tmp_pkg.y, tmp_pkg.x);
+                if(next_ch == '~')
+                    *score += 100;
+            break;
+            case RIGHT:
+                next_ch = mvinch(tmp_pkg.y, tmp_pkg.x+1);
+                if(next_ch == '~')
+                    *score += 100;
+            break;
+            case LEFT:
+                next_ch = mvinch(tmp_pkg.y, tmp_pkg.x-1);
+                if(next_ch == '~')
+                    *score += 100;
+            break;
+        }
 }
