@@ -91,6 +91,7 @@ void food_handler(int * score, Position pos,int rows, int col, char game_food[ro
     else if(game_food[pos.y][pos.x] == '`') //energizers
     {
         *score += 50;
+        game_food[pos.y][pos.x] = MAP[pos.y][pos.x];
         //Funzione "spaventa fantasmi"
     }
 }
