@@ -1,17 +1,25 @@
+#include <unistd.h>
 #include "ghost.h"
 #include "utils.h"
 #include "entity.h"
 #include "drawings.h"
+#include "ai.h"
 
-void ghost_main(int i, int pipein, int pos_out)
+void ghost_main(int id, int pipe_in, int pos_out)
 {
     Entity ghost = {GHOST_ID, {GHOST_START_X, GHOST_START_Y}, GHOST_START_DIR};
 
+    Ghost_Info ghost_info = {{PACMAN_ID, {PAC_START_X, PAC_START_Y}, PAC_START_DIR}, false};
+
+    int i = 0;
+
     while(1)
-    {        
+    {       
+        while(read(pipe_in, &ghost_info, sizeof(ghost_info)) != -1);
+        
         if(!can_move(ghost, ghost.dir))
-        {  
-            //Scegli nuova direzione  
+        {          
+            ghost.dir = choose_direction_target(ghost, blinky_target(ghost_info.pacman));
         }    
 
         switch(ghost.dir)

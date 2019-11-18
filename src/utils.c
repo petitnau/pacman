@@ -4,7 +4,6 @@
 #include <string.h>
 
 #include "utils.h"
-#include "entity.h"
 #include "drawings.h"
 
 void print_gui_string(int y, int x, char* str)
@@ -85,40 +84,6 @@ void print_pellets()
     attroff(COLOR_PAIR(3));
 }
 
-void print_entity(Entity entity)
-{
-    Position pos;
-    int i;
-    char sprite[3];
-    switch(entity.id)
-    {
-        case PACMAN_ID:
-            attron(COLOR_PAIR(4));
-            strcpy(sprite, S_PAC[entity.dir]);
-            break;
-        case GHOST_ID:
-            attron(COLOR_PAIR(5));
-            strcpy(sprite, S_GHST);
-            break;
-    }
-    for(i=0; i<3; i++)
-    {
-        pos.x = entity.p.x+(i-1);
-        pos.y = entity.p.y;
-        pos = get_pac_eff_pos(pos);
-        mvaddch(pos.y+GUI_HEIGHT,pos.x, sprite[i]);
-    }
-    switch(entity.id)
-    {
-        case PACMAN_ID:
-            attroff(COLOR_PAIR(4));
-            break;
-        case GHOST_ID:
-            attroff(COLOR_PAIR(5));
-            break;
-    }
-    //attroff(COLOR_PAIR(4));
-}
 
 char get_map_at(int x, int y)
 {
@@ -151,10 +116,10 @@ int min_index (int size, int *array)
     int i, x=0;
 
     for(i=0; i < size; i++)
-        if (array[i] < array[x]) //se uguali viene seguita la priorità up left down right
+        if (array[i] <= array[x]) //se uguali viene seguita la priorità up left down right
             x = i;
 
-    return i;
+    return x;
 }
 
 int distance (Position a, Position b)

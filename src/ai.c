@@ -1,8 +1,6 @@
 #include <limits.h>
 
 #include "ai.h"
-#include "entity.h"
-#include "utils.h"
 
 Position blinky_target (Entity pacman)
 {
@@ -67,14 +65,33 @@ Direction choose_direction_random (_Bool possibleDirections[4])
     }
 }
 
-Direction choose_direction_target (Position ghost, Position target, _Bool possible_dirs[4])
+Direction choose_direction_target (Entity ghost, Position target)
 {
     int i;
     int dir_dist[4];
-    Position dir_ghost[4] = {{ghost.x, ghost.y+1},  // up
-                            {ghost.x-1, ghost.y},  // left
-                            {ghost.x, ghost.y-1},  // down
-                            {ghost.x+1, ghost.y}}; // right
+    Position dir_ghost[4] = {{ghost.p.x, ghost.p.y-1},  // up
+                            {ghost.p.x, ghost.p.y+1},  // down
+                            {ghost.p.x+1, ghost.p.y}, // right
+                            {ghost.p.x-1, ghost.p.y}};  // left
+    _Bool possible_dirs[4];
+
+    for (i=0; i < 4; i++)      
+    {
+        if (can_move(ghost, i))
+            possible_dirs[i] = true;
+    }
+
+    switch(ghost.dir)
+    {
+        case UP: possible_dirs[DOWN] = false;
+            break;
+        case DOWN: possible_dirs[UP] = false;
+            break;
+        case RIGHT: possible_dirs[LEFT] = false;
+            break;
+        case LEFT: possible_dirs[RIGHT] = false;
+            break;
+    }
 
     for (i=0; i < 4; i++)
     {
@@ -86,3 +103,4 @@ Direction choose_direction_target (Position ghost, Position target, _Bool possib
 
     return min_index(4, dir_dist);
 }
+

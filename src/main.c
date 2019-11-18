@@ -63,6 +63,8 @@ int main()
 
     fcntl(cmd_pipe[0], F_SETFL, O_NONBLOCK);
     fcntl(cmd_pipe[1], F_SETFL, O_NONBLOCK);
+    fcntl(ghost_pipe[0], F_SETFL, O_NONBLOCK);
+    fcntl(ghost_pipe[1], F_SETFL, O_NONBLOCK);
 
     switch(p_pacman = fork())
     {
@@ -85,7 +87,7 @@ int main()
             close(ghost_pipe[P_WR]);
             close(cmd_pipe[P_RD]);
             close(cmd_pipe[P_WR]);
-            ghost_main(i, crec_pipe[P_WR], ghost_pipe[P_RD]);
+            ghost_main(i, ghost_pipe[P_RD], crec_pipe[P_WR]);
     }
 
     switch(p_player = fork())

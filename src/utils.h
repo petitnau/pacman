@@ -33,7 +33,6 @@ void print_gui_string(int, int, char*);
 void print_map_at(int, int);
 void print_map();
 void print_pellets();
-void print_entity(Entity);
 char get_map_at(int, int);
 Position get_pac_eff_pos(Position);
 int mod(int, int);

@@ -16,5 +16,6 @@ typedef struct
 
 _Bool accept_turn(Entity, Direction);
 _Bool can_move(Entity, Direction);
+void print_entity(Entity);
 
 #endif
