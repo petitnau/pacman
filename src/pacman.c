@@ -6,7 +6,7 @@
 #include "utils.h"
 #include "drawings.h"
 
-void pacman_main(int cmd_in, int pos_out)
+void pacman_main(int cmd_in, int pos_out, int log_out)
 {
     Entity pacman = {PACMAN_ID, {PAC_START_X, PAC_START_Y}, PAC_START_DIR};
     Direction nextDir = UP;

@@ -7,11 +7,35 @@
 #include "ghost.h"
 #include "entity.h"
 #include "drawings.h"
+#include "list.h"
 
 void food_handler(int* score, Position pos, int rows, int col, char game_food[rows][col]);
 void food_setup();
 
-void control_main(int pos_in, int ghost_out)
+
+void manage_logs(int log_in, MessageList log_list)
+{
+    int i;
+    char msg_pkg[50];
+
+    while(read(log_in, &msg_pkg, sizeof(char)*50) != -1)
+    {
+        list_push(&log_list, msg_pkg);
+    }    
+    for(i = list_count(log_list); i > MAP_HEIGHT-2; i--)
+        list_pop(&log_list);
+
+    i = 0;
+    MessageNode* aux = log_list.tail;
+    while(aux != NULL)
+    {
+        mvprintw(MAP_HEIGHT+GUI_HEIGHT-(2+i++), 60, "%s", aux->msg);
+        aux = aux->prev;
+    }
+    refresh();
+}
+
+void control_main(int pos_in, int ghost_out, int log_in)
 {
     Entity pacman = {PACMAN_ID, {PAC_START_X, PAC_START_Y}, PAC_START_DIR};
     Entity ghost = {GHOST_ID, {GHOST_START_X, GHOST_START_Y}, GHOST_START_DIR};
@@ -29,8 +53,11 @@ void control_main(int pos_in, int ghost_out)
 
     food_setup(MAP_HEIGHT, MAP_WIDTH, game_food);
 
+    MessageList log_list;
+    list_init(&log_list);
+
     while(1)
-    {
+    {  
         read(pos_in, &tmp_pkg, sizeof(tmp_pkg));    //leggo posizione di pacman
         
         if(tmp_pkg.id == PACMAN_ID)
@@ -66,8 +93,8 @@ void control_main(int pos_in, int ghost_out)
         }
         
         ///////////////
-        mvprintw(5, 40, "x:%2d,y:%2d,d:%d", pacman.p.x, pacman.p.y, pacman.dir);
-        mvprintw(5, 55, "x:%2d,y:%2d,d:%d", ghost.p.x, ghost.p.y, ghost.dir);
+        //mvprintw(5, 40, "x:%2d,y:%2d,d:%d", pacman.p.x, pacman.p.y, pacman.dir);
+        //mvprintw(5, 55, "x:%2d,y:%2d,d:%d", ghost.p.x, ghost.p.y, ghost.dir);
         sprintf(scorestr, "%d", score/10);
         sprintf(nupstr, "1UP");
         print_gui_string(0,11, nupstr);
@@ -78,6 +105,7 @@ void control_main(int pos_in, int ghost_out)
         print_gui_string(0,37, "HIGH SCORE");
         print_entity(pacman);
         print_entity(ghost);
+        manage_logs(log_in, log_list);
         refresh();
     }
 }

@@ -5,6 +5,6 @@
 
 #define PAC_SPEED 70000
 
-void pacman_main();
+void pacman_main(int, int, int);
 
 #endif

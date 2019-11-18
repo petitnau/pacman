@@ -5,7 +5,7 @@
 #include "drawings.h"
 #include "ai.h"
 
-void ghost_main(int id, int pipe_in, int pos_out)
+void ghost_main(int pipe_in, int pos_out, int log_out)
 {
     Entity ghost = {GHOST_ID, {GHOST_START_X, GHOST_START_Y}, GHOST_START_DIR};
 

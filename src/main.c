@@ -50,7 +50,7 @@ int main()
 {
     int i;
     pid_t p_player, p_pacman, p_ghosts;
-    int crec_pipe[2], ghost_pipe[2], cmd_pipe[2];
+    int crec_pipe[2], ghost_pipe[2], cmd_pipe[2], log_pipe[2];
 
     init();
 
@@ -60,11 +60,15 @@ int main()
         _exit(PIPE_ERROR);
     if(pipe(cmd_pipe) == -1)
         _exit(PIPE_ERROR);
+    if(pipe(log_pipe) == -1)
+        _exit(PIPE_ERROR);
 
     fcntl(cmd_pipe[0], F_SETFL, O_NONBLOCK);
     fcntl(cmd_pipe[1], F_SETFL, O_NONBLOCK);
     fcntl(ghost_pipe[0], F_SETFL, O_NONBLOCK);
     fcntl(ghost_pipe[1], F_SETFL, O_NONBLOCK);
+    fcntl(log_pipe[0], F_SETFL, O_NONBLOCK);
+    fcntl(log_pipe[1], F_SETFL, O_NONBLOCK);
 
     switch(p_pacman = fork())
     {
@@ -75,7 +79,8 @@ int main()
             close(ghost_pipe[P_RD]);
             close(ghost_pipe[P_WR]);
             close(cmd_pipe[P_WR]);
-            pacman_main(cmd_pipe[P_RD], crec_pipe[P_WR]);
+            close(log_pipe[P_RD]);
+            pacman_main(cmd_pipe[P_RD], crec_pipe[P_WR], log_pipe[P_WR]);
     }   
 
     switch(p_ghosts = fork())
@@ -87,7 +92,8 @@ int main()
             close(ghost_pipe[P_WR]);
             close(cmd_pipe[P_RD]);
             close(cmd_pipe[P_WR]);
-            ghost_main(i, ghost_pipe[P_RD], crec_pipe[P_WR]);
+            close(log_pipe[P_RD]);
+            ghost_main(ghost_pipe[P_RD], crec_pipe[P_WR], log_pipe[P_WR]);
     }
 
     switch(p_player = fork())
@@ -100,14 +106,16 @@ int main()
             close(ghost_pipe[P_RD]);
             close(ghost_pipe[P_WR]);
             close(cmd_pipe[P_RD]);
-            player_main(cmd_pipe[P_WR]);
+            close(log_pipe[P_RD]);
+            player_main(cmd_pipe[P_WR], log_pipe[P_WR]);
     }
 
     close(crec_pipe[P_WR]);
     close(ghost_pipe[P_RD]);  
     close(cmd_pipe[P_RD]);
     close(cmd_pipe[P_WR]);
-    control_main(crec_pipe[P_RD], ghost_pipe[P_WR]);
+    close(log_pipe[P_WR]);
+    control_main(crec_pipe[P_RD], ghost_pipe[P_WR], log_pipe[P_RD]);
     
     kill(p_pacman, 1);
     kill(p_ghosts, 1);

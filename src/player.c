@@ -4,7 +4,7 @@
 #include "player.h"
 #include "utils.h"
 
-void player_main(int cmd_out)
+void player_main(int cmd_out, int log_out)
 {
     char c;
     Direction direction;
