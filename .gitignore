@@ -1,0 +1,9 @@
+bin/pacman
+obj/ai.o
+obj/control.o
+obj/ghost.o
+obj/main.o
+obj/pacman.o
+obj/player.o
+obj/utils.o
+.vscode/settings.json
