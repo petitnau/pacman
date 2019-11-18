@@ -12,11 +12,16 @@ OBJS=$(SRCS:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 
 .PHONY : clean
 
-$(OBJDIR)/%.o : $(SRCDIR)/%.c $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS)
+all: directories $(BINDIR)/$(PROJNAME)
+
+directories: 
+	@mkdir -p $(OBJDIR) $(BINDIR)
 
 $(BINDIR)/$(PROJNAME): $(OBJS)
 	$(CC) -o $@ $^ $(CFLAGS)
-	
+
+$(OBJDIR)/%.o : $(SRCDIR)/%.c $(DEPS)
+	$(CC) -c -o $@ $< $(CFLAGS)
+
 clean:
 	-rm -f $(OBJS)
