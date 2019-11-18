@@ -21,6 +21,7 @@ void control_main(int pos_in, int ghost_out)
     char game_food[MAP_HEIGHT][MAP_WIDTH];
     int eated_dots; //Dopo 70 e 170 spawna frutto
     char scorestr[10];
+    char nupstr[10];
 
     food_setup(MAP_HEIGHT, MAP_WIDTH, game_food);
 
@@ -41,11 +42,16 @@ void control_main(int pos_in, int ghost_out)
         
         food_handler(&score, pacman.p, MAP_HEIGHT, MAP_WIDTH, game_food);
 
-        mvprintw(0, 60, "x:%.1f,y:%d,d:%d", pacman.p.x/2.0, pacman.p.y, pacman.dir);
-        mvprintw(2, 60, "Score:   %d", score);
+        mvprintw(5, 40, "x:%2d,y:%2d,d:%d", pacman.p.x, pacman.p.y, pacman.dir);
 
-        sprintf(scorestr, "%d", score);
-        print_gui_string(1, 1, scorestr);
+        sprintf(scorestr, "%d", score/10);
+        sprintf(nupstr, "1UP");
+        print_gui_string(0,11, nupstr);
+        print_gui_string(3,13, "0");
+        print_gui_string(3,11, scorestr);
+        print_gui_string(3,33, "0");
+        print_gui_string(3,31, scorestr);
+        print_gui_string(0,37, "HIGH SCORE");
         print_pacman(pacman);
         refresh();
     }
@@ -57,7 +63,6 @@ void food_setup(int row, int col, char game_food[row][col])
     for (i = 0; i < MAP_HEIGHT; i++)
     {
         strcpy(game_food[i], PELLETS[i]);
-        mvprintw(9, 60, "Debug:   %d", i);
     } 
 }
 

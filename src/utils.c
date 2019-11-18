@@ -6,23 +6,37 @@
 #include "utils.h"
 #include "drawings.h"
 
-void print_gui_string(int x, int y, char* str)
+void print_gui_string(int y, int x, char* str)
 {
     int i,j,k;
     int len = strlen(str);
     char c;
-    
+
+    attron(COLOR_PAIR(2));
+
     for(i=0; i<len; i++)
+    {
         for(j=0; j<6; j++)
         {
-            c = F_NUMBERS[str[i]-'0'][j];
+            if(str[i] >= '0' && str[i] <= '9')
+                c = F_NUMBERS[str[i]-'0'][j];
+            else if(str[i] >= 'a' && str[i] <= 'z')
+                c = F_LETTERS[str[i]-'a'][j];
+            else if(str[i] >= 'A' && str[i] <= 'Z')
+                c = F_LETTERS[str[i]-'A'][j];
+            else 
+                c = ' ';
+
             if(c=='m' || c=='q' || c=='x' || c=='j' 
             || c=='l' || c=='k' || c=='t' || c=='u' 
             || c=='w' || c=='v')
-                    mvaddch(y+(j/2),x+(j%2)+i*2, NCURSES_ACS(c));
+                    mvaddch(y+(j/2),x+(j%2)-(len-i)*2, NCURSES_ACS(c));
             else
-                mvaddch(y+(j/2),x+(j%2)+i*2, c);
+                mvaddch(y+(j/2),x+(j%2)-(len-i)*2, c);
         }
+    }
+
+    attroff(COLOR_PAIR(2));
 }
 
 void print_map_at(int x, int y)
@@ -61,13 +75,13 @@ void print_pellets_at(int x, int y)
 void print_pellets()
 {
     int i, j;
-    attron(COLOR_PAIR(2));
+    attron(COLOR_PAIR(3));
 
     for(i=0; i<MAP_WIDTH; i++)
         for(j=0; j<MAP_HEIGHT; j++)
             print_pellets_at(i,j);
         
-    attroff(COLOR_PAIR(2));
+    attroff(COLOR_PAIR(3));
 }
 
 void print_pacman(Entity pacman)
