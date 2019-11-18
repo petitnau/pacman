@@ -30,14 +30,16 @@ void init()
     init_color(COLOR_CYAN, 0, 1000, 1000);
     init_color(COLOR_MAGENTA, 1000, 700, 1000);
     init_color(COLOR_GREEN, 1000, 700, 300);
+    init_color(7, 1000, 800, 800);
 
     init_pair(1, COLOR_BLUE, COLOR_BLACK);
     init_pair(2, COLOR_WHITE, COLOR_BLACK);
-    init_pair(3, COLOR_BLACK, COLOR_YELLOW);
-    init_pair(4, COLOR_BLACK, COLOR_RED);
-    init_pair(5, COLOR_BLACK, COLOR_CYAN);
-    init_pair(6, COLOR_BLACK, COLOR_MAGENTA);
-    init_pair(7, COLOR_BLACK, COLOR_GREEN);
+    init_pair(3, 7, COLOR_BLACK);
+    init_pair(4, COLOR_BLACK, COLOR_YELLOW);
+    init_pair(5, COLOR_BLACK, COLOR_RED);
+    init_pair(6, COLOR_BLACK, COLOR_CYAN);
+    init_pair(7, COLOR_BLACK, COLOR_MAGENTA);
+    init_pair(8, COLOR_BLACK, COLOR_GREEN);
 
     refresh();
     print_map();

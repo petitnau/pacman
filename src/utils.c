@@ -47,7 +47,7 @@ void print_pacman(Entity pacman)
     Position pos;
     int i;
     
-    attron(COLOR_PAIR(3));
+    attron(COLOR_PAIR(4));
     for(i=0; i<3; i++)
     {
         pos.x=pacman.p.x+(i-1);
@@ -55,7 +55,7 @@ void print_pacman(Entity pacman)
         pos = get_pac_eff_pos(pos);
         mvaddch(pos.y,pos.x, S_PAC[pacman.dir][i]);
     }
-    attroff(COLOR_PAIR(3));
+    attroff(COLOR_PAIR(4));
 }
 
 char get_map_at(int x, int y)
