@@ -4,7 +4,7 @@
 
 #include "control.h"
 #include "utils.h"
-
+#include "drawings.h"
 
 void food_handler(int * score, Position pos, int rows, int col, char game_food[rows][col]);
 void food_setup();
@@ -33,7 +33,7 @@ void control_main(int pos_in, int ghost_out)
             pos.y=pacman.p.y;
             pos = get_pac_eff_pos(pos);
             
-            mvaddch(pos.y, pos.x, NCURSES_ACS(game_food[pos.y][pos.x]));
+            mvaddch(pos.y+GUI_HEIGHT, pos.x, NCURSES_ACS(game_food[pos.y][pos.x]));
         }
         
         pacman = tmp_pkg;

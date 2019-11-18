@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 #include "utils.h"
+#include "drawings.h"
 
 void print_map_at(int x, int y)
 {
@@ -13,11 +14,13 @@ void print_map_at(int x, int y)
     if(c=='m' || c=='q' || c=='x' || c=='j' 
      || c=='l' || c=='k' || c=='t' || c=='u' 
      || c=='w' || c=='~' || c=='`')
-        mvaddch(y, x, NCURSES_ACS(c));
+        mvaddch(y+GUI_HEIGHT, x, NCURSES_ACS(c));
     else if(c=='@')
-        mvaddch(y, x, ' ');
+        mvaddch(y+GUI_HEIGHT, x, ' ');
     else
-        mvaddch(y, x, c);
+        mvaddch(y+GUI_HEIGHT, x, c);
+        
+    attroff(COLOR_PAIR(1));
 }
 
 void print_map()
@@ -29,6 +32,12 @@ void print_map()
            print_map_at(i, j);
 }
 
+void print_pellets_at(int x, int y)
+{
+    if(PELLETS[y][x] != ' ')
+        mvaddch(y+GUI_HEIGHT, x, NCURSES_ACS(PELLETS[y][x]));
+}
+
 void print_pellets()
 {
     int i, j;
@@ -36,8 +45,7 @@ void print_pellets()
 
     for(i=0; i<MAP_WIDTH; i++)
         for(j=0; j<MAP_HEIGHT; j++)
-            if(PELLETS[j][i] != ' ')
-                mvaddch(j, i, NCURSES_ACS(PELLETS[j][i]));
+            print_pellets_at(i,j);
         
     attroff(COLOR_PAIR(2));
 }
@@ -53,7 +61,7 @@ void print_pacman(Entity pacman)
         pos.x=pacman.p.x+(i-1);
         pos.y=pacman.p.y;
         pos = get_pac_eff_pos(pos);
-        mvaddch(pos.y,pos.x, S_PAC[pacman.dir][i]);
+        mvaddch(pos.y+GUI_HEIGHT,pos.x, S_PAC[pacman.dir][i]);
     }
     attroff(COLOR_PAIR(4));
 }
