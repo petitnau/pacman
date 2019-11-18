@@ -7,3 +7,4 @@ obj/pacman.o
 obj/player.o
 obj/utils.o
 .vscode/settings.json
+obj/entity.o

@@ -1,6 +1,7 @@
 #include <limits.h>
 
 #include "ai.h"
+#include "entity.h"
 #include "utils.h"
 
 Position blinky_target (Entity pacman)

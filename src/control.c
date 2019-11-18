@@ -4,14 +4,17 @@
 
 #include "control.h"
 #include "utils.h"
+#include "ghost.h"
+#include "entity.h"
 #include "drawings.h"
 
-void food_handler(int * score, Position pos, int rows, int col, char game_food[rows][col]);
+void food_handler(int* score, Position pos, int rows, int col, char game_food[rows][col]);
 void food_setup();
 
 void control_main(int pos_in, int ghost_out)
 {
-    Entity pacman = {PACMAN_ID, PAC_START_X, PAC_START_Y, PAC_START_DIR};
+    Entity pacman = {PACMAN_ID, {PAC_START_X, PAC_START_Y}, PAC_START_DIR};
+    Entity ghost = {GHOST_ID, {GHOST_START_X, GHOST_START_Y}, GHOST_START_DIR};
     Entity tmp_pkg;
 
     Position pos;
@@ -29,21 +32,36 @@ void control_main(int pos_in, int ghost_out)
     {
         read(pos_in, &tmp_pkg, sizeof(tmp_pkg));    //leggo posizione di pacman
         
-        for(i=-1; i<=1/* code */; i++)    //cancella pacman
+        if(tmp_pkg.id == PACMAN_ID)
         {
-            pos.x=pacman.p.x+i;
-            pos.y=pacman.p.y;
-            pos = get_pac_eff_pos(pos);
+            for(i=-1; i<=1; i++)    //cancella pacman
+            {
+                pos.x=pacman.p.x+i;
+                pos.y=pacman.p.y;
+                pos = get_pac_eff_pos(pos);
+                
+                mvaddch(pos.y+GUI_HEIGHT, pos.x, NCURSES_ACS(game_food[pos.y][pos.x]));
+            }
             
-            mvaddch(pos.y+GUI_HEIGHT, pos.x, NCURSES_ACS(game_food[pos.y][pos.x]));
+            pacman = tmp_pkg;
+            food_handler(&score, pacman.p, MAP_HEIGHT, MAP_WIDTH, game_food);
+        }
+        else if(tmp_pkg.id == GHOST_ID)
+        {
+            for(i=-1; i<=1; i++)    //cancella pacman
+            {
+                pos.x=ghost.p.x+i;
+                pos.y=ghost.p.y;
+                pos = get_pac_eff_pos(pos);
+                
+                mvaddch(pos.y+GUI_HEIGHT, pos.x, NCURSES_ACS(game_food[pos.y][pos.x]));
+            }
+            
+            ghost = tmp_pkg;
         }
         
-        pacman = tmp_pkg;
-        
-        food_handler(&score, pacman.p, MAP_HEIGHT, MAP_WIDTH, game_food);
-
+        ///////////////
         mvprintw(5, 40, "x:%2d,y:%2d,d:%d", pacman.p.x, pacman.p.y, pacman.dir);
-
         sprintf(scorestr, "%d", score/10);
         sprintf(nupstr, "1UP");
         print_gui_string(0,11, nupstr);
@@ -52,7 +70,8 @@ void control_main(int pos_in, int ghost_out)
         print_gui_string(3,33, "0");
         print_gui_string(3,31, scorestr);
         print_gui_string(0,37, "HIGH SCORE");
-        print_pacman(pacman);
+        print_entity(pacman);
+        print_entity(ghost);
         refresh();
     }
 }

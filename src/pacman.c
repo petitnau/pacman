@@ -2,107 +2,13 @@
 #include <unistd.h>
 
 #include "pacman.h"
+#include "entity.h"
 #include "utils.h"
 #include "drawings.h"
 
-#define VERTICALCUT 6
-#define HORIZONTALCUT 4
-
-_Bool accept_turn(Entity pacman, Direction direction)
-{
-    int i;
-
-    switch(direction)
-    {
-        case UP:
-            if(pacman.dir == UP || pacman.dir == DOWN) 
-                return true;
-            else
-                for(i=0; i<VERTICALCUT; i++)
-                {
-                    if(pacman.dir == RIGHT && get_map_at(pacman.p.x+i, pacman.p.y-1)==' ')
-                            return true;
-                    else if(pacman.dir == LEFT && get_map_at(pacman.p.x-i, pacman.p.y-1)==' ')
-                            return true;
-                }
-            break;
-        case DOWN:
-            if(pacman.dir == UP || pacman.dir == DOWN) 
-                return true;
-            else
-                for(i=0; i<VERTICALCUT; i++)
-                {
-                    if(pacman.dir == RIGHT && get_map_at(pacman.p.x+i, pacman.p.y+1)==' ')
-                            return true;
-                    else if(pacman.dir == LEFT && get_map_at(pacman.p.x-i, pacman.p.y+1)==' ')
-                            return true;
-                }
-            break;
-        case RIGHT:
-            if(pacman.dir == RIGHT || pacman.dir == LEFT) 
-                return true;
-            else
-                for(i=0; i<HORIZONTALCUT; i++)
-                {
-                    if(pacman.dir == UP && get_map_at(pacman.p.x+2, pacman.p.y-i)==' ')
-                            return true;
-                    else if(pacman.dir == DOWN && get_map_at(pacman.p.x+2, pacman.p.y+i)==' ')
-                            return true;
-                }
-            break;
-        case LEFT:
-            if(pacman.dir == RIGHT || pacman.dir == LEFT)
-                return true;
-            else
-                for(i=0; i<HORIZONTALCUT; i++)
-                {
-                    if(pacman.dir == UP && get_map_at(pacman.p.x-2, pacman.p.y-i)==' ')
-                            return true;
-                    else if(pacman.dir == DOWN && get_map_at(pacman.p.x-2, pacman.p.y+i)==' ')
-                            return true;
-                }
-            break;
-    }
-
-    return false;
-}
-
-_Bool can_move(Entity pacman, Direction direction)
-{
-    int i;
-
-    switch(direction)
-    {
-        case UP:
-            for(i=-1; i<=1; i++)
-            {
-                if(get_map_at(pacman.p.x+i, pacman.p.y-1) != ' ')
-                    return false;
-            }
-            break;
-        case DOWN:
-            for(i=-1; i<=1; i++)
-            {
-                if(get_map_at(pacman.p.x+i, pacman.p.y+1) != ' ')
-                    return false;
-            }
-            break;
-        case RIGHT:
-            if(get_map_at(pacman.p.x+2, pacman.p.y) != ' ')
-                return false;
-            break;
-        case LEFT:
-            if(get_map_at(pacman.p.x-2, pacman.p.y) != ' ')
-                return false;
-            break;
-    }
-
-    return true;
-}
-
 void pacman_main(int cmd_in, int pos_out)
 {
-    Entity pacman = {PACMAN_ID, PAC_START_X, PAC_START_Y, PAC_START_DIR};
+    Entity pacman = {PACMAN_ID, {PAC_START_X, PAC_START_Y}, PAC_START_DIR};
     Direction nextDir = UP;
 
     Direction tmp_dir;
@@ -154,4 +60,3 @@ void pacman_main(int cmd_in, int pos_out)
             usleep(PAC_SPEED);
     }
 }
- 
