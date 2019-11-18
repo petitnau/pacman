@@ -72,6 +72,7 @@ void food_handler(int* score, Position pos, int rows, int col, char game_food[ro
         {
             case '~':
                 *score += 10;
+                beep();
                 break;
             case '`': 
                 //Funzione "spaventa fantasmi"
