@@ -3,6 +3,7 @@
 
 #include "pacman.h"
 #include "utils.h"
+#include "drawings.h"
 
 #define VERTICALCUT 6
 #define HORIZONTALCUT 4

@@ -1,9 +1,29 @@
 #include <curses.h>
 #include <math.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "utils.h"
 #include "drawings.h"
+
+void print_gui_string(int x, int y, char* str)
+{
+    int i,j,k;
+    int len = strlen(str);
+    char c;
+    
+    for(i=0; i<len; i++)
+        for(j=0; j<6; j++)
+        {
+            c = F_NUMBERS[str[i]-'0'][j];
+            if(c=='m' || c=='q' || c=='x' || c=='j' 
+            || c=='l' || c=='k' || c=='t' || c=='u' 
+            || c=='w' || c=='v')
+                    mvaddch(y+(j/2),x+(j%2)+i*2, NCURSES_ACS(c));
+            else
+                mvaddch(y+(j/2),x+(j%2)+i*2, c);
+        }
+}
 
 void print_map_at(int x, int y)
 {

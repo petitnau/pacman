@@ -20,6 +20,7 @@ void control_main(int pos_in, int ghost_out)
     int score = 0;
     char game_food[MAP_HEIGHT][MAP_WIDTH];
     int eated_dots; //Dopo 70 e 170 spawna frutto
+    char scorestr[10];
 
     food_setup(MAP_HEIGHT, MAP_WIDTH, game_food);
 
@@ -42,6 +43,9 @@ void control_main(int pos_in, int ghost_out)
 
         mvprintw(0, 60, "x:%.1f,y:%d,d:%d", pacman.p.x/2.0, pacman.p.y, pacman.dir);
         mvprintw(2, 60, "Score:   %d", score);
+
+        sprintf(scorestr, "%d", score);
+        print_gui_string(1, 1, scorestr);
         print_pacman(pacman);
         refresh();
     }

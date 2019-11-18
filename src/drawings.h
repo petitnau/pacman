@@ -7,6 +7,8 @@
 static const char S_PAC[4][4] = {"(*v", "^*)", "(*<", ">*)"};
 static const char S_GHST[4] = "[\"]";
 
+static const char F_NUMBERS[][7] = {"lkxxmj", " k x v", "lkljmj", "lk umj", "k mu v", "lkmkmj", "lktkmj", "lk x  ", "lktumj", "lkmumj"};
+
 static const char MAP[MAP_HEIGHT][MAP_WIDTH+1] = {
 "lqqqqqqqqqqqqqqqqqqqqqqqqqwqwqqqqqqqqqqqqqqqqqqqqqqqqqk",
 "x                         x@x                         x",

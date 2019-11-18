@@ -36,6 +36,7 @@ typedef struct
     Direction dir;
 } Entity;
 
+void print_gui_string(int, int, char*); 
 void print_map_at(int, int);
 void print_map();
 void print_pellets();
