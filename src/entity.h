@@ -7,7 +7,7 @@
 #define VERTICALCUT 6
 #define HORIZONTALCUT 4
 
-typedef enum {M_SCATTER, M_CHASE, M_FRIGHT} GhostMode;
+typedef enum {M_SCATTER, M_CHASE, M_FRIGHT, M_DEAD} GhostMode;
 
 typedef struct
 {

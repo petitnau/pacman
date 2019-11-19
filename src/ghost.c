@@ -12,21 +12,42 @@ void ghost_main(int pipe_in, int pos_out, int log_out)
     GhostInfo ghost_info = {{PACMAN_ID, {PAC_START_X, PAC_START_Y}, PAC_START_DIR}, false};
 
     int i = 0;
+    long fright_timer=0;
 
     while(1)
     {       
-        while(read(pipe_in, &ghost_info, sizeof(ghost_info)) != -1);
+        while(read(pipe_in, &ghost_info, sizeof(ghost_info)) != -1)
+        {
+            if(ghost_info.fright)
+            {
+                fright_timer = start_timer(6);
+                ghost.mode = M_FRIGHT;  
+            }
+            if(ghost_info.death)
+            {
+                write(log_out, "la mia vita è finita", 50);
 
-        if(!check_timer(ghost_info.fright))
-        {
-            ghost.e.dir = choose_direction_target(ghost.e, blinky_target(ghost_info.pacman));
-            ghost.mode = M_CHASE;
+                fright_timer = 0;
+                ghost.mode = M_DEAD;
+            }
         }
-        else
+
+        switch(ghost.mode)
         {
-            ghost.e.dir = choose_direction_target(ghost.e, SCATTER[0]);
-            ghost.mode = M_FRIGHT;
+            case M_FRIGHT:
+                if(check_timer(fright_timer))
+                    ghost.e.dir = choose_direction_target(ghost.e, SCATTER[0]);
+                else
+                    ghost.mode = M_CHASE; //ciclo di chase saltato?
+                break;
+            case M_DEAD:
+                    ghost.e.dir = choose_direction_target(ghost.e, HOME_TARGET);
+                break;
+            default:
+                ghost.e.dir = choose_direction_target(ghost.e, blinky_target(ghost_info.pacman));
+                break;
         }
+
         switch(ghost.e.dir)
         {
             case UP:
@@ -48,9 +69,15 @@ void ghost_main(int pipe_in, int pos_out, int log_out)
         if(ghost.e.p.x == MAP_WIDTH && ghost.e.dir == RIGHT)
             ghost.e.p.x = 0;
 
+        if(ghost.e.p.x == HOME_TARGET.x && ghost.e.p.y == HOME_TARGET.y)
+        {
+            ghost.e.dir = UP;
+            ghost.mode = M_CHASE;
+        }
+
         write(pos_out, &ghost, sizeof(ghost)); //invia la posizione a control
 
-        if(ghost.e.dir == UP || ghost.e.dir == DOWN) //gestisce la velocità di pacman
+        if(ghost.e.dir == UP || ghost.e.dir == DOWN) //gestisce la velocità
             usleep(GHOST_SPEED*2);
         else
             usleep(GHOST_SPEED);

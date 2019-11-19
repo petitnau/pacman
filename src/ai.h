@@ -12,7 +12,7 @@ static const Position SCATTER[4] = {{ 2, 0},  //BLINKY
                                     {27,35},  //INKY
                                     { 0,35}}; //CLYDE
 
-static const Position HOME_TARGET = {13,14};
+static const Position HOME_TARGET = {23,14};
 
 Position blinky_target(Entity);
 Position pinky_target(Entity);

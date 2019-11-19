@@ -31,6 +31,7 @@ void print_ghost(CharGhost ghost)
     
     switch(ghost.mode)
     {
+        case M_DEAD:
         case M_FRIGHT:
             attron(COLOR_PAIR(9));
             break;
@@ -48,6 +49,7 @@ void print_ghost(CharGhost ghost)
 
     switch(ghost.mode)
     {
+        case M_DEAD:
         case M_FRIGHT:
             attroff(COLOR_PAIR(9));
             break;
