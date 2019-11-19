@@ -32,7 +32,6 @@ void ghost_main(int pipe_in, int pos_out, int log_out)
             }
             if(ghost_info.full)
             {
-                usleep(5000);
                 ghost.e.p.x = GHOST_START_X;
                 ghost.e.p.y = GHOST_START_Y;
                 ghost.e.dir = UP;

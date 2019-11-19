@@ -74,7 +74,7 @@ Direction choose_direction_target (Entity ghost, Position target)
                             {ghost.p.x, ghost.p.y+1},  // down
                             {ghost.p.x+1, ghost.p.y}, // right
                             {ghost.p.x-1, ghost.p.y}};  // left
-                            
+
     _Bool possible_dirs[4] = {false, false, false, false};
 
     for (i=0; i < 4; i++)      
@@ -105,4 +105,3 @@ Direction choose_direction_target (Entity ghost, Position target)
 
     return min_index(4, dir_dist);
 }
-
