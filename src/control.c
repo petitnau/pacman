@@ -4,12 +4,13 @@
 
 #include "control.h"
 #include "utils.h"
+#include "pacman.h"
 #include "ghost.h"
 #include "entity.h"
 #include "drawings.h"
 #include "list.h"
 
-void food_handler(int* score, Position pos, int rows, int col, char game_food[rows][col], Ghost_Info *ghost_info);
+void food_handler(int* score, Position pos, int rows, int col, char game_food[rows][col], GhostInfo *ghost_info);
 void food_setup();
 
 void manage_logs(int log_in, MessageList* log_list)
@@ -38,12 +39,11 @@ void manage_logs(int log_in, MessageList* log_list)
     refresh();
 }
 
-void control_main(int pos_in, int ghost_out, int log_in)
+void control_main(int pacman_in, int ghost_in, int ghost_out, int log_in)
 {
-    Entity pacman = {PACMAN_ID, {PAC_START_X, PAC_START_Y}, PAC_START_DIR};
-    Entity ghost = {GHOST_ID, {GHOST_START_X, GHOST_START_Y}, GHOST_START_DIR};
-    Entity tmp_pkg;
-    Ghost_Info ghost_info = {pacman, 0};
+    CharPacman pac_tmp, pacman = {{PACMAN_ID, {PAC_START_X, PAC_START_Y}, PAC_START_DIR}};
+    CharGhost ghost_tmp, ghost = {{GHOST_ID, {GHOST_START_X, GHOST_START_Y}, GHOST_START_DIR}, M_CHASE};
+    GhostInfo ghost_info = {pacman.e, 0};
 
     Position pos;
     int i,j;
@@ -61,40 +61,38 @@ void control_main(int pos_in, int ghost_out, int log_in)
 
     while(1)
     {  
-        read(pos_in, &tmp_pkg, sizeof(tmp_pkg));    //leggo posizione di pacman
-        
-        if(tmp_pkg.id == PACMAN_ID)
+        while(read(pacman_in, &pac_tmp, sizeof(pac_tmp)) != -1)
         {
             for(i=-1; i<=1; i++)    //cancella pacman
             {
-                pos.x=pacman.p.x+i;
-                pos.y=pacman.p.y;
+                pos.x=pacman.e.p.x+i;
+                pos.y=pacman.e.p.y;
                 pos = get_pac_eff_pos(pos);
                 
                 mvaddch(pos.y+GUI_HEIGHT, pos.x, NCURSES_ACS(game_food[pos.y][pos.x]));
             }
-            
-            pacman = tmp_pkg;
-            food_handler(&score, pacman.p, MAP_HEIGHT, MAP_WIDTH, game_food, &ghost_info);
+            pacman = pac_tmp;
 
-            ghost_info.pacman = pacman;
+            food_handler(&score, pacman.e.p, MAP_HEIGHT, MAP_WIDTH, game_food, &ghost_info);
+
+            ghost_info.pacman = pacman.e;
             
             write(ghost_out, &ghost_info, sizeof(ghost_info));
         }
-        else if(tmp_pkg.id == GHOST_ID)
+        while(read(ghost_in, &ghost_tmp, sizeof(ghost_tmp)) != -1)
         {
             for(i=-1; i<=1; i++)    //cancella ghost
             {
-                pos.x=ghost.p.x+i;
-                pos.y=ghost.p.y;
+                pos.x=ghost.e.p.x+i;
+                pos.y=ghost.e.p.y;
                 pos = get_pac_eff_pos(pos);
                 
                 mvaddch(pos.y+GUI_HEIGHT, pos.x, NCURSES_ACS(game_food[pos.y][pos.x]));
             }
                 
-            ghost = tmp_pkg;
+            ghost = ghost_tmp;
         }
-    
+
         sprintf(scorestr, "%d", score/10);
         sprintf(nupstr, "1UP");
         print_gui_string(0,11, nupstr);
@@ -103,8 +101,8 @@ void control_main(int pos_in, int ghost_out, int log_in)
         print_gui_string(3,33, "0");
         print_gui_string(3,31, scorestr);
         print_gui_string(0,37, "HIGH SCORE");
-        print_entity(pacman);
-        print_entity(ghost);
+        print_pacman(pacman);
+        print_ghost(ghost);
         manage_logs(log_in, &log_list);
         refresh();
     }
@@ -119,7 +117,7 @@ void food_setup(int row, int col, char game_food[row][col])
     } 
 }
 
-void food_handler(int* score, Position pos, int rows, int col, char game_food[rows][col], Ghost_Info *ghost_info)
+void food_handler(int* score, Position pos, int rows, int col, char game_food[rows][col], GhostInfo *ghost_info)
 {  
     int i;
     Position pe_pos;

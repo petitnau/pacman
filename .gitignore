@@ -9,3 +9,4 @@ obj/utils.o
 .vscode/settings.json
 obj/entity.o
 obj/list.o
+obj/drawings.o

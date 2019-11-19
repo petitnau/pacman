@@ -1,11 +1,14 @@
 #ifndef DRAWINGS_H
 #define DRAWINGS_H
 
+#include "ghost.h"
+#include "pacman.h"
+
 #define MAP_WIDTH 55
 #define MAP_HEIGHT 31
 
 static const char S_PAC[4][4] = {"(*v", "^*)", "(*<", ">*)"};
-static const char S_GHST[4] = "[\"]";
+static const char S_GHST[3][4] = {"[\"]", "[\"]", "[w]"};
 
 static const char F_NUMBERS[][7] = {"lkxxmj", " k x v", "lkljmj", "lk umj", "k mu v", "lkmkmj", "lktkmj", "lk x  ", "lktumj", "lkmumj"};
 static const char F_LETTERS[][7] = {"lktu  ", "", "lkx mj", "", "lkt mj", "", "lkxkmj", //ABCDEFG
@@ -78,5 +81,8 @@ static const char PELLETS[MAP_HEIGHT][MAP_WIDTH+1] = {
 "  ~                     ~     ~                     ~  ",
 "  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ",
 "                                                       "};
+
+void print_pacman(CharPacman pacman);
+void print_ghost(CharGhost ghost);
 
 #endif

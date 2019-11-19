@@ -7,6 +7,8 @@
 #define VERTICALCUT 6
 #define HORIZONTALCUT 4
 
+typedef enum {M_SCATTER, M_CHASE, M_FRIGHT} GhostMode;
+
 typedef struct
 {
     int id;
@@ -16,6 +18,5 @@ typedef struct
 
 _Bool accept_turn(Entity, Direction);
 _Bool can_move(Entity, Direction);
-void print_entity(Entity);
 
 #endif

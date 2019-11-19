@@ -14,7 +14,13 @@ typedef struct
 {
     Entity pacman;
     long fright;
-} Ghost_Info;
+} GhostInfo;
+
+typedef struct
+{
+    Entity e;
+    GhostMode mode;
+} CharGhost;
 
 void ghost_main(int, int, int);
 

@@ -7,9 +7,9 @@
 
 void ghost_main(int pipe_in, int pos_out, int log_out)
 {
-    Entity ghost = {GHOST_ID, {GHOST_START_X, GHOST_START_Y}, GHOST_START_DIR};
+    CharGhost ghost = {{GHOST_ID, {GHOST_START_X, GHOST_START_Y}, GHOST_START_DIR}, M_CHASE};
 
-    Ghost_Info ghost_info = {{PACMAN_ID, {PAC_START_X, PAC_START_Y}, PAC_START_DIR}, false};
+    GhostInfo ghost_info = {{PACMAN_ID, {PAC_START_X, PAC_START_Y}, PAC_START_DIR}, false};
 
     int i = 0;
 
@@ -18,34 +18,39 @@ void ghost_main(int pipe_in, int pos_out, int log_out)
         while(read(pipe_in, &ghost_info, sizeof(ghost_info)) != -1);
 
         if(!check_timer(ghost_info.fright))
-            ghost.dir = choose_direction_target(ghost, blinky_target(ghost_info.pacman));
+        {
+            ghost.e.dir = choose_direction_target(ghost.e, blinky_target(ghost_info.pacman));
+            ghost.mode = M_CHASE;
+        }
         else
-            ghost.dir = choose_direction_target(ghost, SCATTER[0]);
-        
-        switch(ghost.dir)
+        {
+            ghost.e.dir = choose_direction_target(ghost.e, SCATTER[0]);
+            ghost.mode = M_FRIGHT;
+        }
+        switch(ghost.e.dir)
         {
             case UP:
-                ghost.p.y--;
+                ghost.e.p.y--;
                 break;
             case DOWN:
-                ghost.p.y++;
+                ghost.e.p.y++;
                 break;
             case RIGHT:
-                ghost.p.x++;
+                ghost.e.p.x++;
                 break;
             case LEFT:
-                ghost.p.x--;
+                ghost.e.p.x--;
                 break;
         }
 
-        if(ghost.p.x == 0 && ghost.dir == LEFT)
-            ghost.p.x = MAP_WIDTH;
-        if(ghost.p.x == MAP_WIDTH && ghost.dir == RIGHT)
-            ghost.p.x = 0;
+        if(ghost.e.p.x == 0 && ghost.e.dir == LEFT)
+            ghost.e.p.x = MAP_WIDTH;
+        if(ghost.e.p.x == MAP_WIDTH && ghost.e.dir == RIGHT)
+            ghost.e.p.x = 0;
 
         write(pos_out, &ghost, sizeof(ghost)); //invia la posizione a control
 
-        if(ghost.dir == UP || ghost.dir == DOWN) //gestisce la velocità di pacman
+        if(ghost.e.dir == UP || ghost.e.dir == DOWN) //gestisce la velocità di pacman
             usleep(GHOST_SPEED*2);
         else
             usleep(GHOST_SPEED);
