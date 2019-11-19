@@ -39,7 +39,7 @@ int mod(int, int);
 
 int rand_between(int, int);
 float distance(Position, Position);
-int min_index(int, int *);
+int min_index(int, float *);
 Position offset_position(Position, Direction, int);
 Direction reverse_direction(Direction);
 

@@ -111,7 +111,7 @@ int rand_between (int min, int max)
     return min+rand()%(max-min+1);
 }
 
-int min_index (int size, int *array)
+int min_index (int size, float *array)
 {
     int i, x=0;
 
