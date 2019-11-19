@@ -107,6 +107,7 @@ void control_main(int pacman_in, int ghost_in, int ghost_out, int log_in)
         print_gui_string(3,33, "0");
         print_gui_string(3,31, scorestr);
         print_gui_string(0,37, "HIGH SCORE");
+        print_hp(pacman.hp);
         print_pacman(pacman);
         print_ghost(ghost);
         manage_logs(log_in, &log_list);

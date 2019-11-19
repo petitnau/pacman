@@ -40,6 +40,15 @@ void print_gui_string(int y, int x, char* str)
     attroff(COLOR_PAIR(2));
 }
 
+void print_hp(int n)
+{
+    int i;
+    for(i = 0; i < n; i++)
+    {
+        mvprintw(5,70+(i*4), "(*<");
+    }
+}
+
 void print_map_at(int x, int y)
 {
     char c = MAP[y][x];

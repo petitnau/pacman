@@ -31,6 +31,7 @@ typedef struct
 
 void print_gui_string(int, int, char*); 
 void print_map_at(int, int);
+void print_hp(int n);
 void print_map();
 void print_pellets();
 char get_map_at(int, int);
