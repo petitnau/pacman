@@ -8,9 +8,9 @@
 #define INKY_CHASE_OFFSET 2
 
 static const Position SCATTER[4] = {{ 2, 0},  //BLINKY
-                             {25, 0},  //PINKY
-                             {27,35},  //INKY
-                             { 0,35}}; //CLYDE
+                                    {25, 0},  //PINKY
+                                    {27,35},  //INKY
+                                    { 0,35}}; //CLYDE
 
 static const Position HOME_TARGET = {13,14};
 

@@ -13,7 +13,7 @@
 typedef struct
 {
     Entity pacman;
-    _Bool fear;
+    long fright;
 } Ghost_Info;
 
 void ghost_main(int, int, int);

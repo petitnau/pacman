@@ -161,3 +161,13 @@ Direction reverse_direction (Direction direction)
         case RIGHT: return LEFT;
     }
 }
+
+long start_timer(long duration)
+{
+    return time(NULL) + duration;
+}
+
+_Bool check_timer(long timer)
+{
+    return time(NULL) < timer;
+}

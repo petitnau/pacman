@@ -9,9 +9,8 @@
 #include "drawings.h"
 #include "list.h"
 
-void food_handler(int* score, Position pos, int rows, int col, char game_food[rows][col]);
+void food_handler(int* score, Position pos, int rows, int col, char game_food[rows][col], Ghost_Info *ghost_info);
 void food_setup();
-
 
 void manage_logs(int log_in, MessageList* log_list)
 {
@@ -44,7 +43,7 @@ void control_main(int pos_in, int ghost_out, int log_in)
     Entity pacman = {PACMAN_ID, {PAC_START_X, PAC_START_Y}, PAC_START_DIR};
     Entity ghost = {GHOST_ID, {GHOST_START_X, GHOST_START_Y}, GHOST_START_DIR};
     Entity tmp_pkg;
-    Ghost_Info ghost_info;
+    Ghost_Info ghost_info = {pacman, 0};
 
     Position pos;
     int i,j;
@@ -76,7 +75,7 @@ void control_main(int pos_in, int ghost_out, int log_in)
             }
             
             pacman = tmp_pkg;
-            food_handler(&score, pacman.p, MAP_HEIGHT, MAP_WIDTH, game_food);
+            food_handler(&score, pacman.p, MAP_HEIGHT, MAP_WIDTH, game_food, &ghost_info);
 
             ghost_info.pacman = pacman;
             
@@ -95,10 +94,7 @@ void control_main(int pos_in, int ghost_out, int log_in)
                 
             ghost = tmp_pkg;
         }
-        
-        ///////////////
-        //mvprintw(5, 40, "x:%2d,y:%2d,d:%d", pacman.p.x, pacman.p.y, pacman.dir);
-        //mvprintw(5, 55, "x:%2d,y:%2d,d:%d", ghost.p.x, ghost.p.y, ghost.dir);
+    
         sprintf(scorestr, "%d", score/10);
         sprintf(nupstr, "1UP");
         print_gui_string(0,11, nupstr);
@@ -123,7 +119,7 @@ void food_setup(int row, int col, char game_food[row][col])
     } 
 }
 
-void food_handler(int* score, Position pos, int rows, int col, char game_food[rows][col])
+void food_handler(int* score, Position pos, int rows, int col, char game_food[rows][col], Ghost_Info *ghost_info)
 {  
     int i;
     Position pe_pos;
@@ -141,8 +137,8 @@ void food_handler(int* score, Position pos, int rows, int col, char game_food[ro
                 beep();
                 break;
             case '`': 
-                //Funzione "spaventa fantasmi"
                 *score += 50;
+                ghost_info->fright = start_timer(6);
                 break;
         }
         game_food[pe_pos.y][pe_pos.x] = ' ';
