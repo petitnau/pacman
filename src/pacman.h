@@ -8,6 +8,7 @@
 typedef struct
 {
     Entity e;
+    int hp;
 } CharPacman;
 
 void pacman_main(int, int, int);

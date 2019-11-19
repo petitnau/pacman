@@ -97,6 +97,7 @@ void control_main(int pacman_in, int ghost_in, int ghost_out, int log_in)
         write(ghost_out, &ghost_info, sizeof(ghost_info));
         ghost_info.fright = false;
         ghost_info.death = false;
+        ghost_info.full = false;
 
         sprintf(scorestr, "%d", score/10);
         sprintf(nupstr, "1UP");
@@ -161,6 +162,7 @@ void collision_handler(CharPacman pacman, CharGhost ghost, GhostInfo* ghost_info
         {
             //perdi una vita
             pacman.hp--;
+            ghost_info->full = true;
             //pacman viene riportato alla pos. inziiale idem
         }
     }

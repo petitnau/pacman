@@ -9,7 +9,7 @@ void ghost_main(int pipe_in, int pos_out, int log_out)
 {
     CharGhost ghost = {{GHOST_ID, {GHOST_START_X, GHOST_START_Y}, GHOST_START_DIR}, M_CHASE};
 
-    GhostInfo ghost_info = {{PACMAN_ID, {PAC_START_X, PAC_START_Y}, PAC_START_DIR}, false};
+    GhostInfo ghost_info = {{PACMAN_ID, {PAC_START_X, PAC_START_Y}, PAC_START_DIR}, false, false};
 
     int i = 0;
     long fright_timer=0;
@@ -30,8 +30,15 @@ void ghost_main(int pipe_in, int pos_out, int log_out)
                 fright_timer = 0;
                 ghost.mode = M_DEAD;
             }
+            if(ghost_info.full)
+            {
+                usleep(5000);
+                ghost.e.p.x = GHOST_START_X;
+                ghost.e.p.y = GHOST_START_Y;
+                ghost.e.dir = UP;
+            }
         }
-
+       
         switch(ghost.mode)
         {
             case M_FRIGHT:

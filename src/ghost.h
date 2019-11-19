@@ -15,6 +15,7 @@ typedef struct
     Entity pacman;
     _Bool fright;
     _Bool death;
+    _Bool full;
 } GhostInfo;
 
 typedef struct
