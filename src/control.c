@@ -13,24 +13,28 @@ void food_handler(int* score, Position pos, int rows, int col, char game_food[ro
 void food_setup();
 
 
-void manage_logs(int log_in, MessageList log_list)
+void manage_logs(int log_in, MessageList* log_list)
 {
+    static int p=0;
     int i;
     char msg_pkg[50];
 
     while(read(log_in, &msg_pkg, sizeof(char)*50) != -1)
     {
-        list_push(&log_list, msg_pkg);
+        list_push(log_list, msg_pkg);
     }    
-    for(i = list_count(log_list); i > MAP_HEIGHT-2; i--)
-        list_pop(&log_list);
+
+    while(log_list->count > MAP_HEIGHT-2)
+        list_pop(log_list);
 
     i = 0;
-    MessageNode* aux = log_list.tail;
+    MessageNode* aux = log_list->tail;
     while(aux != NULL)
     {
-        mvprintw(MAP_HEIGHT+GUI_HEIGHT-(2+i++), 60, "%s", aux->msg);
+        mvprintw(MAP_HEIGHT+GUI_HEIGHT-(2+i), 60, "%*s",50,"");
+        mvprintw(MAP_HEIGHT+GUI_HEIGHT-(2+i), 60, "%s", aux->msg);
         aux = aux->prev;
+        i++;
     }
     refresh();
 }
@@ -105,7 +109,7 @@ void control_main(int pos_in, int ghost_out, int log_in)
         print_gui_string(0,37, "HIGH SCORE");
         print_entity(pacman);
         print_entity(ghost);
-        manage_logs(log_in, log_list);
+        manage_logs(log_in, &log_list);
         refresh();
     }
 }

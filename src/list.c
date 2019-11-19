@@ -6,6 +6,7 @@ void list_init(MessageList *list)
 {
     list->head = NULL;
     list->tail = NULL;
+    list->count = 0;
 }
 void list_push(MessageList* list, char msg[50])
 {
@@ -20,6 +21,7 @@ void list_push(MessageList* list, char msg[50])
         list->tail->next = new_node;
     
     list->tail = new_node;
+    list->count++;
 }
 void list_pop(MessageList* list)
 {
@@ -34,6 +36,7 @@ void list_pop(MessageList* list)
         list->head->prev = NULL;
 
     free(aux);
+    list->count--;
 }
 
 int list_count(MessageList list)

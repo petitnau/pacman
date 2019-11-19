@@ -12,6 +12,7 @@ typedef struct
 {
     MessageNode *head;
     MessageNode *tail;
+    int count;
 } MessageList;
 
 void list_init(MessageList *list);
