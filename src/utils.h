@@ -38,7 +38,7 @@ Position get_pac_eff_pos(Position);
 int mod(int, int);
 
 int rand_between(int, int);
-int distance(Position, Position);
+float distance(Position, Position);
 int min_index(int, int *);
 Position offset_position(Position, Direction, int);
 Direction reverse_direction(Direction);

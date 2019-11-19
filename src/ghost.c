@@ -16,11 +16,8 @@ void ghost_main(int pipe_in, int pos_out, int log_out)
     while(1)
     {       
         while(read(pipe_in, &ghost_info, sizeof(ghost_info)) != -1);
-        
-        if(!can_move(ghost, ghost.dir))
-        {          
-            ghost.dir = choose_direction_target(ghost, blinky_target(ghost_info.pacman));
-        }    
+              
+        ghost.dir = choose_direction_target(ghost, blinky_target(ghost_info.pacman));
 
         switch(ghost.dir)
         {

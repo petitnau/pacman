@@ -122,9 +122,9 @@ int min_index (int size, int *array)
     return x;
 }
 
-int distance (Position a, Position b)
+float distance (Position a, Position b)
 {
-    return sqrt(pow(b.x-a.x,2) + pow(b.y-a.y,2));
+    return sqrt(pow(b.x/2.0-a.x/2.0,2) + pow(b.y-a.y,2));
 }
 
 Position offset_position (Position position, Direction direction, int quantity)

@@ -1,4 +1,5 @@
 #include <limits.h>
+#include <curses.h>
 
 #include "ai.h"
 
@@ -68,12 +69,12 @@ Direction choose_direction_random (_Bool possibleDirections[4])
 Direction choose_direction_target (Entity ghost, Position target)
 {
     int i;
-    int dir_dist[4];
+    float dir_dist[4];
     Position dir_ghost[4] = {{ghost.p.x, ghost.p.y-1},  // up
                             {ghost.p.x, ghost.p.y+1},  // down
                             {ghost.p.x+1, ghost.p.y}, // right
                             {ghost.p.x-1, ghost.p.y}};  // left
-    _Bool possible_dirs[4];
+    _Bool possible_dirs[4] = {};
 
     for (i=0; i < 4; i++)      
     {
@@ -98,7 +99,7 @@ Direction choose_direction_target (Entity ghost, Position target)
         if (possible_dirs[i])
             dir_dist[i] = distance(dir_ghost[i], target);
         else
-            dir_dist[i] = INT_MAX;
+            dir_dist[i] = INT_MAX;    
     }
 
     return min_index(4, dir_dist);
