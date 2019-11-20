@@ -12,6 +12,7 @@
 typedef struct
 {
     Entity e;
+    Direction next_dir;
     int lives;
 } CharPacman;
 

@@ -5,7 +5,7 @@
 #include <time.h>
 
 #include "utils.h"
-#include "drawings.h"
+#include "interface.h"
 
 void print_gui_string(int y, int x, char* str)
 {
@@ -31,7 +31,7 @@ void print_gui_string(int y, int x, char* str)
             if(c=='m' || c=='q' || c=='x' || c=='j' 
             || c=='l' || c=='k' || c=='t' || c=='u' 
             || c=='w' || c=='v')
-                    mvaddch(y+(j/2),x+(j%2)-(len-i)*2, NCURSES_ACS(c));
+                mvaddch(y+(j/2),x+(j%2)-(len-i)*2, NCURSES_ACS(c));
             else
                 mvaddch(y+(j/2),x+(j%2)-(len-i)*2, c);
         }

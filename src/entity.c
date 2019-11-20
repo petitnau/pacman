@@ -1,7 +1,7 @@
 #include <curses.h>
 #include <string.h>
 #include "entity.h"
-#include "drawings.h"
+#include "interface.h"
 
 _Bool accept_turn(Entity entity, Direction direction)
 {
@@ -93,4 +93,40 @@ _Bool can_move(Entity entity, Direction direction)
     }
 
     return true;
+}
+
+void map_loop(Entity* entity)
+{
+    if(entity->p.x == 0)
+        entity->p.x = MAP_WIDTH;
+    else if(entity->p.x == MAP_WIDTH)
+        entity->p.x = 0;
+
+    if(entity->p.y == 0)
+        entity->p.y = MAP_HEIGHT;
+    else if(entity->p.y == MAP_HEIGHT)
+        entity->p.y= 0;
+}
+
+void e_move(Entity* entity)
+{         
+    if(can_move(*entity, entity->dir))
+    {        
+        switch(entity->dir)
+        {
+            case UP:
+                entity->p.y--;
+                break;
+            case LEFT:
+                entity->p.x--;
+                break;
+            case DOWN:
+                entity->p.y++;
+                break;
+            case RIGHT:
+                entity->p.x++;
+                break;
+        }
+    }
+    map_loop(entity);
 }

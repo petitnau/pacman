@@ -1,5 +1,5 @@
-#ifndef DRAWINGS_H
-#define DRAWINGS_H
+#ifndef INTERFACE_H
+#define INTERFACE_H
 
 #include "ghost.h"
 #include "pacman.h"
@@ -82,7 +82,9 @@ static const char PELLETS[MAP_HEIGHT][MAP_WIDTH+1] = {
 "  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ",
 "                                                       "};
 
-void print_pacman(CharPacman pacman);
-void print_ghost(CharGhost ghost);
+void print_pacman(CharPacman);
+void print_ghost(CharGhost);
+void unprint_entity(Entity, char[MAP_HEIGHT][MAP_WIDTH]);
+void print_ui(int, CharPacman, CharGhost);
 
 #endif

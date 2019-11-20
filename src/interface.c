@@ -1,6 +1,6 @@
 #include <curses.h>
 #include <string.h>
-#include "drawings.h"
+#include "interface.h"
 #include "pacman.h"
 #include "ghost.h"
 
@@ -61,4 +61,39 @@ void print_ghost(CharGhost ghost)
             attroff(COLOR_PAIR(5));
             break;
     }
+}
+
+void unprint_entity(Entity entity, char game_food[MAP_HEIGHT][MAP_WIDTH])
+{
+    Position pos;
+    int i;
+
+    attron(COLOR_PAIR(3));
+    for(i=-1; i<=1; i++)
+    {
+        pos.x=entity.p.x+i;
+        pos.y=entity.p.y;
+        pos = get_pac_eff_pos(pos);
+        
+        mvaddch(pos.y+GUI_HEIGHT, pos.x, NCURSES_ACS(game_food[pos.y][pos.x]));
+    }
+    attroff(COLOR_PAIR(3));
+}
+
+void print_ui(int score, CharPacman pacman, CharGhost ghost)
+{
+    char scorestr[10];
+    char nupstr[10];
+
+    sprintf(scorestr, "%d", score/10);
+    sprintf(nupstr, "1UP");
+    print_gui_string(0,11, nupstr);
+    print_gui_string(3,13, "0");
+    print_gui_string(3,11, scorestr);
+    print_gui_string(3,33, "0");
+    print_gui_string(3,31, scorestr);
+    print_gui_string(0,37, "HIGH SCORE");
+    print_lives(pacman.lives);
+    print_pacman(pacman);
+    print_ghost(ghost);
 }
