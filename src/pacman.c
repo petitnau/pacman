@@ -10,7 +10,7 @@ void manage_cmd_in(int, CharPacman*, Direction*);
 void switch_direction(CharPacman*);
 void pac_wait(CharPacman);
 
-void pacman_main(int cmd_in, int pos_out, int log_out)
+void pacman_main(int cmd_in, int info_in, int pos_out, int log_out)
 {
     CharPacman pacman = {{PACMAN_ID, {PAC_START_X, PAC_START_Y}, PAC_START_DIR}, PAC_START_DIR, PAC_START_LIVES};
 

@@ -16,6 +16,6 @@ typedef struct
     int lives;
 } CharPacman;
 
-void pacman_main(int, int, int);
+void pacman_main(int, int, int, int);
 
 #endif

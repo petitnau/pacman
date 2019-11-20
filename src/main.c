@@ -52,11 +52,13 @@ int main()
 {
     int i;
     pid_t p_player, p_pacman, p_ghosts;
-    int pacman_ch_pipe[2], ghost_ch_pipe[2], ghost_info_pipe[2], cmd_pipe[2], log_pipe[2];
+    int pacman_ch_pipe[2], pacman_info_pipe[2], ghost_ch_pipe[2], ghost_info_pipe[2], cmd_pipe[2], log_pipe[2];
 
     init();
 
     if(pipe(pacman_ch_pipe) == -1)
+        _exit(PIPE_ERROR);
+    if(pipe(pacman_info_pipe) == -1)
         _exit(PIPE_ERROR);
     if(pipe(ghost_ch_pipe) == -1)
         _exit(PIPE_ERROR);
@@ -69,6 +71,8 @@ int main()
 
     fcntl(pacman_ch_pipe[0], F_SETFL, O_NONBLOCK);
     fcntl(pacman_ch_pipe[1], F_SETFL, O_NONBLOCK);
+    fcntl(pacman_info_pipe[0], F_SETFL, O_NONBLOCK);
+    fcntl(pacman_info_pipe[1], F_SETFL, O_NONBLOCK);
     fcntl(ghost_ch_pipe[0], F_SETFL, O_NONBLOCK);
     fcntl(ghost_ch_pipe[1], F_SETFL, O_NONBLOCK);
     fcntl(cmd_pipe[0], F_SETFL, O_NONBLOCK);
@@ -83,14 +87,15 @@ int main()
         case -1:
             _exit(FORK_ERROR | PACMAN_ID);
         case 0: //pacman
-            close(pacman_ch_pipe[P_RD]);      
+            close(pacman_ch_pipe[P_RD]); 
+            close(pacman_info_pipe[P_WR]);   
             close(ghost_ch_pipe[P_RD]);      
             close(ghost_ch_pipe[P_WR]);      
             close(ghost_info_pipe[P_RD]);
             close(ghost_info_pipe[P_WR]);
             close(cmd_pipe[P_WR]);
             close(log_pipe[P_RD]);
-            pacman_main(cmd_pipe[P_RD], pacman_ch_pipe[P_WR], log_pipe[P_WR]);
+            pacman_main(cmd_pipe[P_RD], pacman_info_pipe[P_RD], pacman_ch_pipe[P_WR], log_pipe[P_WR]);
     }   
 
     switch(p_ghosts = fork())
@@ -99,7 +104,9 @@ int main()
             _exit(FORK_ERROR | GHOST_ID);
         case 0:
             close(pacman_ch_pipe[P_RD]);      
-            close(pacman_ch_pipe[P_WR]);      
+            close(pacman_ch_pipe[P_WR]);     
+            close(pacman_info_pipe[P_WR]);   
+            close(pacman_info_pipe[P_RD]);   
             close(ghost_ch_pipe[P_RD]);      
             close(ghost_info_pipe[P_WR]);
             close(cmd_pipe[P_RD]);
@@ -114,7 +121,9 @@ int main()
             _exit(FORK_ERROR | PLAYER_ID);
         case 0:
             close(pacman_ch_pipe[P_RD]);      
-            close(pacman_ch_pipe[P_WR]);  
+            close(pacman_ch_pipe[P_WR]);
+            close(pacman_info_pipe[P_WR]);   
+            close(pacman_info_pipe[P_RD]); 
             close(ghost_ch_pipe[P_RD]);      
             close(ghost_ch_pipe[P_WR]);      
             close(ghost_info_pipe[P_RD]);
@@ -124,7 +133,8 @@ int main()
             player_main(cmd_pipe[P_WR], log_pipe[P_WR]);
     }
 
-    close(pacman_ch_pipe[P_WR]);  
+    close(pacman_ch_pipe[P_WR]);
+    close(pacman_info_pipe[P_RD]); 
     close(ghost_ch_pipe[P_WR]);
     close(ghost_info_pipe[P_RD]);  
     close(cmd_pipe[P_RD]);
