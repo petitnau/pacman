@@ -10,7 +10,7 @@ typedef struct
     int fright;
 } GhostTimers;
 
-void manage_info_in(int, CharGhost*, GhostInfo*, GhostTimers*);
+void manage_g_info_in(int, CharGhost*, GhostInfo*, GhostTimers*);
 void manage_timers(CharGhost*, GhostTimers);
 void ghost_choose_dir(CharGhost*, GhostInfo);
 void manage_position_events(CharGhost*);
@@ -26,7 +26,7 @@ void ghost_main(int info_in, int pos_out, int log_out)
 
     while(1)
     {       
-        manage_info_in(info_in, &ghost, &info_pkg, &timers);
+        manage_g_info_in(info_in, &ghost, &info_pkg, &timers);
         manage_timers(&ghost, timers);
         ghost_choose_dir(&ghost, info_pkg); 
         e_move(&ghost.e);
@@ -36,7 +36,7 @@ void ghost_main(int info_in, int pos_out, int log_out)
     }
 }
 
-void manage_info_in(int info_in, CharGhost* ghost, GhostInfo* info_pkg, GhostTimers* timers)
+void manage_g_info_in(int info_in, CharGhost* ghost, GhostInfo* info_pkg, GhostTimers* timers)
 {
     while(read(info_in, info_pkg, sizeof(*info_pkg)) != -1)
     {                

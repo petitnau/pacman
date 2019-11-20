@@ -48,10 +48,10 @@ void manage_logs(int log_in, MessageList* log_list)
 
 void control_main(int pacman_in, int pacman_out, int ghost_in, int ghost_out, int log_in)
 {
-    CharPacman pacman = {{PACMAN_ID, {PAC_START_X, PAC_START_Y}, PAC_START_DIR}, PAC_START_LIVES};
+    CharPacman pacman = {{PACMAN_ID, {PAC_START_X, PAC_START_Y}, PAC_START_DIR}, PAC_START_LIVES, false};
     CharGhost ghost = {{GHOST_ID, {GHOST_START_X, GHOST_START_Y}, GHOST_START_DIR}, M_CHASE};
     GhostInfo ghost_info = {pacman.e, false, false, false};
-    PacManInfo pacman_info = {false};
+    PacManInfo pacman_info = {false, false};
 
     int score = 0;
     char game_food[MAP_HEIGHT][MAP_WIDTH];
@@ -72,6 +72,9 @@ void control_main(int pacman_in, int pacman_out, int ghost_in, int ghost_out, in
         print_ui(score, pacman, ghost);
         manage_logs(log_in, &log_list);
         refresh();
+
+        if(pacman.lives < 0)
+            return;
     }
 }
 
@@ -88,8 +91,6 @@ void manage_pacman_in(int pacman_in, CharPacman* pacman, GhostInfo* info_pkg, ch
 {
     CharPacman pacman_pkg;
 
-    int i;
-
     while(read(pacman_in, &pacman_pkg, sizeof(pacman_pkg)) != -1)
     {
         unprint_entity(pacman->e, game_food);
@@ -104,8 +105,6 @@ void manage_pacman_in(int pacman_in, CharPacman* pacman, GhostInfo* info_pkg, ch
 void manage_ghost_in(int ghost_in, CharGhost* ghost, char game_food[MAP_HEIGHT][MAP_WIDTH])
 {
     CharGhost ghost_pkg;
-
-    int i;
 
     while(read(ghost_in, &ghost_pkg, sizeof(ghost_pkg)) != -1)
     {
@@ -128,10 +127,10 @@ void send_ghost_info(int ghost_out, GhostInfo* ghost_info)
 
 void send_pacman_info(int pacman_out, PacManInfo* pacman_info)
 {    
-    if(pacman_info->eaten)
+    if(pacman_info->death)
     {
         write(pacman_out, pacman_info, sizeof(*pacman_info));
-        pacman_info->eaten = false;
+        pacman_info->death = false;
     }
 }
 
@@ -173,10 +172,12 @@ void collision_handler(CharPacman *pacman, PacManInfo *pacman_info, CharGhost *g
             ghost_info->new = true;
             // morto il fantasma
         }
-        else if(ghost->mode != M_DEAD)
+        else if(ghost->mode != M_DEAD && !pacman->dead)
         {
             //perdi una vita
-            pacman_info->eaten = true;
+            pacman->dead = true;
+            pacman_info->death = true;
+            pacman_info->new = true;
             ghost_info->full = true;
             ghost_info->new = true;
             //pacman viene riportato alla pos. inziiale idem

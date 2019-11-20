@@ -14,11 +14,13 @@ typedef struct
     Entity e;
     Direction next_dir;
     int lives;
+    _Bool dead;
 } CharPacman;
 
 typedef struct
 {
-    _Bool eaten;
+    _Bool new;
+    _Bool death;
 } PacManInfo;
 
 void pacman_main(int, int, int, int);

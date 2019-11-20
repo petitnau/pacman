@@ -10,3 +10,4 @@ obj/utils.o
 obj/entity.o
 obj/list.o
 obj/drawings.o
+obj/interface.o
