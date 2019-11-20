@@ -75,7 +75,7 @@ Direction choose_direction_target (Entity ghost, Position target)
                             {ghost.p.x+1, ghost.p.y}, // right
                             {ghost.p.x-1, ghost.p.y}};  // left
 
-    _Bool possible_dirs[4] = {false, false, false, false};
+    _Bool possible_dirs[4] = {};
 
     for (i=0; i < 4; i++)      
     {

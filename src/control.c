@@ -42,7 +42,7 @@ void manage_logs(int log_in, MessageList* log_list)
 
 void control_main(int pacman_in, int ghost_in, int ghost_out, int log_in)
 {
-    CharPacman pac_tmp, pacman = {{PACMAN_ID, {PAC_START_X, PAC_START_Y}, PAC_START_DIR}, 3};
+    CharPacman pac_tmp, pacman = {{PACMAN_ID, {PAC_START_X, PAC_START_Y}, PAC_START_DIR}, PAC_START_LIVES};
     CharGhost ghost_tmp, ghost = {{GHOST_ID, {GHOST_START_X, GHOST_START_Y}, GHOST_START_DIR}, M_CHASE};
     GhostInfo ghost_info = {pacman.e, false, false};
 
@@ -107,7 +107,7 @@ void control_main(int pacman_in, int ghost_in, int ghost_out, int log_in)
         print_gui_string(3,33, "0");
         print_gui_string(3,31, scorestr);
         print_gui_string(0,37, "HIGH SCORE");
-        print_hp(pacman.hp);
+        print_lives(pacman.lives);
         print_pacman(pacman);
         print_ghost(ghost);
         manage_logs(log_in, &log_list);
@@ -162,7 +162,7 @@ void collision_handler(CharPacman pacman, CharGhost ghost, GhostInfo* ghost_info
         else
         {
             //perdi una vita
-            pacman.hp--;
+            pacman.lives--;
             ghost_info->full = true;
             //pacman viene riportato alla pos. inziiale idem
         }

@@ -40,13 +40,19 @@ void print_gui_string(int y, int x, char* str)
     attroff(COLOR_PAIR(2));
 }
 
-void print_hp(int n)
+void print_lives(int n)
 {
     int i;
+
+    attron(COLOR_PAIR(4));
+
     for(i = 0; i < n; i++)
-    {
-        mvprintw(5,70+(i*4), "(*<");
-    }
+        mvprintw(37,4+(i*4), S_PAC[LEFT]);
+
+    attroff(COLOR_PAIR(4));
+
+    for(i = n; i < MAX_HP; i++)
+        mvprintw(37,4+(i*4), "   ");
 }
 
 void print_map_at(int x, int y)
