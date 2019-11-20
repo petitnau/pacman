@@ -16,8 +16,8 @@ void send_pacman_info(int, PacManInfo*);
 void manage_ghost_in(int, CharGhost*, char[MAP_HEIGHT][MAP_WIDTH]);
 void send_ghost_info(int, GhostInfo*);
 
-void collision_handler(CharPacman* pacman, PacManInfo* pacman_info, CharGhost* ghost, GhostInfo* ghost_info);
-void food_handler(int* score, Position pos, int rows, int col, char game_food[rows][col], GhostInfo *ghost_info);
+void collision_handler(CharPacman*, PacManInfo*, CharGhost*, GhostInfo*, int*);
+void food_handler(int*, Entity, char[MAP_HEIGHT][MAP_WIDTH], GhostInfo*);
 void food_setup();
 
 void manage_logs(int log_in, MessageList* log_list)
@@ -66,7 +66,7 @@ void control_main(int pacman_in, int pacman_out, int ghost_in, int ghost_out, in
     {  
         manage_pacman_in(pacman_in, &pacman, &ghost_info, game_food, &score);
         manage_ghost_in(ghost_in, &ghost, game_food);
-        collision_handler(&pacman, &pacman_info, &ghost, &ghost_info);
+        collision_handler(&pacman, &pacman_info, &ghost, &ghost_info, &score);
         send_pacman_info(pacman_out, &pacman_info);
         send_ghost_info(ghost_out, &ghost_info);
         print_ui(score, pacman, ghost);
@@ -95,7 +95,7 @@ void manage_pacman_in(int pacman_in, CharPacman* pacman, GhostInfo* info_pkg, ch
     {
         unprint_entity(pacman->e, game_food);
         *pacman = pacman_pkg;
-        food_handler(&score, pacman->e.p, MAP_HEIGHT, MAP_WIDTH, game_food, info_pkg);
+        food_handler(score, pacman->e, game_food, info_pkg);
         
         info_pkg->pacman = pacman->e;
         info_pkg->new = true;
@@ -134,15 +134,15 @@ void send_pacman_info(int pacman_out, PacManInfo* pacman_info)
     }
 }
 
-void food_handler(int* score, Position pos, int rows, int col, char game_food[rows][col], GhostInfo *ghost_info)
+void food_handler(int* score, Entity pacman, char game_food[MAP_HEIGHT][MAP_WIDTH], GhostInfo *ghost_info)
 {  
     int i;
     Position pe_pos;
 
     for(i=-1; i<=1; i++)
     {
-        pe_pos.x = pos.x+i;
-        pe_pos.y = pos.y;
+        pe_pos.x = pacman.p.x+i;
+        pe_pos.y = pacman.p.y;
         pe_pos = get_pac_eff_pos(pe_pos);
 
         switch(game_food[pe_pos.y][pe_pos.x])
@@ -161,12 +161,13 @@ void food_handler(int* score, Position pos, int rows, int col, char game_food[ro
     }
 }
 
-void collision_handler(CharPacman *pacman, PacManInfo *pacman_info, CharGhost *ghost, GhostInfo* ghost_info)
+void collision_handler(CharPacman *pacman, PacManInfo *pacman_info, CharGhost *ghost, GhostInfo* ghost_info, int* score)
 {
     if(pacman->e.p.x == ghost->e.p.x && pacman->e.p.y == ghost->e.p.y)
     {
         if(ghost->mode == M_FRIGHT)
         {
+            *score += 200; //200 400 800 1600
             ghost->mode = M_DEAD;
             ghost_info->death = true;
             ghost_info->new = true;

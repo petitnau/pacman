@@ -104,6 +104,8 @@ void ghost_wait(CharGhost ghost)
         movepause *= 2;
     if(ghost.mode == M_FRIGHT)
         movepause *= 2;
+    else if(ghost.mode == M_DEAD)
+        movepause /= 3;
 
     usleep(movepause);
 }
