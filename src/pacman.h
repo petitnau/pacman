@@ -16,6 +16,11 @@ typedef struct
     int lives;
 } CharPacman;
 
+typedef struct
+{
+    _Bool eaten;
+} PacManInfo;
+
 void pacman_main(int, int, int, int);
 
 #endif

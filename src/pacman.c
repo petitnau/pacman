@@ -6,6 +6,7 @@
 #include "utils.h"
 #include "interface.h"
 
+void manage_info_in_pacman(int info_in, CharPacman *pacman, PacManInfo *info_pkg);
 void manage_cmd_in(int, CharPacman*, Direction*);
 void switch_direction(CharPacman*);
 void pac_wait(CharPacman);
@@ -13,18 +14,32 @@ void pac_wait(CharPacman);
 void pacman_main(int cmd_in, int info_in, int pos_out, int log_out)
 {
     CharPacman pacman = {{PACMAN_ID, {PAC_START_X, PAC_START_Y}, PAC_START_DIR}, PAC_START_DIR, PAC_START_LIVES};
-
+    PacManInfo info_pkg;
     Direction cmd_pkg;
     int i;
 
     while(1)
     {
         //Legge solo l'ultimo inserito nella pipe e controlla se è una mossa valida
+        manage_info_in_pacman(info_in, &pacman, &info_pkg);
         manage_cmd_in(cmd_in, &pacman, &cmd_pkg);
         switch_direction(&pacman);
         e_move(&pacman.e);
         write(pos_out, &pacman, sizeof(pacman)); //invia la posizione a control
         pac_wait(pacman);
+    }
+}
+
+void manage_info_in_pacman(int info_in, CharPacman *pacman, PacManInfo *info_pkg)
+{
+    while(read(info_in, info_pkg, sizeof(*info_pkg)) != -1)
+    {                
+        if(info_pkg->eaten)
+        {
+            pacman->e.p.x = PAC_START_X;
+            pacman->e.p.y = PAC_START_Y;
+            pacman->lives--;
+        }
     }
 }
 
