@@ -42,45 +42,42 @@ Position eaten_target ()
     return HOME_TARGET;
 }
 
-Direction choose_direction_random (_Bool possibleDirections[4])
+Direction choose_direction_random (Entity ghost)
 {
     int i;
-    int randomDirection;
-    int numPossible = 0;
+    int rand_dir;
+    int num_possible = 0;
+    _Bool possible_dirs[4];
+
+    ghost_possible_dirs(ghost, possible_dirs);
 
     for (i=0; i < 4; i++)
-        if (possibleDirections[i])
-            numPossible++;
+        if (possible_dirs[i])
+            num_possible++;
 
-    randomDirection = rand_between(1, numPossible);
+    rand_dir=rand_between(1, num_possible);
 
     // Scorre le direzioni possibili e restituisce la numPossible-esima posizione
     for (i=0; i < 4; i++)
     {
-        if (possibleDirections[i])
+        if (possible_dirs[i])
         {
-            numPossible--;
-            if (randomDirection == 0)
+            rand_dir--;
+            if (rand_dir == 0)
+            {
                 return i;
+            }
         }
     }
 }
 
-Direction choose_direction_target (Entity ghost, Position target)
+void ghost_possible_dirs(Entity ghost, _Bool possible_dirs[4])
 {
     int i;
-    float dir_dist[4];
-    Position dir_ghost[4] = {{ghost.p.x, ghost.p.y-1},  // up
-                            {ghost.p.x, ghost.p.y+1},  // down
-                            {ghost.p.x+1, ghost.p.y}, // right
-                            {ghost.p.x-1, ghost.p.y}};  // left
-
-    _Bool possible_dirs[4] = {};
 
     for (i=0; i < 4; i++)      
     {
-        if (can_move(ghost, i))
-            possible_dirs[i] = true;
+        possible_dirs[i] = can_move(ghost, i);        
     }
 
     switch(ghost.dir)
@@ -94,6 +91,20 @@ Direction choose_direction_target (Entity ghost, Position target)
         case LEFT: possible_dirs[RIGHT] = false;
             break;
     }
+}
+
+Direction choose_direction_target (Entity ghost, Position target)
+{
+    int i;
+    float dir_dist[4];
+    Position dir_ghost[4] = {{ghost.p.x, ghost.p.y-1},  // up
+                            {ghost.p.x-1, ghost.p.y},  // left
+                            {ghost.p.x, ghost.p.y+1},  // down
+                            {ghost.p.x+1, ghost.p.y}}; // right
+
+    _Bool possible_dirs[4] = {};
+
+    ghost_possible_dirs(ghost, possible_dirs);
 
     for (i=0; i < 4; i++)
     {

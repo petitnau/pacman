@@ -10,7 +10,7 @@
 #include "drawings.h"
 #include "list.h"
 
-void collision_handler(CharPacman pacman, CharGhost ghost, GhostInfo* ghost_info);
+void collision_handler(CharPacman* pacman, CharGhost* ghost, GhostInfo* ghost_info);
 void food_handler(int* score, Position pos, int rows, int col, char game_food[rows][col], GhostInfo *ghost_info);
 void food_setup();
 
@@ -44,7 +44,9 @@ void control_main(int pacman_in, int ghost_in, int ghost_out, int log_in)
 {
     CharPacman pac_tmp, pacman = {{PACMAN_ID, {PAC_START_X, PAC_START_Y}, PAC_START_DIR}, PAC_START_LIVES};
     CharGhost ghost_tmp, ghost = {{GHOST_ID, {GHOST_START_X, GHOST_START_Y}, GHOST_START_DIR}, M_CHASE};
-    GhostInfo ghost_info = {pacman.e, false, false};
+    GhostInfo ghost_info = {pacman.e, false, false, false};
+
+    _Bool new_ghost_info = false;
 
     Position pos;
     int i,j;
@@ -77,6 +79,7 @@ void control_main(int pacman_in, int ghost_in, int ghost_out, int log_in)
             food_handler(&score, pacman.e.p, MAP_HEIGHT, MAP_WIDTH, game_food, &ghost_info);
             
             ghost_info.pacman = pacman.e;
+            ghost_info.new = true;
             
         }
         while(read(ghost_in, &ghost_tmp, sizeof(ghost_tmp)) != -1)
@@ -92,12 +95,16 @@ void control_main(int pacman_in, int ghost_in, int ghost_out, int log_in)
             
             ghost = ghost_tmp;
         }
-        collision_handler(pacman, ghost, &ghost_info);
+        collision_handler(&pacman, &ghost, &ghost_info);
         //info inviate a ghost
-        write(ghost_out, &ghost_info, sizeof(ghost_info));
-        ghost_info.fright = false;
-        ghost_info.death = false;
-        ghost_info.full = false;
+        if(ghost_info.new)
+        {
+            write(ghost_out, &ghost_info, sizeof(ghost_info));
+            ghost_info.fright = false;
+            ghost_info.death = false;
+            ghost_info.full = false;
+            ghost_info.new = false;
+        }
 
         sprintf(scorestr, "%d", score/10);
         sprintf(nupstr, "1UP");
@@ -144,26 +151,30 @@ void food_handler(int* score, Position pos, int rows, int col, char game_food[ro
             case '`': 
                 *score += 50;
                 ghost_info->fright = true;
+                ghost_info->new = true;
                 break;
         }
         game_food[pe_pos.y][pe_pos.x] = ' ';
     }
 }
 
-void collision_handler(CharPacman pacman, CharGhost ghost, GhostInfo* ghost_info)
+void collision_handler(CharPacman *pacman, CharGhost *ghost, GhostInfo* ghost_info)
 {
-    if(pacman.e.p.x == ghost.e.p.x && pacman.e.p.y == ghost.e.p.y)
+    if(pacman->e.p.x == ghost->e.p.x && pacman->e.p.y == ghost->e.p.y)
     {
-        if(ghost.mode == M_FRIGHT)
+        if(ghost->mode == M_FRIGHT)
         {
+            ghost->mode = M_DEAD;
             ghost_info->death = true;
+            ghost_info->new = true;
             // morto il fantasma
         }
-        else
+        else if(ghost->mode != M_DEAD)
         {
             //perdi una vita
-            pacman.lives--;
+            pacman->lives--;
             ghost_info->full = true;
+            ghost_info->new = true;
             //pacman viene riportato alla pos. inziiale idem
         }
     }

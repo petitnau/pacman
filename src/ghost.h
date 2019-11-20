@@ -13,6 +13,7 @@
 typedef struct
 {
     Entity pacman;
+    _Bool new;
     _Bool fright;
     _Bool death;
     _Bool full;

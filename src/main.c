@@ -40,6 +40,7 @@ void init()
     init_pair(7, COLOR_BLACK, COLOR_MAGENTA);
     init_pair(8, COLOR_BLACK, COLOR_GREEN);
     init_pair(9, COLOR_WHITE, COLOR_BLUE);
+    init_pair(10, COLOR_WHITE, COLOR_BLACK);
 
     refresh();
     print_map();

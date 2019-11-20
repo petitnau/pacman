@@ -21,7 +21,7 @@
 
 #define MAX_HP 3
 
-typedef enum {UP, DOWN, RIGHT, LEFT} Direction;
+typedef enum {UP, LEFT, DOWN, RIGHT} Direction;
 
 typedef struct
 {

@@ -21,6 +21,18 @@ _Bool accept_turn(Entity entity, Direction direction)
                             return true;
                 }
             break;
+        case LEFT:
+            if(entity.dir == RIGHT || entity.dir == LEFT)
+                return true;
+            else
+                for(i=0; i<HORIZONTALCUT; i++)
+                {
+                    if(entity.dir == UP && get_map_at(entity.p.x-2, entity.p.y-i)==' ')
+                            return true;
+                    else if(entity.dir == DOWN && get_map_at(entity.p.x-2, entity.p.y+i)==' ')
+                            return true;
+                }
+            break;
         case DOWN:
             if(entity.dir == UP || entity.dir == DOWN) 
                 return true;
@@ -45,18 +57,6 @@ _Bool accept_turn(Entity entity, Direction direction)
                             return true;
                 }
             break;
-        case LEFT:
-            if(entity.dir == RIGHT || entity.dir == LEFT)
-                return true;
-            else
-                for(i=0; i<HORIZONTALCUT; i++)
-                {
-                    if(entity.dir == UP && get_map_at(entity.p.x-2, entity.p.y-i)==' ')
-                            return true;
-                    else if(entity.dir == DOWN && get_map_at(entity.p.x-2, entity.p.y+i)==' ')
-                            return true;
-                }
-            break;
     }
 
     return false;
@@ -75,6 +75,10 @@ _Bool can_move(Entity entity, Direction direction)
                     return false;
             }
             break;
+        case LEFT:
+            if(get_map_at(entity.p.x-2, entity.p.y) != ' ')
+                return false;
+            break;
         case DOWN:
             for(i=-1; i<=1; i++)
             {
@@ -84,10 +88,6 @@ _Bool can_move(Entity entity, Direction direction)
             break;
         case RIGHT:
             if(get_map_at(entity.p.x+2, entity.p.y) != ' ')
-                return false;
-            break;
-        case LEFT:
-            if(get_map_at(entity.p.x-2, entity.p.y) != ' ')
                 return false;
             break;
     }

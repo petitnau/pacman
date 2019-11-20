@@ -14,10 +14,16 @@ void player_main(int cmd_out, int log_out)
         switch(c=getch())
         {
             case K_UP:
+                direction = UP;
+                break;
             case K_DOWN:
+                direction = DOWN;
+                break;
             case K_RIGHT:
+                direction = RIGHT;
+                break;
             case K_LEFT:
-                direction = c-65;
+                direction = LEFT;
                 break;
         }
 

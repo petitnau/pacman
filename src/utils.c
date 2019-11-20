@@ -132,7 +132,7 @@ int min_index (int size, float *array)
     int i, x=0;
 
     for(i=0; i < size; i++)
-        if (array[i] <= array[x]) //se uguali viene seguita la priorità up left down right
+        if (array[i] < array[x]) //se uguali viene seguita la priorità up left down right
             x = i;
 
     return x;

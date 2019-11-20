@@ -22,7 +22,7 @@ Position clyde_target(Entity, Entity);
 Position scatter_target(int id);
 Position eaten_target();
 
-Direction choose_direction_random(_Bool[4]);
+Direction choose_direction_random(Entity);
 Direction choose_direction_target(Entity, Position); //Si può usare entity
 
 #endif
