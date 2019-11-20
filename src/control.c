@@ -11,6 +11,7 @@
 #include "list.h"
 
 void manage_pacman_in(int, CharPacman*, GhostInfo*, char[MAP_HEIGHT][MAP_WIDTH], int*);
+
 void manage_ghost_in(int, CharGhost*, char[MAP_HEIGHT][MAP_WIDTH]);
 void send_ghost_info(int, GhostInfo*);
 
@@ -44,7 +45,7 @@ void manage_logs(int log_in, MessageList* log_list)
     refresh();
 }
 
-void control_main(int pacman_in, int ghost_in, int ghost_out, int log_in)
+void control_main(int pacman_in, int pacman_out, int ghost_in, int ghost_out, int log_in)
 {
     CharPacman pacman = {{PACMAN_ID, {PAC_START_X, PAC_START_Y}, PAC_START_DIR}, PAC_START_LIVES};
     CharGhost ghost = {{GHOST_ID, {GHOST_START_X, GHOST_START_Y}, GHOST_START_DIR}, M_CHASE};
