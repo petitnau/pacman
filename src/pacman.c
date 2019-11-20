@@ -40,6 +40,8 @@ void manage_p_info_in(int info_in, CharPacman *pacman)
         {
             pacman->e.p.x = PAC_START_X;
             pacman->e.p.y = PAC_START_Y;
+            pacman->e.dir = PAC_START_DIR;
+            pacman->next_dir = PAC_START_DIR;
             pacman->lives--;
         }
     }

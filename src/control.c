@@ -10,14 +10,14 @@
 #include "interface.h"
 #include "list.h"
 
-void manage_pacman_in(int, CharPacman*, GhostInfo*, char[MAP_HEIGHT][MAP_WIDTH], int*);
+void manage_pacman_in(int, int* , CharPacman*, GhostInfo*, char[MAP_HEIGHT][MAP_WIDTH], int*);
 void send_pacman_info(int, PacManInfo*);
 
 void manage_ghost_in(int, CharGhost*, char[MAP_HEIGHT][MAP_WIDTH]);
 void send_ghost_info(int, GhostInfo*);
 
 void collision_handler(CharPacman*, PacManInfo*, CharGhost*, GhostInfo*, int*);
-void food_handler(int*, Entity, char[MAP_HEIGHT][MAP_WIDTH], GhostInfo*);
+void food_handler(int*, int* , Entity, char[MAP_HEIGHT][MAP_WIDTH], GhostInfo*);
 void food_setup();
 
 void manage_logs(int log_in, MessageList* log_list)
@@ -64,7 +64,7 @@ void control_main(int pacman_in, int pacman_out, int ghost_in, int ghost_out, in
 
     while(1)
     {  
-        manage_pacman_in(pacman_in, &pacman, &ghost_info, game_food, &score);
+        manage_pacman_in(pacman_in, &eaten_dots, &pacman, &ghost_info, game_food, &score);
         manage_ghost_in(ghost_in, &ghost, game_food);
         collision_handler(&pacman, &pacman_info, &ghost, &ghost_info, &score);
         send_pacman_info(pacman_out, &pacman_info);
@@ -73,8 +73,10 @@ void control_main(int pacman_in, int pacman_out, int ghost_in, int ghost_out, in
         manage_logs(log_in, &log_list);
         refresh();
 
-        if(pacman.lives < 0)
-            return;
+        if(pacman.lives < 0){
+            mvprintw(23, 23, "GAME OVER!");
+            return 0;
+        }
     }
 }
 
@@ -87,7 +89,7 @@ void food_setup(char game_food[MAP_HEIGHT][MAP_WIDTH])
     } 
 }
 
-void manage_pacman_in(int pacman_in, CharPacman* pacman, GhostInfo* info_pkg, char game_food[MAP_HEIGHT][MAP_WIDTH], int* score)
+void manage_pacman_in(int pacman_in, int* eaten_dots, CharPacman* pacman, GhostInfo* info_pkg, char game_food[MAP_HEIGHT][MAP_WIDTH], int* score)
 {
     CharPacman pacman_pkg;
 
@@ -95,7 +97,7 @@ void manage_pacman_in(int pacman_in, CharPacman* pacman, GhostInfo* info_pkg, ch
     {
         unprint_entity(pacman->e, game_food);
         *pacman = pacman_pkg;
-        food_handler(score, pacman->e, game_food, info_pkg);
+        food_handler(score, eaten_dots, pacman->e, game_food, info_pkg);
         
         info_pkg->pacman = pacman->e;
         info_pkg->new = true;
@@ -134,7 +136,7 @@ void send_pacman_info(int pacman_out, PacManInfo* pacman_info)
     }
 }
 
-void food_handler(int* score, Entity pacman, char game_food[MAP_HEIGHT][MAP_WIDTH], GhostInfo *ghost_info)
+void food_handler(int* score, int* eaten_dots, Entity pacman, char game_food[MAP_HEIGHT][MAP_WIDTH], GhostInfo *ghost_info)
 {  
     int i;
     Position pe_pos;
@@ -149,6 +151,7 @@ void food_handler(int* score, Entity pacman, char game_food[MAP_HEIGHT][MAP_WIDT
         {
             case '~':
                 *score += 10;
+                *eaten_dots +=1;
                 beep();
                 break;
             case '`': 
@@ -157,6 +160,11 @@ void food_handler(int* score, Entity pacman, char game_food[MAP_HEIGHT][MAP_WIDT
                 ghost_info->new = true;
                 break;
         }
+
+        if(*eaten_dots == 70){
+            //spawna un frutto va tutto in funzione col controllo
+        }
+
         game_food[pe_pos.y][pe_pos.x] = ' ';
     }
 }

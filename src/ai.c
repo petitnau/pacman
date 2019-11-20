@@ -47,7 +47,7 @@ Direction choose_direction_random (Entity ghost)
     int i;
     int rand_dir;
     int num_possible = 0;
-    _Bool possible_dirs[4];
+    _Bool possible_dirs[4] = {};
 
     ghost_possible_dirs(ghost, possible_dirs);
 
