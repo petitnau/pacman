@@ -78,24 +78,35 @@ void unprint_entity(Entity entity, char game_food[MAP_HEIGHT][MAP_WIDTH])
 {
     Position pos;
     int i;
+    char c;
 
-    attron(COLOR_PAIR(3));
     for(i=-1; i<=1; i++)
     {
         pos.x=entity.p.x+i;
         pos.y=entity.p.y;
         pos = get_pac_eff_pos(pos);
         
-        if(game_food[FRUIT_SPAWN_Y][PAC_START_X] == '^' && pos.y == FRUIT_SPAWN_Y && (pos.x == 26 || pos.x == 27 || pos.x == 28))
-        {   
-            print_fruit();
+        c = game_food[pos.y][pos.x];
+        if(c == '^')
+        {
+            attron(COLOR_PAIR(12));
+            mvaddch(pos.y+GUI_HEIGHT, pos.x, c);
+            attroff(COLOR_PAIR(12));
         }
+        else if(c == '.')
+        {
+            attron(COLOR_PAIR(11));
+            mvaddch(pos.y+GUI_HEIGHT, pos.x, c);
+            attroff(COLOR_PAIR(11));
+        }
+        //else if(c == '~')
         else
         {
-            mvaddch(pos.y+GUI_HEIGHT, pos.x, NCURSES_ACS(game_food[pos.y][pos.x]));
+            attron(COLOR_PAIR(3));
+            mvaddch(pos.y+GUI_HEIGHT, pos.x, NCURSES_ACS(c));
+            attroff(COLOR_PAIR(3));
         }
     }
-    attroff(COLOR_PAIR(3));
 }
 
 void print_ui(int score, CharPacman pacman, CharGhost ghost)

@@ -144,7 +144,7 @@ void send_pacman_info(int pacman_out, PacManInfo* pacman_info)
 
 void food_handler(int* score, int* eaten_dots, Entity pacman, char game_food[MAP_HEIGHT][MAP_WIDTH], GhostInfo *ghost_info)
 {  
-    int i;
+    int i,j ;
     Position pe_pos;
 
     for(i=-1; i<=1; i++)
@@ -159,16 +159,24 @@ void food_handler(int* score, int* eaten_dots, Entity pacman, char game_food[MAP
                 *score += 10;
                 *eaten_dots +=1;
                 beep();
+                game_food[pe_pos.y][pe_pos.x] = ' ';
                 break;
             case '`': 
                 *score += 50;
                 
                 ghost_info->fright = true;
-                ghost_info->new = true;
+                ghost_info->new = true;    
+                game_food[pe_pos.y][pe_pos.x] = ' ';
                 break;
             case '^':
                 *score += 100; //*lvl?
-            break;
+
+                for(j=-1; j<=1; j++)
+                    game_food[pe_pos.y][pe_pos.x+j] = ' '; 
+                
+                mvaddch(pe_pos.y+GUI_HEIGHT, pe_pos.x+i, ' ');
+                refresh();
+                break;
         }
 
         if(*eaten_dots == 70 || *eaten_dots == 170){
@@ -179,7 +187,6 @@ void food_handler(int* score, int* eaten_dots, Entity pacman, char game_food[MAP
             game_food[17][PAC_START_X] = FRUIT[0][1];
         }
 
-        game_food[pe_pos.y][pe_pos.x] = ' ';
     }
 }
 
