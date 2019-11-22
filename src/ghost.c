@@ -16,10 +16,39 @@ void ghost_choose_dir(CharGhost*, GhostInfo);
 void manage_position_events(CharGhost*);
 void ghost_wait(CharGhost);
 
+CharGhost init_ghost_char()
+{
+    CharGhost ghost;
+    ghost.e.id = GHOST_ID;
+    ghost.e.dir = GHOST_START_DIR;
+    ghost.e.p.x = GHOST_START_X;
+    ghost.e.p.y = GHOST_START_Y;
+    ghost.mode = M_CHASE;
+    ghost.paused = true;
+    return ghost;
+}
+
+GhostInfo init_ghost_info()
+{
+    GhostInfo info;
+    info.pacman.id = PACMAN_ID;
+    info.pacman.dir = PACMAN_START_DIR;
+    info.pacman.p.x = PACMAN_START_X;
+    info.pacman.p.y = PACMAN_START_Y;
+    info.new = false;
+    info.fright = false;
+    info.death = false;
+    info.full = false;
+    info.pause = false;
+    info.resume = false;
+    info.sleeptime = 0;
+    return info;
+}
+
 void ghost_main(int info_in, int pos_out, int log_out)
 {
-    CharGhost ghost = {{GHOST_ID, {GHOST_START_X, GHOST_START_Y}, GHOST_START_DIR}, M_CHASE, true};
-    GhostInfo info_pkg = {{PACMAN_ID, {PAC_START_X, PAC_START_Y}, PAC_START_DIR}, false, false, false, false, 0};
+    CharGhost ghost = init_ghost_char();
+    GhostInfo info_pkg = init_ghost_info();
     GhostTimers timers = {};
     //creazione thread
     //pthread_t blinky;

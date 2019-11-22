@@ -10,6 +10,13 @@
 #define FRUIT_POS_Y 17
 #define FRUIT_POS_X 27
 
+typedef struct
+{
+    Position p;
+    char text[10];
+    unsigned long long timer;
+} TempText;
+
 static const char S_PAC[4][4] = {"(*v", ">*)", "^*)", "(*<"};
 static const char S_GHST[4][4] = {"[\"]", "[\"]", "[w]", "* *"};
 
@@ -93,6 +100,7 @@ void unprint_area(int, int, int, char[MAP_HEIGHT][MAP_WIDTH]);
 void sunprint_area(int, int, int, char[MAP_HEIGHT][MAP_WIDTH], CharPacman, CharGhost);
 void print_ui(int, CharPacman, CharGhost);
 void print_fruit();
-void print_temp_text(int, int, char*);
+void print_temp_text(TempText);
+void create_temp_text(TempText*, int, int, char*, int);
 
 #endif

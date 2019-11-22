@@ -3,11 +3,11 @@
 
 #include "entity.h"
 
-#define PAC_START_X 27
-#define PAC_START_Y 23
-#define PAC_START_DIR UP
-#define PAC_SPEED 70000
-#define PAC_START_LIVES 2
+#define PACMAN_START_X 27
+#define PACMAN_START_Y 23
+#define PACMAN_START_DIR UP
+#define PACMAN_SPEED 70000
+#define PACMAN_START_LIVES 2
 
 typedef struct
 {
@@ -27,6 +27,8 @@ typedef struct
     int sleeptime;
 } PacManInfo;
 
+CharPacman init_pacman_char();
+PacManInfo init_pacman_info();
 void pacman_main(int, int, int, int);
 
 #endif

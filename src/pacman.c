@@ -11,10 +11,34 @@ void manage_p_cmd_in(int, CharPacman*, Direction*);
 void switch_direction(CharPacman*);
 void pac_wait(CharPacman);
 
+CharPacman init_pacman_char()
+{
+    CharPacman pacman;
+    pacman.e.id = PACMAN_ID;
+    pacman.e.dir = PACMAN_START_DIR;
+    pacman.e.p.x = PACMAN_START_X;
+    pacman.e.p.y = PACMAN_START_Y;
+    pacman.lives = PACMAN_START_LIVES;
+    pacman.next_dir = PACMAN_START_DIR;
+    pacman.paused = true;
+    pacman.dead = false;
+    return pacman;
+}
+
+PacManInfo init_pacman_info()
+{
+    PacManInfo info;
+    info.new = false;
+    info.death = false;
+    info.pause = false;
+    info.resume = false;
+    info.sleeptime = 0;
+    return info;
+}
 void pacman_main(int cmd_in, int info_in, int pos_out, int log_out)
 {
-    CharPacman pacman = {{PACMAN_ID, {PAC_START_X, PAC_START_Y}, PAC_START_DIR}, PAC_START_DIR, PAC_START_LIVES, true, false};
-    PacManInfo info_pkg = {};
+    CharPacman pacman = init_pacman_char();
+    PacManInfo info_pkg = init_pacman_info();
     Direction cmd_pkg;
     int i;
 
@@ -38,10 +62,10 @@ void manage_p_info_in(int info_in, CharPacman *pacman)
     {                
         if(info_pkg.death)
         {
-            pacman->e.p.x = PAC_START_X;
-            pacman->e.p.y = PAC_START_Y;
-            pacman->e.dir = PAC_START_DIR;
-            pacman->next_dir = PAC_START_DIR;
+            pacman->e.p.x = PACMAN_START_X;
+            pacman->e.p.y = PACMAN_START_Y;
+            pacman->e.dir = PACMAN_START_DIR;
+            pacman->next_dir = PACMAN_START_DIR;
             pacman->paused = true;
             pacman->lives--;
         }
@@ -79,7 +103,7 @@ void switch_direction(CharPacman* pacman)
 
 void pac_wait(CharPacman pacman)
 {
-    int movepause = PAC_SPEED;
+    int movepause = PACMAN_SPEED;
 
     if(pacman.e.dir == UP || pacman.e.dir == DOWN) //gestisce la velocità di pacman
         movepause*=2;

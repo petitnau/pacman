@@ -66,11 +66,11 @@ void print_ghost(CharGhost ghost)
 void print_fruit()
 {
     attron(COLOR_PAIR(11));
-    mvaddch(23, PAC_START_X-1, FRUIT[0][0]);
-    mvaddch(17+GUI_HEIGHT, PAC_START_X+1, FRUIT[0][2]);
+    mvaddch(23, FRUIT_POS_X-1, FRUIT[0][0]);
+    mvaddch(17+GUI_HEIGHT, FRUIT_POS_X+1, FRUIT[0][2]);
     attroff(COLOR_PAIR(11));
     attron(COLOR_PAIR(12));
-    mvaddch(23, PAC_START_X, FRUIT[0][1]);
+    mvaddch(23, FRUIT_POS_X, FRUIT[0][1]);
     attroff(COLOR_PAIR(12));
 }
 
@@ -127,15 +127,26 @@ void print_ui(int score, CharPacman pacman, CharGhost ghost)
     print_ghost(ghost);
 }
 
-void print_temp_text(int y, int x, char* text)
+void create_temp_text(TempText* temp_text, int x, int y, char* string, int time)
 {
-    mvprintw(y,x, "%s", text);
-    refresh();
+    temp_text->timer = start_timer(time);
+    strcpy(temp_text->text, string);
+    temp_text->p.x = x;
+    temp_text->p.y = y;
+}
+
+void print_temp_text(TempText temp_text)
+{
+    if(temp_text.timer != 0 && check_timer(temp_text.timer))
+    {
+        mvprintw(temp_text.p.y, temp_text.p.x, "%s", temp_text.text);
+        refresh();
+    }
 }
 
 void sunprint_area(int y, int x, int size, char game_food[MAP_HEIGHT][MAP_WIDTH], CharPacman pacman, CharGhost ghost)
 {
-    unprint_area(y,x,size,game_food);
+    unprint_area(y-GUI_HEIGHT,x,size,game_food);
     print_pacman(pacman);
     print_ghost(ghost);
 }

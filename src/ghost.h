@@ -29,6 +29,8 @@ typedef struct
     int sleeptime;
 } GhostInfo;
 
+CharGhost init_ghost_char();
+GhostInfo init_ghost_info();
 void ghost_main(int, int, int);
 
 #endif
