@@ -70,12 +70,18 @@ void control_main(int pacman_in, int pacman_out, int ghost_in, int ghost_out, in
         send_pacman_info(pacman_out, &pacman_info);
         send_ghost_info(ghost_out, &ghost_info);
         print_ui(score, pacman, ghost);
+
+        if(eaten_dots == 240)
+        {
+            mvprintw(23, 23, "GAME OVER! VITTORIA");
+            refresh();
+            return;
+        }
         manage_logs(log_in, &log_list);
-        refresh();
 
         if(pacman.lives < 0){
             mvprintw(23, 23, "GAME OVER!");
-            return 0;
+            return;
         }
     }
 }
@@ -159,10 +165,17 @@ void food_handler(int* score, int* eaten_dots, Entity pacman, char game_food[MAP
                 ghost_info->fright = true;
                 ghost_info->new = true;
                 break;
+            case '^':
+                *score += 100; //*lvl?
+            break;
         }
 
         if(*eaten_dots == 70){
             //spawna un frutto va tutto in funzione col controllo
+            print_fruit();
+            game_food[17][PAC_START_X-1] = FRUIT[0][0];
+            game_food[17][PAC_START_X+1] = FRUIT[0][2];
+            game_food[17][PAC_START_X] = FRUIT[0][1];
         }
 
         game_food[pe_pos.y][pe_pos.x] = ' ';

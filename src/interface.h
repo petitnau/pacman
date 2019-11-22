@@ -7,8 +7,12 @@
 #define MAP_WIDTH 55
 #define MAP_HEIGHT 31
 
+#define FRUIT_SPAWN_Y 17
+
 static const char S_PAC[4][4] = {"(*v", ">*)", "^*)", "(*<"};
 static const char S_GHST[4][4] = {"[\"]", "[\"]", "[w]", "* *"};
+
+static const char FRUIT[1][4] = {".^."};
 
 static const char F_NUMBERS[][7] = {"lkxxmj", " k x v", "lkljmj", "lk umj", "k mu v", "lkmkmj", "lktkmj", "lk x  ", "lktumj", "lkmumj"};
 static const char F_LETTERS[][7] = {"lktu  ", "", "lkx mj", "", "lkt mj", "", "lkxkmj", //ABCDEFG
@@ -86,5 +90,6 @@ void print_pacman(CharPacman);
 void print_ghost(CharGhost);
 void unprint_entity(Entity, char[MAP_HEIGHT][MAP_WIDTH]);
 void print_ui(int, CharPacman, CharGhost);
+void print_fruit();
 
 #endif

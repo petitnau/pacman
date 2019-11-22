@@ -24,5 +24,7 @@ Position eaten_target();
 
 Direction choose_direction_random(Entity);
 Direction choose_direction_target(Entity, Position); //Si può usare entity
+void ghost_possible_dirs(Entity, _Bool [4]);
+
 
 #endif

@@ -63,6 +63,17 @@ void print_ghost(CharGhost ghost)
     }
 }
 
+void print_fruit()
+{
+    attron(COLOR_PAIR(11));
+    mvaddch(23, PAC_START_X-1, FRUIT[0][0]);
+    mvaddch(17+GUI_HEIGHT, PAC_START_X+1, FRUIT[0][2]);
+    attroff(COLOR_PAIR(11));
+    attron(COLOR_PAIR(12));
+    mvaddch(23, PAC_START_X, FRUIT[0][1]);
+    attroff(COLOR_PAIR(12));
+}
+
 void unprint_entity(Entity entity, char game_food[MAP_HEIGHT][MAP_WIDTH])
 {
     Position pos;
@@ -75,7 +86,14 @@ void unprint_entity(Entity entity, char game_food[MAP_HEIGHT][MAP_WIDTH])
         pos.y=entity.p.y;
         pos = get_pac_eff_pos(pos);
         
-        mvaddch(pos.y+GUI_HEIGHT, pos.x, NCURSES_ACS(game_food[pos.y][pos.x]));
+        if(game_food[FRUIT_SPAWN_Y][PAC_START_X] == '^' && pos.y == FRUIT_SPAWN_Y && (pos.x == 26 || pos.x == 27 || pos.x == 28))
+        {   
+            print_fruit();
+        }
+        else
+        {
+            mvaddch(pos.y+GUI_HEIGHT, pos.x, NCURSES_ACS(game_food[pos.y][pos.x]));
+        }
     }
     attroff(COLOR_PAIR(3));
 }

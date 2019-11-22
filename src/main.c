@@ -17,6 +17,7 @@
 void init()
 {
     initscr();
+    cbreak();
     noecho(); 
     srand(time(NULL));
     curs_set(0);
@@ -41,6 +42,10 @@ void init()
     init_pair(8, COLOR_BLACK, COLOR_GREEN);
     init_pair(9, COLOR_WHITE, COLOR_BLUE);
     init_pair(10, COLOR_WHITE, COLOR_BLACK);
+    
+    //test
+    init_pair(11, COLOR_WHITE, COLOR_RED);
+    init_pair(12, COLOR_WHITE, COLOR_GREEN);
 
     refresh();
     print_map();
@@ -142,6 +147,7 @@ int main()
     close(log_pipe[P_WR]);
     control_main(pacman_ch_pipe[P_RD], pacman_info_pipe[P_WR], ghost_ch_pipe[P_RD], ghost_info_pipe[P_WR], log_pipe[P_RD]);
     
+    getchar();
     kill(p_pacman, 1);
     kill(p_ghosts, 1);
     kill(p_player, 1);
