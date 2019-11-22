@@ -14,7 +14,7 @@ void pac_wait(CharPacman);
 void pacman_main(int cmd_in, int info_in, int pos_out, int log_out)
 {
     CharPacman pacman = {{PACMAN_ID, {PAC_START_X, PAC_START_Y}, PAC_START_DIR}, PAC_START_DIR, PAC_START_LIVES, true, false};
-    PacManInfo info_pkg;
+    PacManInfo info_pkg = {};
     Direction cmd_pkg;
     int i;
 
@@ -45,9 +45,17 @@ void manage_p_info_in(int info_in, CharPacman *pacman)
             pacman->paused = true;
             pacman->lives--;
         }
+        if(info_pkg.pause)
+        {
+            pacman->paused = true;
+        }
         if(info_pkg.resume)
         {
             pacman->paused = false;
+        }
+        if(info_pkg.sleeptime > 0)
+        {
+            usleep(info_pkg.sleeptime);
         }
     }
 }

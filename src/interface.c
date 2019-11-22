@@ -74,16 +74,16 @@ void print_fruit()
     attroff(COLOR_PAIR(12));
 }
 
-void unprint_entity(Entity entity, char game_food[MAP_HEIGHT][MAP_WIDTH])
+void unprint_area(int y, int x, int size, char game_food[MAP_HEIGHT][MAP_WIDTH])
 {
     Position pos;
     int i;
     char c;
 
-    for(i=-1; i<=1; i++)
+    for(i=0; i<size; i++)
     {
-        pos.x=entity.p.x+i;
-        pos.y=entity.p.y;
+        pos.x=x+i;
+        pos.y=y;
         pos = get_pac_eff_pos(pos);
         
         c = game_food[pos.y][pos.x];
@@ -123,6 +123,19 @@ void print_ui(int score, CharPacman pacman, CharGhost ghost)
     print_gui_string(3,31, scorestr);
     print_gui_string(0,37, "HIGH SCORE");
     print_lives(pacman.lives);
+    print_pacman(pacman);
+    print_ghost(ghost);
+}
+
+void print_temp_text(int y, int x, char* text)
+{
+    mvprintw(y,x, "%s", text);
+    refresh();
+}
+
+void sunprint_area(int y, int x, int size, char game_food[MAP_HEIGHT][MAP_WIDTH], CharPacman pacman, CharGhost ghost)
+{
+    unprint_area(y,x,size,game_food);
     print_pacman(pacman);
     print_ghost(ghost);
 }

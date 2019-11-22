@@ -22,7 +22,9 @@ typedef struct
 {
     _Bool new;
     _Bool death;
+    _Bool pause;
     _Bool resume;
+    int sleeptime;
 } PacManInfo;
 
 void pacman_main(int, int, int, int);

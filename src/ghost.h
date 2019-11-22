@@ -12,20 +12,22 @@
 
 typedef struct
 {
+    Entity e;
+    GhostMode mode;
+    _Bool paused;
+} CharGhost;
+
+typedef struct
+{
     Entity pacman;
     _Bool new;
     _Bool fright;
     _Bool death;
     _Bool full;
+    _Bool pause;
     _Bool resume;
+    int sleeptime;
 } GhostInfo;
-
-typedef struct
-{
-    Entity e;
-    GhostMode mode;
-    _Bool paused;
-} CharGhost;
 
 void ghost_main(int, int, int);
 

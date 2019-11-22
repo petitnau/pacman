@@ -7,11 +7,11 @@
 
 typedef struct
 {
-    int fright;
+    unsigned long long fright;
 } GhostTimers;
 
 void manage_g_info_in(int, CharGhost*, GhostInfo*, GhostTimers*);
-void manage_timers(CharGhost*, GhostTimers);
+void manage_g_timers(GhostTimers, CharGhost*);
 void ghost_choose_dir(CharGhost*, GhostInfo);
 void manage_position_events(CharGhost*);
 void ghost_wait(CharGhost);
@@ -19,7 +19,7 @@ void ghost_wait(CharGhost);
 void ghost_main(int info_in, int pos_out, int log_out)
 {
     CharGhost ghost = {{GHOST_ID, {GHOST_START_X, GHOST_START_Y}, GHOST_START_DIR}, M_CHASE, true};
-    GhostInfo info_pkg = {{PACMAN_ID, {PAC_START_X, PAC_START_Y}, PAC_START_DIR}, false, false, false};
+    GhostInfo info_pkg = {{PACMAN_ID, {PAC_START_X, PAC_START_Y}, PAC_START_DIR}, false, false, false, false, 0};
     GhostTimers timers = {};
     //creazione thread
     //pthread_t blinky;
@@ -28,7 +28,7 @@ void ghost_main(int info_in, int pos_out, int log_out)
     while(1)
     {       
         manage_g_info_in(info_in, &ghost, &info_pkg, &timers);
-        manage_timers(&ghost, timers);
+        manage_g_timers(timers, &ghost);
         ghost_choose_dir(&ghost, info_pkg); 
         if(!ghost.paused) e_move(&ghost.e);
         manage_position_events(&ghost);
@@ -43,7 +43,7 @@ void manage_g_info_in(int info_in, CharGhost* ghost, GhostInfo* info_pkg, GhostT
     {                
         if(info_pkg->fright && ghost->mode != M_DEAD)
         {
-            timers->fright = start_timer(6);
+            timers->fright = start_timer(6e3);
             ghost->mode = M_FRIGHT;  
             ghost->e.dir = reverse_direction(ghost->e.dir);
         }
@@ -59,14 +59,22 @@ void manage_g_info_in(int info_in, CharGhost* ghost, GhostInfo* info_pkg, GhostT
             ghost->e.dir = GHOST_START_DIR;
             ghost->paused = true;
         }
+        if(info_pkg->pause)
+        {
+            ghost->paused = true;
+        }
         if(info_pkg->resume)
         {
             ghost->paused = false;
         }
+        if(info_pkg->sleeptime > 0)
+        {
+            usleep(info_pkg->sleeptime);
+        }
     }
 }
 
-void manage_timers(CharGhost* ghost, GhostTimers timers)
+void manage_g_timers(GhostTimers timers, CharGhost* ghost)
 {
     if(ghost->mode == M_FRIGHT)
     {
