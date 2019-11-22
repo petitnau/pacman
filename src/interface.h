@@ -7,7 +7,8 @@
 #define MAP_WIDTH 55
 #define MAP_HEIGHT 31
 
-#define FRUIT_SPAWN_Y 17
+#define FRUIT_POS_Y 17
+#define FRUIT_POS_X 27
 
 static const char S_PAC[4][4] = {"(*v", ">*)", "^*)", "(*<"};
 static const char S_GHST[4][4] = {"[\"]", "[\"]", "[w]", "* *"};

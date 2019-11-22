@@ -10,6 +10,7 @@
 #include "interface.h"
 #include "list.h"
 
+void manage_cmd_in(int, int, GhostInfo*, PacManInfo*);
 void manage_pacman_in(int, int* , CharPacman*, GhostInfo*, char[MAP_HEIGHT][MAP_WIDTH], int*);
 void send_pacman_info(int, PacManInfo*);
 
@@ -46,16 +47,16 @@ void manage_logs(int log_in, MessageList* log_list)
     refresh();
 }
 
-void control_main(int pacman_in, int pacman_out, int ghost_in, int ghost_out, int log_in)
+void control_main(int pacman_in, int pacman_out, int ghost_in, int ghost_out, int cmd_in, int p_cmd_out, int log_in)
 {
-    CharPacman pacman = {{PACMAN_ID, {PAC_START_X, PAC_START_Y}, PAC_START_DIR}, PAC_START_LIVES, false};
-    CharGhost ghost = {{GHOST_ID, {GHOST_START_X, GHOST_START_Y}, GHOST_START_DIR}, M_CHASE};
-    GhostInfo ghost_info = {pacman.e, false, false, false};
-    PacManInfo pacman_info = {false, false};
+    CharPacman pacman = {{PACMAN_ID, {PAC_START_X, PAC_START_Y}, PAC_START_DIR}, PAC_START_LIVES, true, false};
+    CharGhost ghost = {{GHOST_ID, {GHOST_START_X, GHOST_START_Y}, GHOST_START_DIR}, M_CHASE, true};
+    GhostInfo ghost_info = {pacman.e, false, false, false, false, false};
+    PacManInfo pacman_info = {false, false, false};
 
     int score = 0;
     char game_food[MAP_HEIGHT][MAP_WIDTH];
-    int eaten_dots;
+    int eaten_dots = 0;
 
     food_setup(game_food);
 
@@ -64,23 +65,25 @@ void control_main(int pacman_in, int pacman_out, int ghost_in, int ghost_out, in
 
     while(1)
     {  
+        manage_cmd_in(cmd_in, p_cmd_out, &ghost_info, &pacman_info);
         manage_pacman_in(pacman_in, &eaten_dots, &pacman, &ghost_info, game_food, &score);
         manage_ghost_in(ghost_in, &ghost, game_food);
         collision_handler(&pacman, &pacman_info, &ghost, &ghost_info, &score);
         send_pacman_info(pacman_out, &pacman_info);
         send_ghost_info(ghost_out, &ghost_info);
         print_ui(score, pacman, ghost);
-
+        manage_logs(log_in, &log_list);
         if(eaten_dots == 240)
         {
             mvprintw(23, 23, "GAME OVER! VITTORIA");
             refresh();
             return;
         }
-        manage_logs(log_in, &log_list);
-
         if(pacman.lives < 0){
-            mvprintw(23, 23, "GAME OVER!");
+            attron(COLOR_PAIR(5));
+            mvprintw(23, 23, "G A M E   O V E R !");
+            attroff(COLOR_PAIR(5));
+            refresh();
             return;
         }
     }
@@ -95,6 +98,39 @@ void food_setup(char game_food[MAP_HEIGHT][MAP_WIDTH])
     } 
 }
 
+void manage_cmd_in(int cmd_in, int p_cmd_out, GhostInfo* ghost_info, PacManInfo* pacman_info)
+{
+    Direction direction;
+    char c_in;
+
+    while(read(cmd_in, &c_in, sizeof(c_in)) != -1)
+    {
+        switch(c_in)
+        {
+            case K_UP:
+                direction = UP;
+                break;
+            case K_LEFT:
+                direction = LEFT;
+                break;
+            case K_DOWN:
+                direction = DOWN;
+                break;
+            case K_RIGHT:
+                direction = RIGHT;
+                break;
+        }
+        if(c_in == K_UP || c_in == K_DOWN || c_in == K_RIGHT || c_in == K_LEFT)
+        {
+            ghost_info->resume = true;
+            ghost_info->new = true;
+            pacman_info->resume = true;
+            pacman_info->new = true;
+            write(p_cmd_out, &direction, sizeof(direction));
+        }
+
+    }
+}
 void manage_pacman_in(int pacman_in, int* eaten_dots, CharPacman* pacman, GhostInfo* info_pkg, char game_food[MAP_HEIGHT][MAP_WIDTH], int* score)
 {
     CharPacman pacman_pkg;
@@ -130,15 +166,18 @@ void send_ghost_info(int ghost_out, GhostInfo* ghost_info)
         ghost_info->death = false;
         ghost_info->full = false;
         ghost_info->new = false;
+        ghost_info->resume = false;
     }
 }
 
 void send_pacman_info(int pacman_out, PacManInfo* pacman_info)
 {    
-    if(pacman_info->death)
+    if(pacman_info->new)
     {
         write(pacman_out, pacman_info, sizeof(*pacman_info));
+        pacman_info->new = false;
         pacman_info->death = false;
+        pacman_info->resume = false;
     }
 }
 
@@ -158,8 +197,15 @@ void food_handler(int* score, int* eaten_dots, Entity pacman, char game_food[MAP
             case '~':
                 *score += 10;
                 *eaten_dots +=1;
-                beep();
                 game_food[pe_pos.y][pe_pos.x] = ' ';
+                if(*eaten_dots == 70 || *eaten_dots == 170){
+                    //spawna un frutto va tutto in funzione col controllo
+                    print_fruit();
+                    game_food[FRUIT_POS_Y][FRUIT_POS_X-1] = FRUIT[0][0];
+                    game_food[FRUIT_POS_Y][FRUIT_POS_X] = FRUIT[0][1];
+                    game_food[FRUIT_POS_Y][FRUIT_POS_X+1] = FRUIT[0][2];
+                }
+                beep();
                 break;
             case '`': 
                 *score += 50;
@@ -177,14 +223,6 @@ void food_handler(int* score, int* eaten_dots, Entity pacman, char game_food[MAP
                 mvaddch(pe_pos.y+GUI_HEIGHT, pe_pos.x+i, ' ');
                 refresh();
                 break;
-        }
-
-        if(*eaten_dots == 70 || *eaten_dots == 170){
-            //spawna un frutto va tutto in funzione col controllo
-            print_fruit();
-            game_food[17][PAC_START_X-1] = FRUIT[0][0];
-            game_food[17][PAC_START_X+1] = FRUIT[0][2];
-            game_food[17][PAC_START_X] = FRUIT[0][1];
         }
 
     }

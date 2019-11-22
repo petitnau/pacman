@@ -18,8 +18,8 @@ void ghost_wait(CharGhost);
 
 void ghost_main(int info_in, int pos_out, int log_out)
 {
-    CharGhost ghost = {{GHOST_ID, {GHOST_START_X, GHOST_START_Y}, GHOST_START_DIR}, M_CHASE};
-    GhostInfo info_pkg = {{PACMAN_ID, {PAC_START_X, PAC_START_Y}, PAC_START_DIR}, false, false};
+    CharGhost ghost = {{GHOST_ID, {GHOST_START_X, GHOST_START_Y}, GHOST_START_DIR}, M_CHASE, true};
+    GhostInfo info_pkg = {{PACMAN_ID, {PAC_START_X, PAC_START_Y}, PAC_START_DIR}, false, false, false};
     GhostTimers timers = {};
     //creazione thread
     //pthread_t blinky;
@@ -30,7 +30,7 @@ void ghost_main(int info_in, int pos_out, int log_out)
         manage_g_info_in(info_in, &ghost, &info_pkg, &timers);
         manage_timers(&ghost, timers);
         ghost_choose_dir(&ghost, info_pkg); 
-        e_move(&ghost.e);
+        if(!ghost.paused) e_move(&ghost.e);
         manage_position_events(&ghost);
         write(pos_out, &ghost, sizeof(ghost)); //invia la posizione a control
         ghost_wait(ghost);
@@ -56,7 +56,12 @@ void manage_g_info_in(int info_in, CharGhost* ghost, GhostInfo* info_pkg, GhostT
         {
             ghost->e.p.x = GHOST_START_X;
             ghost->e.p.y = GHOST_START_Y;
-            ghost->e.dir = UP;
+            ghost->e.dir = GHOST_START_DIR;
+            ghost->paused = true;
+        }
+        if(info_pkg->resume)
+        {
+            ghost->paused = false;
         }
     }
 }

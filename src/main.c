@@ -59,7 +59,7 @@ int main()
 {
     int i;
     pid_t p_player, p_pacman, p_ghosts;
-    int pacman_ch_pipe[2], pacman_info_pipe[2], ghost_ch_pipe[2], ghost_info_pipe[2], cmd_pipe[2], log_pipe[2];
+    int pacman_ch_pipe[2], pacman_info_pipe[2], ghost_ch_pipe[2], ghost_info_pipe[2], pacman_cmd_pipe[2], cmd_pipe[2], log_pipe[2];
 
     init();
 
@@ -70,6 +70,8 @@ int main()
     if(pipe(ghost_ch_pipe) == -1)
         _exit(PIPE_ERROR);
     if(pipe(ghost_info_pipe) == -1)
+        _exit(PIPE_ERROR);
+    if(pipe(pacman_cmd_pipe) == -1)
         _exit(PIPE_ERROR);
     if(pipe(cmd_pipe) == -1)
         _exit(PIPE_ERROR);
@@ -82,6 +84,8 @@ int main()
     fcntl(pacman_info_pipe[1], F_SETFL, O_NONBLOCK);
     fcntl(ghost_ch_pipe[0], F_SETFL, O_NONBLOCK);
     fcntl(ghost_ch_pipe[1], F_SETFL, O_NONBLOCK);
+    fcntl(pacman_cmd_pipe[0], F_SETFL, O_NONBLOCK);
+    fcntl(pacman_cmd_pipe[1], F_SETFL, O_NONBLOCK);
     fcntl(cmd_pipe[0], F_SETFL, O_NONBLOCK);
     fcntl(cmd_pipe[1], F_SETFL, O_NONBLOCK);
     fcntl(ghost_info_pipe[0], F_SETFL, O_NONBLOCK);
@@ -100,9 +104,11 @@ int main()
             close(ghost_ch_pipe[P_WR]);      
             close(ghost_info_pipe[P_RD]);
             close(ghost_info_pipe[P_WR]);
+            close(pacman_cmd_pipe[P_WR]);
+            close(cmd_pipe[P_RD]);
             close(cmd_pipe[P_WR]);
             close(log_pipe[P_RD]);
-            pacman_main(cmd_pipe[P_RD], pacman_info_pipe[P_RD], pacman_ch_pipe[P_WR], log_pipe[P_WR]);
+            pacman_main(pacman_cmd_pipe[P_RD], pacman_info_pipe[P_RD], pacman_ch_pipe[P_WR], log_pipe[P_WR]);
     }   
 
     switch(p_ghosts = fork())
@@ -116,6 +122,8 @@ int main()
             close(pacman_info_pipe[P_RD]);   
             close(ghost_ch_pipe[P_RD]);      
             close(ghost_info_pipe[P_WR]);
+            close(pacman_cmd_pipe[P_RD]);
+            close(pacman_cmd_pipe[P_WR]);
             close(cmd_pipe[P_RD]);
             close(cmd_pipe[P_WR]);
             close(log_pipe[P_RD]);
@@ -135,6 +143,8 @@ int main()
             close(ghost_ch_pipe[P_WR]);      
             close(ghost_info_pipe[P_RD]);
             close(ghost_info_pipe[P_WR]);
+            close(pacman_cmd_pipe[P_RD]);
+            close(pacman_cmd_pipe[P_WR]);
             close(cmd_pipe[P_RD]);
             close(log_pipe[P_RD]);
             player_main(cmd_pipe[P_WR], log_pipe[P_WR]);
@@ -144,10 +154,10 @@ int main()
     close(pacman_info_pipe[P_RD]); 
     close(ghost_ch_pipe[P_WR]);
     close(ghost_info_pipe[P_RD]);  
-    close(cmd_pipe[P_RD]);
+    close(pacman_cmd_pipe[P_RD]);
     close(cmd_pipe[P_WR]);
     close(log_pipe[P_WR]);
-    control_main(pacman_ch_pipe[P_RD], pacman_info_pipe[P_WR], ghost_ch_pipe[P_RD], ghost_info_pipe[P_WR], log_pipe[P_RD]);
+    control_main(pacman_ch_pipe[P_RD], pacman_info_pipe[P_WR], ghost_ch_pipe[P_RD], ghost_info_pipe[P_WR], cmd_pipe[P_RD], pacman_cmd_pipe[P_WR], log_pipe[P_RD]);
     
     getchar();
     kill(p_pacman, 1);

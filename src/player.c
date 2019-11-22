@@ -7,10 +7,11 @@
 void player_main(int cmd_out, int log_out)
 {
     char c;
-    Direction direction;
+    //Direction direction;
 
     while(1)
     {
+        /*
         switch(c=getch())
         {
             case K_UP:
@@ -26,7 +27,8 @@ void player_main(int cmd_out, int log_out)
                 direction = LEFT;
                 break;
         }
-
-        write(cmd_out, &direction, sizeof(direction));  //scrivo input a pacman
+        */
+        c = getch();
+        write(cmd_out, &c, sizeof(c));
     }
 }

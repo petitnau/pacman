@@ -14,6 +14,7 @@ typedef struct
     Entity e;
     Direction next_dir;
     int lives;
+    _Bool paused;
     _Bool dead;
 } CharPacman;
 
@@ -21,6 +22,7 @@ typedef struct
 {
     _Bool new;
     _Bool death;
+    _Bool resume;
 } PacManInfo;
 
 void pacman_main(int, int, int, int);

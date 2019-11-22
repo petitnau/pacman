@@ -17,12 +17,14 @@ typedef struct
     _Bool fright;
     _Bool death;
     _Bool full;
+    _Bool resume;
 } GhostInfo;
 
 typedef struct
 {
     Entity e;
     GhostMode mode;
+    _Bool paused;
 } CharGhost;
 
 void ghost_main(int, int, int);
