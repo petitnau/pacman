@@ -21,7 +21,8 @@ void ghost_main(int info_in, int pos_out, int log_out)
     CharGhost ghost = {{GHOST_ID, {GHOST_START_X, GHOST_START_Y}, GHOST_START_DIR}, M_CHASE};
     GhostInfo info_pkg = {{PACMAN_ID, {PAC_START_X, PAC_START_Y}, PAC_START_DIR}, false, false};
     GhostTimers timers = {};
-
+    //creazione thread
+    //pthread_t blinky;
     int i = 0;
 
     while(1)
@@ -40,7 +41,7 @@ void manage_g_info_in(int info_in, CharGhost* ghost, GhostInfo* info_pkg, GhostT
 {
     while(read(info_in, info_pkg, sizeof(*info_pkg)) != -1)
     {                
-        if(info_pkg->fright)
+        if(info_pkg->fright && ghost->mode != M_DEAD)
         {
             timers->fright = start_timer(6);
             ghost->mode = M_FRIGHT;  

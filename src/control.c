@@ -162,6 +162,7 @@ void food_handler(int* score, int* eaten_dots, Entity pacman, char game_food[MAP
                 break;
             case '`': 
                 *score += 50;
+                
                 ghost_info->fright = true;
                 ghost_info->new = true;
                 break;
@@ -170,7 +171,7 @@ void food_handler(int* score, int* eaten_dots, Entity pacman, char game_food[MAP
             break;
         }
 
-        if(*eaten_dots == 70){
+        if(*eaten_dots == 70 || *eaten_dots == 170){
             //spawna un frutto va tutto in funzione col controllo
             print_fruit();
             game_food[17][PAC_START_X-1] = FRUIT[0][0];
