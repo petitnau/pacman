@@ -2,7 +2,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
+#include <sys/time.h>
 
 #include "utils.h"
 #include "interface.h"
@@ -178,12 +178,16 @@ Direction reverse_direction (Direction direction)
     }
 }
 
-long start_timer(long duration)
+unsigned long long start_timer(unsigned long long duration)
 {
-    return time(NULL) + duration;
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    return now.tv_sec * 1000 + now.tv_usec / 1000 + duration;
 }
 
-_Bool check_timer(long timer)
+_Bool check_timer(unsigned long long timer)
 {
-    return time(NULL) < timer;
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    return timer > (now.tv_sec * 1000 + now.tv_usec / 1000);
 }

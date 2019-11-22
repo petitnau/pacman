@@ -42,7 +42,7 @@ float distance(Position, Position);
 int min_index(int, float *);
 Position offset_position(Position, Direction, int);
 Direction reverse_direction(Direction);
-long start_timer(long);
-_Bool check_timer(long);
+unsigned long long start_timer(unsigned long long l);
+_Bool check_timer(unsigned long long l);
 
 #endif
