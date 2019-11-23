@@ -128,21 +128,24 @@ void print_ui(int score, Characters characters)
     print_ghost(*characters.ghost);
 }
 
-void create_temp_text(TempText* temp_text, int x, int y, char* string, int time)
+void create_temp_text(TempText* temp_text, int x, int y, char* string, int time, int color)
 {
     temp_text->timer = start_timer(time);
     strcpy(temp_text->text, string);
     temp_text->p.x = x;
     temp_text->p.y = y;
+    temp_text->color = color;
 }
 
 void print_temp_text(TempText temp_text)
 {
+    attron(COLOR_PAIR(temp_text.color));
     if(temp_text.timer != 0 && check_timer(temp_text.timer))
     {
         mvprintw(temp_text.p.y, temp_text.p.x, "%s", temp_text.text);
         refresh();
     }
+    attroff(COLOR_PAIR(temp_text.color));
 }
 
 void sunprint_area(int y, int x, int size, char game_food[MAP_HEIGHT][MAP_WIDTH], Characters characters)

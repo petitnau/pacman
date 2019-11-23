@@ -16,6 +16,7 @@ typedef struct
     Position p;
     char text[10];
     unsigned long long timer;
+    int color;
 } TempText;
 
 static const char S_PAC[4][4] = {"(*v", ">*)", "^*)", "(*<"};
@@ -102,6 +103,6 @@ void sunprint_area(int, int, int, char[MAP_HEIGHT][MAP_WIDTH], Characters);
 void print_ui(int, Characters);
 void print_fruit();
 void print_temp_text(TempText);
-void create_temp_text(TempText*, int, int, char*, int);
+void create_temp_text(TempText*, int, int, char*, int, int);
 
 #endif

@@ -233,7 +233,7 @@ void food_handler(int* score, int* eaten_dots, Characters characters, char game_
                 *score += 100; //*lvl?
 
                 sunprint_area(temp_text->p.y, temp_text->p.x, strlen(temp_text->text), game_food, characters);
-                create_temp_text(temp_text, pe_pos.x-1, pe_pos.y+GUI_HEIGHT, "200", 2e3);
+                create_temp_text(temp_text, pe_pos.x-1, pe_pos.y+GUI_HEIGHT, "200", 2e3, 13);
                 for(j=-1; j<=1; j++)
                     game_food[pe_pos.y][pe_pos.x+j] = ' '; 
                 
@@ -274,7 +274,7 @@ void collision_handler(Characters characters, PacManInfo *pacman_info, GhostInfo
 void eat_pause(Characters characters, PacManInfo* pacman_info, GhostInfo* ghost_info, TempText* temp_text, char game_food[MAP_HEIGHT][MAP_WIDTH])
 {        
     sunprint_area(temp_text->p.y, temp_text->p.x, strlen(temp_text->text), game_food, characters);
-    create_temp_text(temp_text, characters.pacman->e.p.x-1, characters.pacman->e.p.y+GUI_HEIGHT, "200", 1e3);
+    create_temp_text(temp_text, characters.pacman->e.p.x-1, characters.pacman->e.p.y+GUI_HEIGHT, "200", 1e3, 12);
     ghost_info->sleeptime = 1e6;    
     ghost_info->new = true;
     pacman_info->sleeptime = 1e6;    
