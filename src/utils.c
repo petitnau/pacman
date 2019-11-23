@@ -65,8 +65,10 @@ void print_map_at(int x, int y)
      || c=='l' || c=='k' || c=='t' || c=='u' 
      || c=='w' || c=='~' || c=='`')
         mvaddch(y+GUI_HEIGHT, x, NCURSES_ACS(c));
-    else if(c=='@')
+    else if(is_empty_space(c) || c == '@')
         mvaddch(y+GUI_HEIGHT, x, ' ');
+    else if(c == '^')
+        mvaddch(y+GUI_HEIGHT, x, '-');
     else
         mvaddch(y+GUI_HEIGHT, x, c);
         
@@ -190,4 +192,22 @@ _Bool check_timer(unsigned long long timer)
     struct timeval now;
     gettimeofday(&now, NULL);
     return timer > (now.tv_sec * 1000 + now.tv_usec / 1000);
+}
+
+_Bool is_empty_space(char c)
+{
+    return c == ' ' || c == '#';
+}
+
+void map_loop(Entity* entity)
+{
+    if(entity->p.x == 0)
+        entity->p.x = MAP_WIDTH;
+    else if(entity->p.x == MAP_WIDTH)
+        entity->p.x = 0;
+
+    if(entity->p.y == 0)
+        entity->p.y = MAP_HEIGHT;
+    else if(entity->p.y == MAP_HEIGHT)
+        entity->p.y= 0;
 }

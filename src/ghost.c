@@ -1,7 +1,7 @@
 #include <unistd.h>
 #include "ghost.h"
-#include "utils.h"
 #include "entity.h"
+#include "utils.h"
 #include "interface.h"
 #include "ai.h"
 
@@ -15,6 +15,8 @@ void manage_g_timers(GhostTimers, CharGhost*);
 void ghost_choose_dir(CharGhost*, GhostInfo);
 void manage_position_events(CharGhost*);
 void ghost_wait(CharGhost);
+void ghost_move(CharGhost*);
+_Bool is_empty_space_ghost(char);
 
 CharGhost init_ghost_char()
 {
@@ -59,7 +61,7 @@ void ghost_main(int info_in, int pos_out, int log_out)
         manage_g_info_in(info_in, &ghost, &info_pkg, &timers);
         manage_g_timers(timers, &ghost);
         ghost_choose_dir(&ghost, info_pkg); 
-        if(!ghost.paused) e_move(&ghost.e);
+        if(!ghost.paused) ghost_move(&ghost);
         manage_position_events(&ghost);
         write(pos_out, &ghost, sizeof(ghost)); //invia la posizione a control
         ghost_wait(ghost);
@@ -119,13 +121,13 @@ void ghost_choose_dir(CharGhost* ghost, GhostInfo info)
     switch(ghost->mode)
     {
         case M_FRIGHT:
-            ghost->e.dir = choose_direction_random(ghost->e);
+            ghost->e.dir = choose_direction_random(*ghost);
             break;
         case M_DEAD:
-            ghost->e.dir = choose_direction_target(ghost->e, HOME_TARGET);
+            ghost->e.dir = choose_direction_target(*ghost, HOME_TARGET);
             break;
         default:
-            ghost->e.dir = choose_direction_target(ghost->e, blinky_target(info.pacman));
+            ghost->e.dir = choose_direction_target(*ghost, blinky_target(info.pacman));
             break;
     }
 }
@@ -151,4 +153,69 @@ void ghost_wait(CharGhost ghost)
         movepause /= 3;
 
     usleep(movepause);
+}
+
+void ghost_move(CharGhost* ghost)
+{         
+    if(can_move_ghost(*ghost, ghost->e.dir))
+    {        
+        switch(ghost->e.dir)
+        {
+            case UP:
+                ghost->e.p.y--;
+                break;
+            case LEFT:
+                ghost->e.p.x--;
+                break;
+            case DOWN:
+                ghost->e.p.y++;
+                break;
+            case RIGHT:
+                ghost->e.p.x++;
+                break;
+        }
+    }
+    map_loop(&ghost->e);
+}
+
+_Bool is_empty_space_ghost(char c)
+{
+    return is_empty_space(c) || c=='^';
+}
+
+_Bool can_move_ghost(CharGhost ghost, Direction direction)
+{
+    int i;
+
+    switch(direction)
+    {
+        case UP:
+            for(i=-1; i<=1; i++)
+            {
+                if(!is_empty_space_ghost(get_map_at(ghost.e.p.x+i, ghost.e.p.y-1)))
+                    return false;
+            }
+            if(get_map_at(ghost.e.p.x, ghost.e.p.y) == '#')
+                return false;
+            break;
+        case LEFT:
+            if(!is_empty_space_ghost(get_map_at(ghost.e.p.x-2, ghost.e.p.y)))
+                return false;
+            break;
+        case DOWN:
+            for(i=-1; i<=1; i++)
+            {
+                if(!is_empty_space_ghost(get_map_at(ghost.e.p.x+i,ghost.e.p.y+1)))
+                    return false;
+                if(ghost.mode != M_DEAD && get_map_at(ghost.e.p.x+i, ghost.e.p.y+1) == '^')
+                    return false;
+            }
+            break;
+        case RIGHT:
+            if(!is_empty_space_ghost(get_map_at(ghost.e.p.x+2, ghost.e.p.y)))
+                return false;
+            break;
+    }
+
+    return true;
 }

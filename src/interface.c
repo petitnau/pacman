@@ -100,12 +100,15 @@ void unprint_area(int y, int x, int size, char game_food[MAP_HEIGHT][MAP_WIDTH])
             mvaddch(pos.y+GUI_HEIGHT, pos.x, c);
             attroff(COLOR_REDTEXT);
         }
-        //else if(c == '~')
-        else
+        else if(c == '~')
         {
             attron(COLOR_PELLETS);
             mvaddch(pos.y+GUI_HEIGHT, pos.x, NCURSES_ACS(c));
             attroff(COLOR_PELLETS);
+        }
+        else if(c == ' ')
+        {
+            print_map_at(pos.x, pos.y);
         }
     }
 }

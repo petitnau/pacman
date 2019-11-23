@@ -1,13 +1,16 @@
 #ifndef PACMAN_H
 #define PACMAN_H
 
-#include "entity.h"
+#include "utils.h"
 
 #define PACMAN_START_X 27
 #define PACMAN_START_Y 23
 #define PACMAN_START_DIR UP
 #define PACMAN_SPEED 70000
 #define PACMAN_START_LIVES 2
+
+#define VERTICALCUT 6
+#define HORIZONTALCUT 4
 
 typedef struct
 {

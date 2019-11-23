@@ -4,6 +4,7 @@
 #include "control.h"
 #include "ghost.h"
 #include "pacman.h"
+#include "entity.h"
 
 #define MAP_WIDTH 55
 #define MAP_HEIGHT 31
@@ -42,8 +43,8 @@ static const char MAP[MAP_HEIGHT][MAP_WIDTH+1] = {
 "x             x@x         x@x         x@x             x",
 "mqqqqqqqqqk   x@mqqqqqk   x@x   lqqqqqj@x   lqqqqqqqqqj",
 "@@@@@@@@@@x   x@lqqqqqj   mqj   mqqqqqk@x   x@@@@@@@@@@",
-"@@@@@@@@@@x   x@x                     x@x   x@@@@@@@@@@",
-"@@@@@@@@@@x   x@x   lqqqqq   qqqqqk   x@x   x@@@@@@@@@@",
+"@@@@@@@@@@x   x@x      #########      x@x   x@@@@@@@@@@",
+"@@@@@@@@@@x   x@x   lqqqqq^^^qqqqqk   x@x   x@@@@@@@@@@",
 "qqqqqqqqqqj   mqj   x@@@@@   @@@@@x   mqj   mqqqqqqqqqq",
 "                    x@@@@@   @@@@@x                    ",
 "qqqqqqqqqqk   lqk   x@@@@@@@@@@@@@x   lqk   lqqqqqqqqqq",
@@ -54,7 +55,7 @@ static const char MAP[MAP_HEIGHT][MAP_WIDTH+1] = {
 "x                         x@x                         x",
 "x   lqqqqqk   lqqqqqqqk   x@x   lqqqqqqqk   lqqqqqk   x",
 "x   mqqqk@x   mqqqqqqqj   mqj   mqqqqqqqj   x@lqqqj   x",
-"x       x@x                                 x@x       x",
+"x       x@x            #########            x@x       x",
 "tqqqk   x@x   lqk   lqqqqqqqqqqqqqk   lqk   x@x   lqqqu",
 "tqqqj   mqj   x@x   mqqqqqk@lqqqqqj   x@x   mqj   mqqqu",
 "x             x@x         x@x         x@x             x",

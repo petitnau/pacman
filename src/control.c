@@ -274,9 +274,9 @@ void collision_handler(Characters characters, PacManInfo *pacman_info, GhostInfo
 void eat_pause(Characters characters, PacManInfo* pacman_info, GhostInfo* ghost_info, TempText* temp_text, char game_food[MAP_HEIGHT][MAP_WIDTH])
 {        
     sunprint_area(temp_text->p.y, temp_text->p.x, strlen(temp_text->text), game_food, characters);
-    create_temp_text(temp_text, characters.pacman->e.p.x-1, characters.pacman->e.p.y+GUI_HEIGHT, "200", 1e3, 12);
-    ghost_info->sleeptime = 1e6;    
+    create_temp_text(temp_text, characters.pacman->e.p.x-1, characters.pacman->e.p.y+GUI_HEIGHT, "200", 0.6e3, 12);
+    ghost_info->sleeptime = 0.6e6;    
     ghost_info->new = true;
-    pacman_info->sleeptime = 1e6;    
+    pacman_info->sleeptime = 0.6e6;    
     pacman_info->new = true;
 }

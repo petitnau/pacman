@@ -2,7 +2,6 @@
 #define AI_H
 
 #include "utils.h"
-#include "entity.h"
 
 #define PINKY_CHASE_OFFSET 4
 #define INKY_CHASE_OFFSET 2
@@ -22,9 +21,9 @@ Position clyde_target(Entity, Entity);
 Position scatter_target(int id);
 Position eaten_target();
 
-Direction choose_direction_random(Entity);
-Direction choose_direction_target(Entity, Position); //Si può usare entity
-void ghost_possible_dirs(Entity, _Bool [4]);
+Direction choose_direction_random(CharGhost);
+Direction choose_direction_target(CharGhost, Position); //Si può usare entity
+void ghost_possible_dirs(CharGhost, _Bool [4]);
 
 
 #endif

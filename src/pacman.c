@@ -10,6 +10,9 @@ void manage_p_info_in(int, CharPacman*);
 void manage_p_cmd_in(int, CharPacman*, Direction*);
 void switch_direction(CharPacman*);
 void pac_wait(CharPacman);
+_Bool accept_turn(CharPacman, Direction);
+void pacman_move(Entity*);
+_Bool can_move_pacman(Entity, Direction);
 
 CharPacman init_pacman_char()
 {
@@ -48,7 +51,7 @@ void pacman_main(int cmd_in, int info_in, int pos_out, int log_out)
         manage_p_info_in(info_in, &pacman);
         manage_p_cmd_in(cmd_in, &pacman, &cmd_pkg);
         switch_direction(&pacman);
-        if (!pacman.paused) e_move(&pacman.e);
+        if (!pacman.paused) pacman_move(&pacman.e);
         write(pos_out, &pacman, sizeof(pacman)); //invia la posizione a control
         pac_wait(pacman);
     }
@@ -88,7 +91,7 @@ void manage_p_cmd_in(int cmd_in, CharPacman* pacman, Direction* cmd_pkg)
 {
     while(read(cmd_in, cmd_pkg, sizeof(*cmd_pkg)) != -1)
     {            
-        if(accept_turn(pacman->e, *cmd_pkg))
+        if(accept_turn(*pacman, *cmd_pkg))
         {
             pacman->next_dir = *cmd_pkg;
         }
@@ -97,7 +100,7 @@ void manage_p_cmd_in(int cmd_in, CharPacman* pacman, Direction* cmd_pkg)
 
 void switch_direction(CharPacman* pacman)
 {
-    if(can_move(pacman->e, pacman->next_dir))   //controlla se può fare movimento nella nuova direzione
+    if(can_move_pacman(pacman->e, pacman->next_dir))   //controlla se può fare movimento nella nuova direzione
         pacman->e.dir = pacman->next_dir;
 }
 
@@ -109,4 +112,119 @@ void pac_wait(CharPacman pacman)
         movepause*=2;
 
     usleep(movepause);
+}
+
+_Bool accept_turn(CharPacman pacman, Direction direction)
+{
+    int i;
+
+    switch(direction)
+    {
+        case UP:
+            if(pacman.e.dir == UP || pacman.e.dir == DOWN) 
+                return true;
+            else
+                for(i=0; i<VERTICALCUT; i++)
+                {
+                    if(pacman.e.dir == RIGHT && is_empty_space(get_map_at(pacman.e.p.x+i, pacman.e.p.y-1)))
+                            return true;
+                    else if(pacman.e.dir == LEFT && is_empty_space(get_map_at(pacman.e.p.x-i, pacman.e.p.y-1)))
+                            return true;
+                }
+            break;
+        case LEFT:
+            if(pacman.e.dir == RIGHT || pacman.e.dir == LEFT)
+                return true;
+            else
+                for(i=0; i<HORIZONTALCUT; i++)
+                {
+                    if(pacman.e.dir == UP && is_empty_space(get_map_at(pacman.e.p.x-2, pacman.e.p.y-i)))
+                            return true;
+                    else if(pacman.e.dir == DOWN && is_empty_space(get_map_at(pacman.e.p.x-2, pacman.e.p.y+i)))
+                            return true;
+                }
+            break;
+        case DOWN:
+            if(pacman.e.dir == UP || pacman.e.dir == DOWN) 
+                return true;
+            else
+                for(i=0; i<VERTICALCUT; i++)
+                {
+                    if(pacman.e.dir == RIGHT && is_empty_space(get_map_at(pacman.e.p.x+i, pacman.e.p.y+1)))
+                            return true;
+                    else if(pacman.e.dir == LEFT && is_empty_space(get_map_at(pacman.e.p.x-i, pacman.e.p.y+1)))
+                            return true;
+                }
+            break;
+        case RIGHT:
+            if(pacman.e.dir == RIGHT || pacman.e.dir == LEFT) 
+                return true;
+            else
+                for(i=0; i<HORIZONTALCUT; i++)
+                {
+                    if(pacman.e.dir == UP && is_empty_space(get_map_at(pacman.e.p.x+2, pacman.e.p.y-i)))
+                            return true;
+                    else if(pacman.e.dir == DOWN && is_empty_space(get_map_at(pacman.e.p.x+2, pacman.e.p.y+i)))
+                            return true;
+                }
+            break;
+    }
+
+    return false;
+}
+
+void pacman_move(Entity* entity)
+{         
+    if(can_move_pacman(*entity, entity->dir))
+    {        
+        switch(entity->dir)
+        {
+            case UP:
+                entity->p.y--;
+                break;
+            case LEFT:
+                entity->p.x--;
+                break;
+            case DOWN:
+                entity->p.y++;
+                break;
+            case RIGHT:
+                entity->p.x++;
+                break;
+        }
+    }
+    map_loop(entity);
+}
+
+_Bool can_move_pacman(Entity entity, Direction direction)
+{
+    int i;
+
+    switch(direction)
+    {
+        case UP:
+            for(i=-1; i<=1; i++)
+            {
+                if(!is_empty_space(get_map_at(entity.p.x+i, entity.p.y-1)))
+                    return false;
+            }
+            break;
+        case LEFT:
+            if(!is_empty_space(get_map_at(entity.p.x-2, entity.p.y)))
+                return false;
+            break;
+        case DOWN:
+            for(i=-1; i<=1; i++)
+            {
+                if(!is_empty_space(get_map_at(entity.p.x+i, entity.p.y+1)))
+                    return false;
+            }
+            break;
+        case RIGHT:
+            if(!is_empty_space(get_map_at(entity.p.x+2, entity.p.y)))
+                return false;
+            break;
+    }
+
+    return true;
 }

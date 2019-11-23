@@ -1,6 +1,7 @@
 #include <limits.h>
 #include <curses.h>
 
+#include "ghost.h" 
 #include "ai.h"
 
 Position blinky_target (Entity pacman)
@@ -42,7 +43,7 @@ Position eaten_target ()
     return HOME_TARGET;
 }
 
-Direction choose_direction_random (Entity ghost)
+Direction choose_direction_random (CharGhost ghost)
 {
     int i;
     int rand_dir;
@@ -71,16 +72,16 @@ Direction choose_direction_random (Entity ghost)
     }
 }
 
-void ghost_possible_dirs(Entity ghost, _Bool possible_dirs[4])
+void ghost_possible_dirs(CharGhost ghost, _Bool possible_dirs[4])
 {
     int i;
 
     for (i=0; i < 4; i++)      
     {
-        possible_dirs[i] = can_move(ghost, i);        
+        possible_dirs[i] = can_move_ghost(ghost, i);        
     }
 
-    switch(ghost.dir)
+    switch(ghost.e.dir)
     {
         case UP: possible_dirs[DOWN] = false;
             break;
@@ -93,14 +94,14 @@ void ghost_possible_dirs(Entity ghost, _Bool possible_dirs[4])
     }
 }
 
-Direction choose_direction_target (Entity ghost, Position target)
+Direction choose_direction_target (CharGhost ghost, Position target)
 {
     int i;
     float dir_dist[4];
-    Position dir_ghost[4] = {{ghost.p.x, ghost.p.y-1},  // up
-                            {ghost.p.x-1, ghost.p.y},  // left
-                            {ghost.p.x, ghost.p.y+1},  // down
-                            {ghost.p.x+1, ghost.p.y}}; // right
+    Position dir_ghost[4] = {{ghost.e.p.x, ghost.e.p.y-1},  // up
+                            {ghost.e.p.x-1, ghost.e.p.y},  // left
+                            {ghost.e.p.x, ghost.e.p.y+1},  // down
+                            {ghost.e.p.x+1, ghost.e.p.y}}; // right
 
     _Bool possible_dirs[4] = {};
 

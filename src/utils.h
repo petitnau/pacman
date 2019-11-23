@@ -1,6 +1,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include "entity.h"
+
 #define K_UP 65
 #define K_DOWN 66
 #define K_RIGHT 67
@@ -38,13 +40,6 @@
 #define COLOR_CYANTEXT COLOR_PAIR(12)
 #define COLOR_MAGENTATEXT COLOR_PAIR(13)
 
-typedef enum {UP, LEFT, DOWN, RIGHT} Direction;
-
-typedef struct
-{
-    int x,y;
-} Position;
-
 void print_gui_string(int, int, char*); 
 void print_map_at(int, int);
 void print_lives(int n);
@@ -61,5 +56,7 @@ Position offset_position(Position, Direction, int);
 Direction reverse_direction(Direction);
 unsigned long long start_timer(unsigned long long l);
 _Bool check_timer(unsigned long long l);
+_Bool is_empty_space(char);
+void map_loop(Entity*);
 
 #endif
