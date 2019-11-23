@@ -13,7 +13,7 @@ void print_gui_string(int y, int x, char* str)
     int len = strlen(str);
     char c;
 
-    attron(COLOR_PAIR(2));
+    attron(COLOR_TEXT);
 
     for(i=0; i<len; i++)
     {
@@ -37,19 +37,19 @@ void print_gui_string(int y, int x, char* str)
         }
     }
 
-    attroff(COLOR_PAIR(2));
+    attroff(COLOR_TEXT);
 }
 
 void print_lives(int n)
 {
     int i;
 
-    attron(COLOR_PAIR(4));
+    attron(COLOR_PACMAN);
 
     for(i = 0; i < n; i++)
         mvprintw(37,4+(i*4), S_PAC[LEFT]);
 
-    attroff(COLOR_PAIR(4));
+    attroff(COLOR_PACMAN);
 
     for(i = n; i < MAX_HP; i++)
         mvprintw(37,4+(i*4), "   ");
@@ -59,7 +59,7 @@ void print_map_at(int x, int y)
 {
     char c = MAP[y][x];
 
-    attron(COLOR_PAIR(1));
+    attron(COLOR_MAP);
 
     if(c=='m' || c=='q' || c=='x' || c=='j' 
      || c=='l' || c=='k' || c=='t' || c=='u' 
@@ -70,7 +70,7 @@ void print_map_at(int x, int y)
     else
         mvaddch(y+GUI_HEIGHT, x, c);
         
-    attroff(COLOR_PAIR(1));
+    attroff(COLOR_MAP);
 }
 
 void print_map()
@@ -91,13 +91,13 @@ void print_pellets_at(int x, int y)
 void print_pellets()
 {
     int i, j;
-    attron(COLOR_PAIR(3));
+    attron(COLOR_PELLETS);
 
     for(i=0; i<MAP_WIDTH; i++)
         for(j=0; j<MAP_HEIGHT; j++)
             print_pellets_at(i,j);
         
-    attroff(COLOR_PAIR(3));
+    attroff(COLOR_PELLETS);
 }
 
 

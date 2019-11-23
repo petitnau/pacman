@@ -1,6 +1,7 @@
 #ifndef INTERFACE_H
 #define INTERFACE_H
 
+#include "control.h"
 #include "ghost.h"
 #include "pacman.h"
 
@@ -97,8 +98,8 @@ static const char PELLETS[MAP_HEIGHT][MAP_WIDTH+1] = {
 void print_pacman(CharPacman);
 void print_ghost(CharGhost);
 void unprint_area(int, int, int, char[MAP_HEIGHT][MAP_WIDTH]);
-void sunprint_area(int, int, int, char[MAP_HEIGHT][MAP_WIDTH], CharPacman, CharGhost);
-void print_ui(int, CharPacman, CharGhost);
+void sunprint_area(int, int, int, char[MAP_HEIGHT][MAP_WIDTH], Characters);
+void print_ui(int, Characters);
 void print_fruit();
 void print_temp_text(TempText);
 void create_temp_text(TempText*, int, int, char*, int);

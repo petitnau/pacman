@@ -14,8 +14,6 @@
 #include "player.h"
 #include "ghost.h"
 
-#define COLOR_PINK 8
-#define COLOR_ORANGE 9
 void init()
 {
     initscr();
@@ -43,11 +41,10 @@ void init()
     init_pair(7, COLOR_BLACK, COLOR_MAGENTA);
     init_pair(8, COLOR_BLACK, COLOR_ORANGE);
     init_pair(9, COLOR_WHITE, COLOR_BLUE);
-    init_pair(10, COLOR_WHITE, COLOR_BLACK);
     
     //test
-    init_pair(11, COLOR_RED, COLOR_BLACK);
-    init_pair(12, COLOR_GREEN, COLOR_BLACK);
+    init_pair(10, COLOR_RED, COLOR_BLACK);
+    init_pair(11, COLOR_GREEN, COLOR_BLACK);
 
     refresh();
     print_map();
