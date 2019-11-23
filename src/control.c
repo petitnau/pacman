@@ -216,9 +216,9 @@ void food_handler(int* score, int* eaten_dots, Characters characters, char game_
                 if(*eaten_dots == 70 || *eaten_dots == 170){
                     //spawna un frutto va tutto in funzione col controllo
                     print_fruit();
-                    game_food[FRUIT_POS_Y][FRUIT_POS_X-1] = FRUIT[0][0];
-                    game_food[FRUIT_POS_Y][FRUIT_POS_X] = FRUIT[0][1];
-                    game_food[FRUIT_POS_Y][FRUIT_POS_X+1] = FRUIT[0][2];
+                    game_food[FRUIT_POS_Y][FRUIT_POS_X-1] = S_FRUIT[0][0];
+                    game_food[FRUIT_POS_Y][FRUIT_POS_X] = S_FRUIT[0][1];
+                    game_food[FRUIT_POS_Y][FRUIT_POS_X+1] = S_FRUIT[0][2];
                 }
                 beep();
                 break;

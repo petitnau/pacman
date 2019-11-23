@@ -93,7 +93,7 @@ int main()
     switch(p_pacman = fork())
     {
         case -1:
-            _exit(FORK_ERROR | PACMAN_ID);
+            _exit(FORK_ERROR);
         case 0: //pacman
             close(pacman_ch_pipe[P_RD]); 
             close(pacman_info_pipe[P_WR]);   
@@ -111,7 +111,7 @@ int main()
     switch(p_ghosts = fork())
     {
         case -1:
-            _exit(FORK_ERROR | GHOST_ID);
+            _exit(FORK_ERROR);
         case 0:
             close(pacman_ch_pipe[P_RD]);      
             close(pacman_ch_pipe[P_WR]);     
@@ -130,7 +130,7 @@ int main()
     switch(p_player = fork())
     {
         case -1:
-            _exit(FORK_ERROR | PLAYER_ID);
+            _exit(FORK_ERROR);
         case 0:
             close(pacman_ch_pipe[P_RD]);      
             close(pacman_ch_pipe[P_WR]);

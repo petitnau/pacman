@@ -12,7 +12,7 @@ void print_pacman(CharPacman pacman)
     char sprite[3];
     
     attron(COLOR_PACMAN);
-    strcpy(sprite, S_PAC[pacman.e.dir]);
+    strcpy(sprite, S_PACMAN[pacman.e.dir]);
     
     for(i=0; i<3; i++)
     {
@@ -47,7 +47,7 @@ void print_ghost(CharGhost ghost)
         pos.x = ghost.e.p.x+(i-1);
         pos.y = ghost.e.p.y;
         pos = get_pac_eff_pos(pos);
-        mvaddch(pos.y+GUI_HEIGHT,pos.x, S_GHST[ghost.mode][i]);
+        mvaddch(pos.y+GUI_HEIGHT,pos.x, S_GHOST[ghost.mode][i]);
     }
 
     switch(ghost.mode)
@@ -67,11 +67,11 @@ void print_ghost(CharGhost ghost)
 void print_fruit()
 {
     attron(COLOR_REDTEXT);
-    mvaddch(23, FRUIT_POS_X-1, FRUIT[0][0]);
-    mvaddch(17+GUI_HEIGHT, FRUIT_POS_X+1, FRUIT[0][2]);
+    mvaddch(23, FRUIT_POS_X-1, S_FRUIT[0][0]);
+    mvaddch(17+GUI_HEIGHT, FRUIT_POS_X+1, S_FRUIT[0][2]);
     attroff(COLOR_REDTEXT);
     attron(COLOR_GREENTEXT);
-    mvaddch(23, FRUIT_POS_X, FRUIT[0][1]);
+    mvaddch(23, FRUIT_POS_X, S_FRUIT[0][1]);
     attroff(COLOR_GREENTEXT);
 }
 

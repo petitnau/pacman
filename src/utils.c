@@ -47,7 +47,7 @@ void print_lives(int n)
     attron(COLOR_PACMAN);
 
     for(i = 0; i < n; i++)
-        mvprintw(37,4+(i*4), S_PAC[LEFT]);
+        mvprintw(37,4+(i*4), S_PACMAN[LEFT]);
 
     attroff(COLOR_PACMAN);
 
