@@ -40,7 +40,6 @@ void list_pop(MessageList* list)
     free(aux);
     list->count--;
 }
-
 int list_count(MessageList list)
 {
     MessageNode* aux = list.head;

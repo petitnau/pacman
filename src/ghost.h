@@ -2,7 +2,9 @@
 #define GHOST_H
 
 #include <stdbool.h>
+#include <semaphore.h>
 #include "utils.h"
+#include "list.h"
 
 #define GHOST_START_X 27
 #define GHOST_START_Y 11
@@ -14,22 +16,40 @@ typedef enum {M_SCATTER, M_CHASE, M_FRIGHT, M_DEAD} GhostMode;
 
 typedef struct
 {
+    Entity pacman;
+    _Bool new;
+    _Bool fright;
+    _Bool restart;
+    _Bool pause;
+    _Bool resume;
+    int death;
+    int sleeptime;
+} GhostInfo;
+
+typedef struct
+{
     Entity e;
+    int ghost_id;
     GhostMode mode;
-    _Bool paused;
 } CharGhost;
 
 typedef struct
 {
+    unsigned long long fright;
+} GhostTimers;
+
+typedef struct
+{
+    CharGhost** ghosts;
+    int ghost_number;
     Entity pacman;
-    _Bool new;
-    _Bool fright;
-    _Bool death;
-    _Bool full;
-    _Bool pause;
-    _Bool resume;
-    int sleeptime;
-} GhostInfo;
+    GhostMode mode;
+    sem_t mutex;
+    int death;
+    _Bool paused;
+    int pos_out;
+    int log_out;
+} GhostShared;
 
 CharGhost init_ghost_char();
 GhostInfo init_ghost_info();

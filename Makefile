@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-I. -lncurses -lm 
+CFLAGS=-I. -lncurses -lm -lpthread
 
 SRCDIR=src
 OBJDIR=obj

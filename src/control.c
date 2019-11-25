@@ -264,7 +264,7 @@ void collision_handler(Characters characters, PacManInfo *pacman_info, GhostInfo
             characters.pacman->dead = true;
             pacman_info->death = true;
             pacman_info->new = true;
-            ghost_info->full = true;
+            ghost_info->restart = true;
             ghost_info->new = true;
             //pacman viene riportato alla pos. inziiale idem
         }

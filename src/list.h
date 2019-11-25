@@ -15,7 +15,7 @@ typedef struct
     int count;
 } MessageList;
 
-void list_init(MessageList *list);
+void list_init(MessageList*);
 void list_push(MessageList*, char[50]);
 void list_pop(MessageList*);
 int list_count(MessageList);

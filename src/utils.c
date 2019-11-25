@@ -169,14 +169,14 @@ Position offset_position (Position position, Direction direction, int quantity)
     return position;
 }
 
-Direction reverse_direction (Direction direction)
+void reverse_direction (Direction* direction)
 {
-    switch (direction)
+    switch (*direction)
     {
-        case UP:    return DOWN;
-        case LEFT:  return RIGHT;
-        case DOWN:  return UP;
-        case RIGHT: return LEFT;
+        case UP:    *direction = DOWN; break;
+        case LEFT:  *direction = RIGHT; break;
+        case DOWN:  *direction = UP; break;
+        case RIGHT: *direction = LEFT; break;
     }
 }
 
