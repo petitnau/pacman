@@ -39,7 +39,21 @@ void print_ghost(CharGhost ghost)
             attron(COLOR_FRIGHT);
             break;
         default:
-            attron(COLOR_BLINKY);
+            switch(ghost.e.id)
+            {
+                case 0:
+                    attron(COLOR_BLINKY);
+                    break;
+                case 1:
+                    attron(COLOR_PINKY);
+                    break;
+                case 2:
+                    attron(COLOR_INKY);
+                    break;
+                case 3:
+                    attron(COLOR_CLYDE);
+                    break;
+            }
             break;
     }
     for(i=0; i<3; i++)
@@ -59,7 +73,21 @@ void print_ghost(CharGhost ghost)
             attroff(COLOR_FRIGHT);
             break;
         default:
-            attroff(COLOR_BLINKY);
+            switch(ghost.e.id)
+            {
+                case 0:
+                    attroff(COLOR_BLINKY);
+                    break;
+                case 1:
+                    attroff(COLOR_PINKY);
+                    break;
+                case 2:
+                    attroff(COLOR_INKY);
+                    break;
+                case 3:
+                    attroff(COLOR_CLYDE);
+                    break;
+            }
             break;
     }
 }
@@ -100,7 +128,7 @@ void unprint_area(int y, int x, int size, char game_food[MAP_HEIGHT][MAP_WIDTH])
             mvaddch(pos.y+GUI_HEIGHT, pos.x, c);
             attroff(COLOR_REDTEXT);
         }
-        else if(c == '~')
+        else if(c == '~' || c == '`')
         {
             attron(COLOR_PELLETS);
             mvaddch(pos.y+GUI_HEIGHT, pos.x, NCURSES_ACS(c));
@@ -115,6 +143,8 @@ void unprint_area(int y, int x, int size, char game_food[MAP_HEIGHT][MAP_WIDTH])
 
 void print_ui(int score, Characters characters)
 {
+    int i;
+
     char scorestr[10];
     char nupstr[10];
 
@@ -128,7 +158,12 @@ void print_ui(int score, Characters characters)
     print_gui_string(0,37, "HIGH SCORE");
     print_lives(characters.pacman->lives);
     print_pacman(*characters.pacman);
-    print_ghost(*characters.ghost);
+    
+    for(i = 0; i < characters.num_ghosts; i++)
+    {                 
+        mvprintw(characters.ghosts[i].ghost_id+4, 60, "%d %d %d",characters.ghosts[i].ghost_id, characters.ghosts[i].e.p.x, characters.ghosts[i].e.p.y);
+        print_ghost(characters.ghosts[i]);
+    }
 }
 
 void create_temp_text(TempText* temp_text, int x, int y, char* string, int time, int color)
@@ -153,7 +188,12 @@ void print_temp_text(TempText temp_text)
 
 void sunprint_area(int y, int x, int size, char game_food[MAP_HEIGHT][MAP_WIDTH], Characters characters)
 {
+    int i;
+
     unprint_area(y-GUI_HEIGHT,x,size,game_food);
     print_pacman(*characters.pacman);
-    print_ghost(*characters.ghost);
+    for(i = 0; i < characters.num_ghosts; i++)
+    {
+        print_ghost(characters.ghosts[i]);
+    }
 }

@@ -12,14 +12,14 @@
 
 void manage_cmd_in(int, int, GhostInfo*, PacManInfo*);
 void manage_pacman_in(int, int*, Characters, GhostInfo*, char[MAP_HEIGHT][MAP_WIDTH], int*, TempText*);
-void manage_ghost_in(int, Characters, char[MAP_HEIGHT][MAP_WIDTH]);
+void manage_ghost_in(int, Characters*, char[MAP_HEIGHT][MAP_WIDTH]);
 
 void manage_timers(TempText, Characters, char[MAP_HEIGHT][MAP_WIDTH]);
 
 void send_ghost_info(int, GhostInfo*);
 void send_pacman_info(int, PacManInfo*);
 
-void collision_handler(Characters, PacManInfo*, GhostInfo*, int*, TempText*, char[MAP_HEIGHT][MAP_WIDTH]);
+void collision_handler(Characters*, PacManInfo*, GhostInfo*, int*, TempText*, char[MAP_HEIGHT][MAP_WIDTH]);
 void food_handler(int*, int*, Characters, char[MAP_HEIGHT][MAP_WIDTH], GhostInfo*, TempText*);
 void food_setup();
 void eat_pause(Characters, PacManInfo*, GhostInfo*, TempText*, char[MAP_HEIGHT][MAP_WIDTH]);
@@ -58,6 +58,7 @@ void control_main(int pacman_in, int pacman_out, int ghost_in, int ghost_out, in
     GhostInfo ghost_info = init_ghost_info();
 
     Characters characters = {&pacman, &ghost};
+    characters.ghosts = malloc(sizeof(CharGhost)*4);
     
     TempText temp_text = {};
 
@@ -74,9 +75,9 @@ void control_main(int pacman_in, int pacman_out, int ghost_in, int ghost_out, in
     {  
         manage_cmd_in(cmd_in, p_cmd_out, &ghost_info, &pacman_info);
         manage_pacman_in(pacman_in, &eaten_dots, characters, &ghost_info, game_food, &score, &temp_text);
-        manage_ghost_in(ghost_in, characters, game_food);
+        manage_ghost_in(ghost_in, &characters, game_food);
         manage_timers(temp_text, characters, game_food);
-        collision_handler(characters, &pacman_info, &ghost_info, &score, &temp_text, game_food);
+        collision_handler(&characters, &pacman_info, &ghost_info, &score, &temp_text, game_food);
         send_pacman_info(pacman_out, &pacman_info);
         send_ghost_info(ghost_out, &ghost_info);
         print_ui(score, characters);
@@ -157,14 +158,25 @@ void manage_pacman_in(int pacman_in, int* eaten_dots, Characters characters, Gho
     }
 }
 
-void manage_ghost_in(int ghost_in, Characters characters, char game_food[MAP_HEIGHT][MAP_WIDTH])
+void manage_ghost_in(int ghost_in, Characters* characters, char game_food[MAP_HEIGHT][MAP_WIDTH])
 {
     CharGhost ghost_pkg;
 
     while(read(ghost_in, &ghost_pkg, sizeof(ghost_pkg)) != -1)
     {
-        unprint_area(characters.ghost->e.p.y, characters.ghost->e.p.x-1, 3, game_food);
-        *characters.ghost = ghost_pkg;
+        unprint_area(characters->ghosts[ghost_pkg.ghost_id].e.p.y, characters->ghosts[ghost_pkg.ghost_id].e.p.x-1, 3, game_food);
+        characters->ghosts[ghost_pkg.ghost_id] = ghost_pkg;
+        mvprintw(ghost_pkg.ghost_id+20, 60, "%d %d %d",ghost_pkg.ghost_id, ghost_pkg.e.p.x, ghost_pkg.e.p.y);
+
+        if(ghost_pkg.ghost_id+1 > characters->num_ghosts)
+            characters->num_ghosts = ghost_pkg.ghost_id+1;
+    }
+    int i;
+    for(i=0; i < characters->num_ghosts; i++)
+    {
+        mvprintw(i+10, 60, "ciao%d %d %d",characters->ghosts[i].ghost_id, 
+        characters->ghosts[i].e.p.x, 
+        characters->ghosts[i].e.p.y);
     }
 }
 
@@ -180,6 +192,7 @@ void manage_timers(TempText temp_text, Characters characters, char game_food[MAP
 
 void send_ghost_info(int ghost_out, GhostInfo* ghost_info)
 {    
+    static int i = 0;
     if(ghost_info->new)
     {
         write(ghost_out, ghost_info, sizeof(*ghost_info));
@@ -245,28 +258,39 @@ void food_handler(int* score, int* eaten_dots, Characters characters, char game_
     }
 }
 
-void collision_handler(Characters characters, PacManInfo *pacman_info, GhostInfo* ghost_info, int* score, TempText* temp_text, char game_food[MAP_HEIGHT][MAP_WIDTH])
+void collision_handler(Characters* characters, PacManInfo *pacman_info, GhostInfo* ghost_info, int* score, TempText* temp_text, char game_food[MAP_HEIGHT][MAP_WIDTH])
 {
-    if(characters.pacman->e.p.x == characters.ghost->e.p.x && characters.pacman->e.p.y == characters.ghost->e.p.y)
+    static int j = 0;
+    int i;
+    CharGhost* ghost;
+
+    for(i = 0; i < characters->num_ghosts; i++)
     {
-        if(characters.ghost->mode == M_FRIGHT)
+        ghost = &characters->ghosts[i];
+
+        if(characters->pacman->e.p.x == ghost->e.p.x && characters->pacman->e.p.y == ghost->e.p.y)
         {
-            *score += 200; //200 400 800 1600
-            characters.ghost->mode = M_DEAD;
-            ghost_info->death = true;
-            ghost_info->new = true;
-            eat_pause(characters, pacman_info, ghost_info, temp_text, game_food);
-            // morto il fantasma
-        }
-        else if(characters.ghost->mode != M_DEAD && !characters.pacman->dead)
-        {
-            //perdi una vita
-            characters.pacman->dead = true;
-            pacman_info->death = true;
-            pacman_info->new = true;
-            ghost_info->restart = true;
-            ghost_info->new = true;
-            //pacman viene riportato alla pos. inziiale idem
+            if(ghost->mode == M_FRIGHT)
+            {
+                *score += 200; //200 400 800 1600
+                ghost->mode = M_DEAD;
+                ghost_info->death = i;
+                ghost_info->new = true;
+
+                mvprintw(0,50, "%d", j++);
+                eat_pause(*characters, pacman_info, ghost_info, temp_text, game_food);
+                // morto il fantasma
+            }
+            else if(ghost->mode != M_DEAD && !characters->pacman->dead)
+            {
+                //perdi una vita
+                characters->pacman->dead = true;
+                pacman_info->death = true;
+                pacman_info->new = true;
+                ghost_info->restart = true;
+                ghost_info->new = true;
+                //pacman viene riportato alla pos. inziiale idem
+            }
         }
     }
 }

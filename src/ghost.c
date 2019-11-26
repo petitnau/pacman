@@ -17,17 +17,34 @@ void ghost_move(CharGhost*);
 _Bool is_empty_space_ghost(char);
 void* ghost_thread(void*);
 void manage_shared_info(GhostShared* ghost_shared, CharGhost* ghost);
+void set_ghost_start(Entity*);
 
-CharGhost init_ghost_char()
+CharGhost init_ghost_char(int id)
 {
     CharGhost ghost;
-    ghost.e.id = GHOST_ID;
-    ghost.e.dir = GHOST_START_DIR;
-    ghost.e.p.x = GHOST_START_X;
-    ghost.e.p.y = GHOST_START_Y;
+    ghost.ghost_id = id;
+    ghost.e.id = id;
+    set_ghost_start(&ghost.e);
     ghost.mode = M_CHASE;
+    ghost.frighted = false;
     //ghost.paused = true;
     return ghost;
+}
+
+void set_ghost_start(Entity* e)
+{
+    if(e->id == 0)
+    {
+        e->dir = BLINKY_START_DIR;
+        e->p.x = BLINKY_START_X;
+        e->p.y = BLINKY_START_Y;
+    }
+    else
+    {
+        e->dir = INKY_START_DIR;
+        e->p.x = INKY_START_X+1;
+        e->p.y = INKY_START_Y+2;
+    }
 }
 
 GhostInfo init_ghost_info()
@@ -39,21 +56,21 @@ GhostInfo init_ghost_info()
     info.pacman.p.y = PACMAN_START_Y;
     info.new = false;
     info.fright = false;
-    info.death = false;
     info.restart = false;
     info.pause = false;
     info.resume = false;
+    info.death = -1;
     info.sleeptime = 0;
     return info;
 }
 
 void ghost_main(int info_in, int pos_out, int log_out) //int num_fantasmi
 {
-    int num_fantasmi = 1;
+    int num_fantasmi = 4;
     GhostInfo info_pkg = init_ghost_info();
     GhostTimers timers = {};
     GhostShared ghost_shared = {};
-    ghost_shared.ghost_number = 0; //bugfix
+    ghost_shared.ghost_number = 0;
     ghost_shared.pacman = init_pacman_char().e;
     ghost_shared.mode = M_CHASE;
     ghost_shared.pos_out = pos_out;
@@ -62,6 +79,9 @@ void ghost_main(int info_in, int pos_out, int log_out) //int num_fantasmi
     sem_init(&ghost_shared.mutex, 0, 1);
     ghost_shared.ghosts = malloc(sizeof(CharGhost*)*num_fantasmi);
 
+    pthread_create(&fantasma, NULL, &ghost_thread, &ghost_shared);
+    pthread_create(&fantasma, NULL, &ghost_thread, &ghost_shared);
+    pthread_create(&fantasma, NULL, &ghost_thread, &ghost_shared);
     pthread_create(&fantasma, NULL, &ghost_thread, &ghost_shared);
 
     while(1)
@@ -73,32 +93,28 @@ void ghost_main(int info_in, int pos_out, int log_out) //int num_fantasmi
 
 void* ghost_thread(void* parameters)
 {
-    CharGhost ghost = init_ghost_char();
+    CharGhost ghost;
     GhostShared* ghost_shared = (GhostShared*) parameters;
 
-    int i = 0;
+    int i = 0;  
 
     //Assegno ad ogni ghost un ghost_id univoco
     sem_wait(&ghost_shared->mutex);
-    ghost.ghost_id = ghost_shared->ghost_number; //Era qua il bug stavamo inizializzando a 1 e non a 0 la prima cosa dell'array
+    ghost = init_ghost_char(ghost_shared->ghost_number);
     ghost_shared->ghosts[ghost.ghost_id] = &ghost;
     ghost_shared->ghost_number++;
     sem_post(&ghost_shared->mutex);
 
-
     while(1)
     {       
-        write(ghost_shared->log_out, "test", 50);
+        //sem_wait(&ghost_shared->mutex);
         manage_shared_info(ghost_shared, &ghost);
         ghost_choose_dir(&ghost, ghost_shared); 
         if(!ghost_shared->paused) ghost_move(&ghost);
         manage_position_events(&ghost);
         write(ghost_shared->pos_out, &ghost, sizeof(ghost)); //invia la posizione a control
-        
-        
-        write(ghost_shared->log_out, "ciao", 50);
         ghost_wait(ghost, ghost_shared);
-        write(ghost_shared->log_out, "prova", 50);
+        //sem_post(&ghost_shared->mutex);
     }
 }
 
@@ -106,7 +122,16 @@ void manage_shared_info(GhostShared* ghost_shared, CharGhost* ghost)
 {
     sem_wait(&ghost_shared->mutex);
     
-    ghost->mode = ghost_shared->mode;
+    if(ghost->mode != M_DEAD)
+    {
+        if(ghost_shared->fright && !ghost->frighted)
+        {
+            ghost->mode = M_FRIGHT;
+            ghost->frighted = true;
+        }
+        else if(!ghost_shared->fright)
+            ghost->mode = ghost_shared->mode;
+    }
 
     sem_post(&ghost_shared->mutex);
 }
@@ -114,23 +139,20 @@ void manage_shared_info(GhostShared* ghost_shared, CharGhost* ghost)
 void manage_g_info_in(int info_in, GhostShared* ghost_shared, GhostTimers* timers)
 {
     GhostInfo info;
-    int i;
+    static int i=0;
     int k;
         
-    //sem_wait(&ghost_shared->mutex);
+    sem_wait(&ghost_shared->mutex);
     while(read(info_in, &info, sizeof(info)) != -1)
     {
-
-
-        //f(info.death)
-        //{
-        //    timers->fright = 0;
-        //    ghost_shared->mode = M_DEAD;
-        //}
+        if(info.death != -1)
+        {
+            ghost_shared->ghosts[info.death]->mode = M_DEAD;
+        }
         if(info.fright)
         {
             timers->fright = start_timer(6e3);
-            ghost_shared->mode = M_FRIGHT; 
+            ghost_shared->fright = true; 
             for(i=0; i < ghost_shared->ghost_number; i++)
             {
                 reverse_direction(&(ghost_shared->ghosts[i]->e.dir));
@@ -140,9 +162,7 @@ void manage_g_info_in(int info_in, GhostShared* ghost_shared, GhostTimers* timer
         {
             for(i=0; i < ghost_shared->ghost_number; i++)
             {
-                ghost_shared->ghosts[i]->e.p.x = GHOST_START_X;
-                ghost_shared->ghosts[i]->e.p.y = GHOST_START_Y;
-                ghost_shared->ghosts[i]->e.dir = GHOST_START_DIR;
+                set_ghost_start(&ghost_shared->ghosts[i]->e);
             } 
             ghost_shared->paused = true;
         }
@@ -159,19 +179,26 @@ void manage_g_info_in(int info_in, GhostShared* ghost_shared, GhostTimers* timer
             ghost_shared->paused = true;
             usleep(info.sleeptime);
             ghost_shared->paused = false;
+            info.sleeptime = 0;
         }
         ghost_shared->pacman = info.pacman;
     }
-    //sem_post(&ghost_shared->mutex);
+    sem_post(&ghost_shared->mutex);
 }
 
 void manage_g_timers(GhostTimers* timers, GhostShared* ghost_shared)
 {
+    int i;
+
     if(timers->fright != 0)
     {
         if(!check_timer(timers->fright))
         {
-            ghost_shared->mode = M_CHASE; //ciclo di chase saltato?   
+            for(i=0; i < ghost_shared->ghost_number; i++)
+            {            
+                ghost_shared->ghosts[i]->frighted = false;
+            }
+            ghost_shared->fright = false; //ciclo di chase saltato?   
             timers->fright = 0; 
         }
     }
@@ -179,7 +206,7 @@ void manage_g_timers(GhostTimers* timers, GhostShared* ghost_shared)
 
 void ghost_choose_dir(CharGhost* ghost, GhostShared* ghost_shared)
 {
-    switch(ghost_shared->mode)
+    switch(ghost->mode)
     {
         case M_FRIGHT:
             ghost->e.dir = choose_direction_random(*ghost);
@@ -188,7 +215,21 @@ void ghost_choose_dir(CharGhost* ghost, GhostShared* ghost_shared)
             ghost->e.dir = choose_direction_target(*ghost, HOME_TARGET);
             break;
         default:
-            ghost->e.dir = choose_direction_target(*ghost, blinky_target(ghost_shared->pacman));
+            switch(ghost->e.id)
+            {
+                case 0: 
+                    ghost->e.dir = choose_direction_target(*ghost, blinky_target(ghost_shared->pacman));
+                    break;
+                case 1:
+                    ghost->e.dir = choose_direction_target(*ghost, pinky_target(ghost_shared->pacman));
+                    break;
+                case 2:
+                    ghost->e.dir = choose_direction_target(*ghost, inky_target(ghost_shared->pacman, ghost_shared->ghosts[0]->e));
+                    break;
+                case 3:
+                    ghost->e.dir = choose_direction_target(*ghost, clyde_target(ghost_shared->pacman, ghost_shared->ghosts[3]->e));
+                    break;
+            }
             break;
     }
 }
@@ -204,18 +245,16 @@ void manage_position_events(CharGhost* ghost)
 
 void ghost_wait(CharGhost ghost, GhostShared* ghost_shared)
 {
-        write(ghost_shared->log_out, "prova", 50);
     int movepause = GHOST_SPEED;
 
     if(ghost.e.dir == UP || ghost.e.dir == DOWN) //gestisce la velocità
         movepause *= 2;
-    if(ghost_shared->mode == M_FRIGHT)
-        movepause *= 2;
-    else if(ghost_shared->mode == M_DEAD)
+    if(ghost.mode == M_DEAD)
         movepause /= 3;
+    else if(ghost.mode == M_FRIGHT)
+        movepause *= 2;
 
     usleep(movepause);
-        write(ghost_shared->log_out, "prova2", 50);
 }
 
 void ghost_move(CharGhost* ghost)

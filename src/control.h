@@ -7,7 +7,8 @@
 typedef struct
 {
     CharPacman* pacman;
-    CharGhost* ghost;
+    CharGhost* ghosts;
+    int num_ghosts;
 } Characters;
 
 void control_main(int, int, int, int, int, int, int);

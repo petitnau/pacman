@@ -10,6 +10,14 @@
 #define GHOST_START_Y 11
 #define GHOST_START_DIR UP
 
+#define BLINKY_START_X 27
+#define BLINKY_START_Y 11
+#define BLINKY_START_DIR UP
+
+#define INKY_START_X 29
+#define INKY_START_Y 12
+#define INKY_START_DIR UP
+
 #define GHOST_SPEED 75000
 
 typedef enum {M_SCATTER, M_CHASE, M_FRIGHT, M_DEAD} GhostMode;
@@ -31,6 +39,7 @@ typedef struct
     Entity e;
     int ghost_id;
     GhostMode mode;
+    _Bool frighted;
 } CharGhost;
 
 typedef struct
@@ -44,8 +53,8 @@ typedef struct
     int ghost_number;
     Entity pacman;
     GhostMode mode;
+    _Bool fright;
     sem_t mutex;
-    int death;
     _Bool paused;
     int pos_out;
     int log_out;

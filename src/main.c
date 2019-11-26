@@ -28,7 +28,7 @@ void init()
     init_color(COLOR_YELLOW, 1000, 1000, 0);
     init_color(COLOR_RED, 1000, 0, 0);
     init_color(COLOR_CYAN, 0, 1000, 1000);
-    init_color(COLOR_MAGENTA, 1000, 700, 1000);
+    init_color(COLOR_MAGENTA, 1000, 700, 700);
     init_color(COLOR_ORANGE, 1000, 700, 300);
     init_color(COLOR_PINK, 1000, 800, 800);
 
