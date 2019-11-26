@@ -161,7 +161,6 @@ void print_ui(int score, Characters characters)
     
     for(i = 0; i < characters.num_ghosts; i++)
     {                 
-        mvprintw(characters.ghosts[i].ghost_id+4, 60, "%d %d %d",characters.ghosts[i].ghost_id, characters.ghosts[i].e.p.x, characters.ghosts[i].e.p.y);
         print_ghost(characters.ghosts[i]);
     }
 }

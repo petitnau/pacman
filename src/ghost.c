@@ -33,18 +33,7 @@ CharGhost init_ghost_char(int id)
 
 void set_ghost_start(Entity* e)
 {
-    if(e->id == 0)
-    {
-        e->dir = BLINKY_START_DIR;
-        e->p.x = BLINKY_START_X;
-        e->p.y = BLINKY_START_Y;
-    }
-    else
-    {
-        e->dir = INKY_START_DIR;
-        e->p.x = INKY_START_X+1;
-        e->p.y = INKY_START_Y+2;
-    }
+    e->p = GHOST_START_POS[e->id];
 }
 
 GhostInfo init_ghost_info()
@@ -72,6 +61,7 @@ void ghost_main(int info_in, int pos_out, int log_out) //int num_fantasmi
     GhostShared ghost_shared = {};
     ghost_shared.ghost_number = 0;
     ghost_shared.pacman = init_pacman_char().e;
+    ghost_shared.paused = true;
     ghost_shared.mode = M_CHASE;
     ghost_shared.pos_out = pos_out;
     ghost_shared.log_out = log_out;
@@ -214,7 +204,10 @@ void ghost_choose_dir(CharGhost* ghost, GhostShared* ghost_shared)
         case M_DEAD:
             ghost->e.dir = choose_direction_target(*ghost, HOME_TARGET);
             break;
-        default:
+        case M_SCATTER:
+            ghost->e.dir = choose_direction_target(*ghost, SCATTER[ghost->e.id]);
+            break;
+        case M_CHASE:
             switch(ghost->e.id)
             {
                 case 0: 
@@ -304,6 +297,8 @@ _Bool can_move_ghost(CharGhost ghost, Direction direction)
             if(!is_empty_space_ghost(get_map_at(ghost.e.p.x-2, ghost.e.p.y)))
                 return false;
             break;
+            if(ghost.mode != M_DEAD && get_map_at(ghost.e.p.x+i, ghost.e.p.y+1) == '>')
+                return false;
         case DOWN:
             for(i=-1; i<=1; i++)
             {
@@ -315,6 +310,8 @@ _Bool can_move_ghost(CharGhost ghost, Direction direction)
             break;
         case RIGHT:
             if(!is_empty_space_ghost(get_map_at(ghost.e.p.x+2, ghost.e.p.y)))
+                return false;
+            if(ghost.mode != M_DEAD && get_map_at(ghost.e.p.x+i, ghost.e.p.y+1) == '<')
                 return false;
             break;
     }

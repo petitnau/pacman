@@ -6,17 +6,7 @@
 #include "utils.h"
 #include "list.h"
 
-#define GHOST_START_X 27
-#define GHOST_START_Y 11
-#define GHOST_START_DIR UP
-
-#define BLINKY_START_X 27
-#define BLINKY_START_Y 11
-#define BLINKY_START_DIR UP
-
-#define INKY_START_X 29
-#define INKY_START_Y 12
-#define INKY_START_DIR UP
+static const Position GHOST_START_POS[4] = {{27,11},{27,14},{24,14},{30,14}};
 
 #define GHOST_SPEED 75000
 

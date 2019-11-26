@@ -65,7 +65,7 @@ void print_map_at(int x, int y)
      || c=='l' || c=='k' || c=='t' || c=='u' 
      || c=='w' || c=='~' || c=='`')
         mvaddch(y+GUI_HEIGHT, x, NCURSES_ACS(c));
-    else if(is_empty_space(c) || c == '@')
+    else if(is_empty_space(c) || c == '@' || c == '<' || c == '>')
         mvaddch(y+GUI_HEIGHT, x, ' ');
     else if(c == '^')
         mvaddch(y+GUI_HEIGHT, x, '-');
@@ -143,30 +143,6 @@ int min_index (int size, float *array)
 float distance (Position a, Position b)
 {
     return sqrt(pow(b.x/2.0-a.x/2.0,2) + pow(b.y-a.y,2));
-}
-
-Position offset_position (Position position, Direction direction, int quantity)
-{
-    switch (direction)
-    {
-        case UP:
-#ifdef LEGACY
-            position.x -= quantity;
-#endif
-            position.y -= quantity;
-            break;
-        case LEFT:
-            position.x -= quantity;
-            break;
-        case DOWN:
-            position.y -= quantity;
-            break;
-        case RIGHT:
-            position.x += quantity;
-            break;
-    }
-
-    return position;
 }
 
 void reverse_direction (Direction* direction)

@@ -43,6 +43,27 @@ Position eaten_target ()
     return HOME_TARGET;
 }
 
+Position offset_position (Position position, Direction direction, int quantity)
+{
+    switch (direction)
+    {
+        case UP:
+            position.y -= quantity;
+            break;
+        case LEFT:
+            position.x -= quantity*2;
+            break;
+        case DOWN:
+            position.y -= quantity;
+            break;
+        case RIGHT:
+            position.x += quantity*2;
+            break;
+    }
+
+    return position;
+}
+
 Direction choose_direction_random (CharGhost ghost)
 {
     int i;

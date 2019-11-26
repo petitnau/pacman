@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <stdlib.h>
 #include <curses.h>
 #include <string.h>
 
@@ -166,17 +167,9 @@ void manage_ghost_in(int ghost_in, Characters* characters, char game_food[MAP_HE
     {
         unprint_area(characters->ghosts[ghost_pkg.ghost_id].e.p.y, characters->ghosts[ghost_pkg.ghost_id].e.p.x-1, 3, game_food);
         characters->ghosts[ghost_pkg.ghost_id] = ghost_pkg;
-        mvprintw(ghost_pkg.ghost_id+20, 60, "%d %d %d",ghost_pkg.ghost_id, ghost_pkg.e.p.x, ghost_pkg.e.p.y);
 
         if(ghost_pkg.ghost_id+1 > characters->num_ghosts)
             characters->num_ghosts = ghost_pkg.ghost_id+1;
-    }
-    int i;
-    for(i=0; i < characters->num_ghosts; i++)
-    {
-        mvprintw(i+10, 60, "ciao%d %d %d",characters->ghosts[i].ghost_id, 
-        characters->ghosts[i].e.p.x, 
-        characters->ghosts[i].e.p.y);
     }
 }
 
@@ -192,7 +185,7 @@ void manage_timers(TempText temp_text, Characters characters, char game_food[MAP
 
 void send_ghost_info(int ghost_out, GhostInfo* ghost_info)
 {    
-    static int i = 0;
+    int i = 0;
     if(ghost_info->new)
     {
         write(ghost_out, ghost_info, sizeof(*ghost_info));
@@ -260,7 +253,6 @@ void food_handler(int* score, int* eaten_dots, Characters characters, char game_
 
 void collision_handler(Characters* characters, PacManInfo *pacman_info, GhostInfo* ghost_info, int* score, TempText* temp_text, char game_food[MAP_HEIGHT][MAP_WIDTH])
 {
-    static int j = 0;
     int i;
     CharGhost* ghost;
 
@@ -277,7 +269,6 @@ void collision_handler(Characters* characters, PacManInfo *pacman_info, GhostInf
                 ghost_info->death = i;
                 ghost_info->new = true;
 
-                mvprintw(0,50, "%d", j++);
                 eat_pause(*characters, pacman_info, ghost_info, temp_text, game_food);
                 // morto il fantasma
             }

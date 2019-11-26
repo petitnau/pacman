@@ -46,7 +46,7 @@ static const char MAP[MAP_HEIGHT][MAP_WIDTH+1] = {
 "@@@@@@@@@@x   x@x      #########      x@x   x@@@@@@@@@@",
 "@@@@@@@@@@x   x@x   lqqqqq^^^qqqqqk   x@x   x@@@@@@@@@@",
 "qqqqqqqqqqj   mqj   x@@@@@   @@@@@x   mqj   mqqqqqqqqqq",
-"                    x@@@@@   @@@@@x                    ",
+"                    x@   >   <   @x                    ",
 "qqqqqqqqqqk   lqk   x@@@@@@@@@@@@@x   lqk   lqqqqqqqqqq",
 "@@@@@@@@@@x   x@x   mqqqqqqqqqqqqqj   x@x   x@@@@@@@@@@",
 "@@@@@@@@@@x   x@x                     x@x   x@@@@@@@@@@",
