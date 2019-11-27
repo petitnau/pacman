@@ -34,6 +34,7 @@ CharGhost init_ghost_char(int id)
 void set_ghost_start(Entity* e)
 {
     e->p = GHOST_START_POS[e->id];
+    e->dir = UP;
 }
 
 GhostInfo init_ghost_info()
@@ -97,20 +98,20 @@ void* ghost_thread(void* parameters)
 
     while(1)
     {       
-        //sem_wait(&ghost_shared->mutex);
+        sem_wait(&ghost_shared->mutex);
         manage_shared_info(ghost_shared, &ghost);
         ghost_choose_dir(&ghost, ghost_shared); 
         if(!ghost_shared->paused) ghost_move(&ghost);
         manage_position_events(&ghost);
         write(ghost_shared->pos_out, &ghost, sizeof(ghost)); //invia la posizione a control
+        sem_post(&ghost_shared->mutex);
         ghost_wait(ghost, ghost_shared);
-        //sem_post(&ghost_shared->mutex);
     }
 }
 
 void manage_shared_info(GhostShared* ghost_shared, CharGhost* ghost)
 {
-    sem_wait(&ghost_shared->mutex);
+    //sem_wait(&ghost_shared->mutex);
     
     if(ghost->mode != M_DEAD)
     {
@@ -123,7 +124,7 @@ void manage_shared_info(GhostShared* ghost_shared, CharGhost* ghost)
             ghost->mode = ghost_shared->mode;
     }
 
-    sem_post(&ghost_shared->mutex);
+    //sem_post(&ghost_shared->mutex);
 }
 
 void manage_g_info_in(int info_in, GhostShared* ghost_shared, GhostTimers* timers)
@@ -145,6 +146,7 @@ void manage_g_info_in(int info_in, GhostShared* ghost_shared, GhostTimers* timer
             ghost_shared->fright = true; 
             for(i=0; i < ghost_shared->ghost_number; i++)
             {
+                ghost_shared->ghosts[i]->frighted = false;
                 reverse_direction(&(ghost_shared->ghosts[i]->e.dir));
             } 
         }
@@ -152,9 +154,12 @@ void manage_g_info_in(int info_in, GhostShared* ghost_shared, GhostTimers* timer
         {
             for(i=0; i < ghost_shared->ghost_number; i++)
             {
-                set_ghost_start(&ghost_shared->ghosts[i]->e);
+                *ghost_shared->ghosts[i] = init_ghost_char(ghost_shared->ghosts[i]->e.id);
             } 
             ghost_shared->paused = true;
+            ghost_shared->fright = false;
+            ghost_shared->mode = M_CHASE;
+            timers->fright = 0;
         }
         if(info.pause)
         {
@@ -184,11 +189,14 @@ void manage_g_timers(GhostTimers* timers, GhostShared* ghost_shared)
     {
         if(!check_timer(timers->fright))
         {
+            sem_wait(&ghost_shared->mutex);
             for(i=0; i < ghost_shared->ghost_number; i++)
             {            
                 ghost_shared->ghosts[i]->frighted = false;
             }
             ghost_shared->fright = false; //ciclo di chase saltato?   
+            sem_post(&ghost_shared->mutex);
+
             timers->fright = 0; 
         }
     }
