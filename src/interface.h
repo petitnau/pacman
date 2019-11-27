@@ -1,16 +1,10 @@
 #ifndef INTERFACE_H
 #define INTERFACE_H
 
-#include "control.h"
 #include "ghost.h"
 #include "pacman.h"
 #include "entity.h"
-
-#define MAP_WIDTH 55
-#define MAP_HEIGHT 31
-
-#define FRUIT_POS_Y 17
-#define FRUIT_POS_X 27
+#include "control.h"
 
 typedef struct
 {
@@ -88,7 +82,7 @@ static const char PELLETS[MAP_HEIGHT][MAP_WIDTH+1] = {
 "  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~     ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ",
 "  ~         ~           ~     ~           ~         ~  ",
 "  ~         ~           ~     ~           ~         ~  ",
-"  ` ~ ~     ~ ~ ~ ~ ~ ~ ~     ~ ~ ~ ~ ~ ~ ~     ~ ~ `  ",
+"  ` ~ ~     ~ ~ ` ~ ~ ~ ~     ~ ~ ~ ~ ~ ~ ~     ~ ~ `  ",
 "      ~     ~     ~                 ~     ~     ~      ",
 "      ~     ~     ~                 ~     ~     ~      ",
 "  ~ ~ ~ ~ ~ ~     ~ ~ ~ ~     ~ ~ ~ ~     ~ ~ ~ ~ ~ ~  ",
@@ -102,7 +96,6 @@ void print_ghost(CharGhost);
 void unprint_area(int, int, int, char[MAP_HEIGHT][MAP_WIDTH]);
 void sunprint_area(int, int, int, char[MAP_HEIGHT][MAP_WIDTH], Characters);
 void print_ui(int, Characters);
-void print_fruit();
 void print_temp_text(TempText);
 void create_temp_text(TempText*, int, int, char*, int, int);
 

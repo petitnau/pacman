@@ -92,17 +92,6 @@ void print_ghost(CharGhost ghost)
     }
 }
 
-void print_fruit()
-{
-    attron(COLOR_REDTEXT);
-    mvaddch(23, FRUIT_POS_X-1, S_FRUIT[0][0]);
-    mvaddch(17+GUI_HEIGHT, FRUIT_POS_X+1, S_FRUIT[0][2]);
-    attroff(COLOR_REDTEXT);
-    attron(COLOR_GREENTEXT);
-    mvaddch(23, FRUIT_POS_X, S_FRUIT[0][1]);
-    attroff(COLOR_GREENTEXT);
-}
-
 void unprint_area(int y, int x, int size, char game_food[MAP_HEIGHT][MAP_WIDTH])
 {
     Position pos;
