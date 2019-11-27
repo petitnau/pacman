@@ -146,8 +146,12 @@ void manage_g_info_in(int info_in, GhostShared* ghost_shared, GhostTimers* timer
             ghost_shared->fright = true; 
             for(i=0; i < ghost_shared->ghost_number; i++)
             {
-                ghost_shared->ghosts[i]->frighted = false;
-                reverse_direction(&(ghost_shared->ghosts[i]->e.dir));
+                if(ghost_shared->ghosts[i]->mode != M_DEAD && !is_in_pen(*ghost_shared->ghosts[i]))
+                {
+                    ghost_shared->ghosts[i]->frighted = false;
+                    reverse_direction(&(ghost_shared->ghosts[i]->e.dir));
+                    
+                }
             } 
         }
         if(info.restart)
@@ -283,7 +287,7 @@ void ghost_move(CharGhost* ghost)
 
 _Bool is_empty_space_ghost(char c)
 {
-    return is_empty_space(c) || c=='^';
+    return is_empty_space(c) || c=='^' || c=='<' || c=='>';
 }
 
 _Bool can_move_ghost(CharGhost ghost, Direction direction)
@@ -304,9 +308,9 @@ _Bool can_move_ghost(CharGhost ghost, Direction direction)
         case LEFT:
             if(!is_empty_space_ghost(get_map_at(ghost.e.p.x-2, ghost.e.p.y)))
                 return false;
-            break;
-            if(ghost.mode != M_DEAD && get_map_at(ghost.e.p.x+i, ghost.e.p.y+1) == '>')
+            if(ghost.mode != M_DEAD && get_map_at(ghost.e.p.x-2, ghost.e.p.y) == '>')
                 return false;
+            break;
         case DOWN:
             for(i=-1; i<=1; i++)
             {
@@ -319,10 +323,15 @@ _Bool can_move_ghost(CharGhost ghost, Direction direction)
         case RIGHT:
             if(!is_empty_space_ghost(get_map_at(ghost.e.p.x+2, ghost.e.p.y)))
                 return false;
-            if(ghost.mode != M_DEAD && get_map_at(ghost.e.p.x+i, ghost.e.p.y+1) == '<')
+            if(ghost.mode != M_DEAD && get_map_at(ghost.e.p.x+2, ghost.e.p.y) == '<')
                 return false;
             break;
     }
 
     return true;
+}
+
+_Bool is_in_pen(CharGhost ghost)
+{
+    return (ghost.e.p.x >= 20 && ghost.e.p.y >= 12 && ghost.e.p.x <= 34 && ghost.e.p.y <= 16);
 }
