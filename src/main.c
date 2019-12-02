@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include "menu.h" 
 #include "pacman.h" 
 #include "control.h"
 #include "utils.h"
@@ -49,19 +50,23 @@ void init()
     init_pair(13, COLOR_MAGENTA, COLOR_BLACK);
 
     refresh();
-    print_map();
-    print_pellets();
-    refresh();
 }
 
 int main()
 {
     int i;
+    int mode;
     pid_t p_player, p_pacman, p_ghosts;
     int pacman_ch_pipe[2], pacman_info_pipe[2], ghost_ch_pipe[2], ghost_info_pipe[2], pacman_cmd_pipe[2], cmd_pipe[2], log_pipe[2];
 
     init();
 
+    mode = main_menu();
+
+    print_map();
+    print_pellets();
+    refresh();
+    
     if(pipe(pacman_ch_pipe) == -1)
         _exit(PIPE_ERROR);
     if(pipe(pacman_info_pipe) == -1)
