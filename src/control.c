@@ -43,7 +43,7 @@ void manage_logs(int log_in, MessageList* log_list)
     MessageNode* aux = log_list->tail;
     while(aux != NULL)
     {
-        mvprintw(MAP_HEIGHT+GUI_HEIGHT-(2+i), 60, "%*s",50,"");
+        mvprintw(MAP_HEIGHT+GUI_HEIGHT-(2+i), 60, "%*s",50," ");
         mvprintw(MAP_HEIGHT+GUI_HEIGHT-(2+i), 60, "%s", aux->msg);
         aux = aux->prev;
         i++;
