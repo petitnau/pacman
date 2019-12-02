@@ -12,7 +12,15 @@
 
 typedef struct
 {
-    CharPacman* pacman;
+    Position p;
+    char text[10];
+    unsigned long long timer;
+    int color;
+} TempText;
+
+typedef struct
+{
+    CharPacman pacman;
     CharGhost* ghosts;
     int num_ghosts;
 } Characters;
@@ -23,7 +31,34 @@ typedef struct
     unsigned long long fright_timer;
 } ControlTimers;
 
-void control_main(int, int, int, int, int, int, int);
-void create_fruit(char[MAP_HEIGHT][MAP_WIDTH], ControlTimers*);
+typedef struct
+{
+    int pacman_in;
+    int pacman_out;
+    int ghost_in;
+    int ghost_out;
+    int cmd_in;
+    int p_cmd_out;
+    int log_in;
+} ControlPipes;
+
+typedef struct
+{
+    GhostInfo ghost_info;
+    PacManInfo pacman_info;
+    Characters characters;
+
+    char game_food[MAP_HEIGHT][MAP_WIDTH];
+    int score;
+    int eaten_dots;
+    int ghost_streak;
+
+    ControlTimers timers;
+    TempText temp_text;
+
+    ControlPipes* pipes;
+} ControlData;
+
+void control_main(ControlPipes);
 
 #endif

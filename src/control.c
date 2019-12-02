@@ -1,6 +1,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <curses.h>
+#include <math.h>
 #include <string.h>
 
 #include "control.h"
@@ -11,19 +12,43 @@
 #include "interface.h"
 #include "list.h"
 
-void manage_cmd_in(int, int, GhostInfo*, PacManInfo*);
-void manage_pacman_in(int, int*, int*, Characters, GhostInfo*, char[MAP_HEIGHT][MAP_WIDTH], int*, TempText*, ControlTimers*);
-void manage_ghost_in(int, Characters*, char[MAP_HEIGHT][MAP_WIDTH]);
+void init_control_data(ControlData*, ControlPipes*);
 
-void manage_timers(TempText, ControlTimers*, Characters, char[MAP_HEIGHT][MAP_WIDTH], int*);
+void manage_cmd_in(ControlData*);
+void manage_pacman_in(ControlData*);
+void manage_ghost_in(ControlData*);
 
-void send_ghost_info(int, GhostInfo*);
-void send_pacman_info(int, PacManInfo*);
+void manage_timers(ControlData*);
 
-void collision_handler(Characters*, PacManInfo*, GhostInfo*, int*, TempText*, char[MAP_HEIGHT][MAP_WIDTH], int*);
-void food_handler(int*, int*, int*, Characters, char[MAP_HEIGHT][MAP_WIDTH], GhostInfo*, TempText*, ControlTimers*);
+void send_ghost_info(ControlData*);
+void send_pacman_info(ControlData*);
+
+void collision_handler(ControlData*);
+void food_handler(ControlData*);
 void food_setup();
-void eat_pause(Characters, PacManInfo*, GhostInfo*, TempText*, char[MAP_HEIGHT][MAP_WIDTH], int);
+void eat_pause(ControlData*, int);
+void create_fruit(ControlData*);
+
+void init_control_data(ControlData* cd, ControlPipes* pipes)
+{
+    cd->characters.pacman = init_pacman_char();
+    cd->pacman_info = init_pacman_info();
+    cd->ghost_info = init_ghost_info();
+
+    cd->characters.ghosts = malloc(sizeof(CharGhost)*4);
+    
+    cd->temp_text.timer = 0;
+    cd->timers.fright_timer = 0;
+    cd->timers.fruit_timer = 0;
+    cd->pipes = pipes;
+
+    int score = 0;
+    char game_food[MAP_HEIGHT][MAP_WIDTH];
+    int eaten_dots = 0;
+    int ghost_streak = 0;
+
+    food_setup(game_food);
+}
 
 void manage_logs(int log_in, MessageList* log_list)
 {
@@ -51,49 +76,34 @@ void manage_logs(int log_in, MessageList* log_list)
     refresh();
 }
 
-void control_main(int pacman_in, int pacman_out, int ghost_in, int ghost_out, int cmd_in, int p_cmd_out, int log_in)
+void control_main(ControlPipes pipes)
 {
-    CharPacman pacman = init_pacman_char();
-    CharGhost ghost = init_ghost_char();
-    PacManInfo pacman_info = init_pacman_info();
-    GhostInfo ghost_info = init_ghost_info();
-
-    Characters characters = {&pacman, &ghost};
-    characters.ghosts = malloc(sizeof(CharGhost)*4);
+    ControlData cd; 
+    init_control_data(&cd, &pipes);
     
-    TempText temp_text = {};
-    ControlTimers timers = {};
-
-    int score = 0;
-    char game_food[MAP_HEIGHT][MAP_WIDTH];
-    int eaten_dots = 0;
-    int ghost_streak = 0;
-
-    food_setup(game_food);
-
+    
     MessageList log_list;
     list_init(&log_list);
 
     while(1)
     {  
-        manage_cmd_in(cmd_in, p_cmd_out, &ghost_info, &pacman_info);
-        manage_pacman_in(pacman_in, &eaten_dots, &ghost_streak, characters, &ghost_info, game_food, &score, &temp_text, &timers);
-        manage_ghost_in(ghost_in, &characters, game_food);
-        manage_timers(temp_text, &timers, characters, game_food, &ghost_streak);
-        collision_handler(&characters, &pacman_info, &ghost_info, &score, &temp_text, game_food, &ghost_streak);
-        send_pacman_info(pacman_out, &pacman_info);
-        send_ghost_info(ghost_out, &ghost_info);
-        print_ui(score, characters);
-        print_temp_text(temp_text);
+        manage_cmd_in(&cd);
+        manage_pacman_in(&cd);/* &eaten_dots, &ghost_streak, characters, &ghost_info, game_food, &score, &temp_text, &timers); */
+        manage_ghost_in(&cd);
+        manage_timers(&cd);
+        collision_handler(&cd);
+        send_pacman_info(&cd);
+        send_ghost_info(&cd);
+        print_ui(&cd);
 
-        manage_logs(log_in, &log_list);
-        if(eaten_dots == 240)
+        manage_logs(pipes.log_in, &log_list);
+        if(cd.eaten_dots == 240)
         {
             mvprintw(23, 18, "GAME OVER! VITTORIA");
             refresh();
             return;
         }
-        if(pacman.lives < 0){
+        if(cd.characters.pacman.lives < 0){
             attron(COLOR_REDTEXT);
             mvprintw(23, 18, "G A M E   O V E R !");
             attroff(COLOR_REDTEXT);
@@ -103,21 +113,21 @@ void control_main(int pacman_in, int pacman_out, int ghost_in, int ghost_out, in
     }
 }
 
-void food_setup(char game_food[MAP_HEIGHT][MAP_WIDTH])
+void food_setup(ControlData* cd)
 {
     int i;
     for (i = 0; i < MAP_HEIGHT; i++)
     {
-        strcpy(game_food[i], PELLETS[i]);
+        strcpy(cd->game_food[i], PELLETS[i]);
     } 
 }
 
-void manage_cmd_in(int cmd_in, int p_cmd_out, GhostInfo* ghost_info, PacManInfo* pacman_info)
+void manage_cmd_in(ControlData* cd)
 {
     Direction direction;
     char c_in;
 
-    while(read(cmd_in, &c_in, sizeof(c_in)) != -1)
+    while(read(cd->pipes->cmd_in, &c_in, sizeof(c_in)) != -1)
     {
         switch(c_in)
         {
@@ -136,127 +146,127 @@ void manage_cmd_in(int cmd_in, int p_cmd_out, GhostInfo* ghost_info, PacManInfo*
         }
         if(c_in == K_UP || c_in == K_DOWN || c_in == K_RIGHT || c_in == K_LEFT)
         {
-            ghost_info->resume = true;
-            ghost_info->new = true;
-            pacman_info->resume = true;
-            pacman_info->new = true;
-            write(p_cmd_out, &direction, sizeof(direction));
+            cd->ghost_info.resume = true;
+            cd->ghost_info.new = true;
+            cd->pacman_info.resume = true;
+            cd->pacman_info.new = true;
+            write(cd->pipes->p_cmd_out, &direction, sizeof(direction));
         }
 
     }
 }
 
-void manage_pacman_in(int pacman_in, int* eaten_dots, int* ghost_streak, Characters characters, GhostInfo* info_pkg, char game_food[MAP_HEIGHT][MAP_WIDTH], int* score, TempText* temp_text, ControlTimers* timers)
+void manage_pacman_in(ControlData* cd)
 {
     CharPacman pacman_pkg;
 
-    while(read(pacman_in, &pacman_pkg, sizeof(pacman_pkg)) != -1)
+    while(read(cd->pipes->pacman_in, &pacman_pkg, sizeof(pacman_pkg)) != -1)
     {
-        unprint_area(characters.pacman->e.p.y, characters.pacman->e.p.x-1, 3, game_food);
-        *characters.pacman = pacman_pkg;
-        food_handler(score, eaten_dots, ghost_streak, characters, game_food, info_pkg, temp_text, timers);
+        unprint_area(cd->characters.pacman.e.p.y, cd->characters.pacman.e.p.x-1, 3, cd->game_food);
+        cd->characters.pacman = pacman_pkg;
+        food_handler(cd);
         
-        info_pkg->pacman = characters.pacman->e;
-        info_pkg->new = true;
+        cd->ghost_info.pacman = cd->characters.pacman.e;
+        cd->ghost_info.new = true;
     }
 }
 
-void manage_ghost_in(int ghost_in, Characters* characters, char game_food[MAP_HEIGHT][MAP_WIDTH])
+void manage_ghost_in(ControlData* cd)
 {
     CharGhost ghost_pkg;
 
-    while(read(ghost_in, &ghost_pkg, sizeof(ghost_pkg)) != -1)
+    while(read(cd->pipes->ghost_in, &ghost_pkg, sizeof(ghost_pkg)) != -1)
     {
-        unprint_area(characters->ghosts[ghost_pkg.ghost_id].e.p.y, characters->ghosts[ghost_pkg.ghost_id].e.p.x-1, 3, game_food);
-        characters->ghosts[ghost_pkg.ghost_id] = ghost_pkg;
+        unprint_area(cd->characters.ghosts[ghost_pkg.ghost_id].e.p.y, cd->characters.ghosts[ghost_pkg.ghost_id].e.p.x-1, 3, cd->game_food);
+        cd->characters.ghosts[ghost_pkg.ghost_id] = ghost_pkg;
 
-        if(ghost_pkg.ghost_id+1 > characters->num_ghosts)
-            characters->num_ghosts = ghost_pkg.ghost_id+1;
+        if(ghost_pkg.ghost_id+1 > cd->characters.num_ghosts)
+            cd->characters.num_ghosts = ghost_pkg.ghost_id+1;
     }
 }
 
-void manage_timers(TempText temp_text, ControlTimers* timers, Characters characters, char game_food[MAP_HEIGHT][MAP_WIDTH], int* ghost_streak)
+void manage_timers(ControlData* cd)
 {
-    if(temp_text.timer != 0)
-        if(!check_timer(temp_text.timer))
+    if(cd->temp_text.timer != 0)
+        if(!check_timer(cd->temp_text.timer))
         {
-            sunprint_area(temp_text.p.y, temp_text.p.x, strlen(temp_text.text), game_food, characters);
-            temp_text.timer = 0;
+            sunprint_area(cd->temp_text.p.y, cd->temp_text.p.x, strlen(cd->temp_text.text), cd);
+            cd->temp_text.timer = 0;
         }
-    if(timers->fruit_timer != 0)
-        if(!check_timer(timers->fruit_timer))
+    if(cd->timers.fruit_timer != 0)
+        if(!check_timer(cd->timers.fruit_timer))
         {
-            game_food[FRUIT_POS_Y][FRUIT_POS_X-1] = ' ';
-            game_food[FRUIT_POS_Y][FRUIT_POS_X] = ' ';
-            game_food[FRUIT_POS_Y][FRUIT_POS_X+1] = ' ';
-            unprint_area(FRUIT_POS_Y, FRUIT_POS_X-1, 3, game_food);
-            timers->fruit_timer = 0;
+            cd->game_food[FRUIT_POS_Y][FRUIT_POS_X-1] = ' ';
+            cd->game_food[FRUIT_POS_Y][FRUIT_POS_X] = ' ';
+            cd->game_food[FRUIT_POS_Y][FRUIT_POS_X+1] = ' ';
+            unprint_area(FRUIT_POS_Y, FRUIT_POS_X-1, 3, cd->game_food);
+            cd->timers.fruit_timer = 0;
         }
-    if(timers->fright_timer != 0)
-        if(!check_timer(timers->fright_timer))
+    if(cd->timers.fright_timer != 0)
+        if(!check_timer(cd->timers.fright_timer))
         {
-            *ghost_streak = 0;
-            timers->fright_timer = 0;;
+            cd->ghost_streak = 0;
+            cd->timers.fright_timer = 0;;
         }
 }
 
-void send_ghost_info(int ghost_out, GhostInfo* ghost_info)
+void send_ghost_info(ControlData* cd)
 {    
     int i = 0;
-    if(ghost_info->new)
+    if(cd->ghost_info.new)
     {
-        write(ghost_out, ghost_info, sizeof(*ghost_info));
-        *ghost_info = init_ghost_info();
+        write(cd->pipes->ghost_out, &cd->ghost_info, sizeof(cd->ghost_info));
+        cd->ghost_info = init_ghost_info();
     }
 }
 
-void send_pacman_info(int pacman_out, PacManInfo* pacman_info)
+void send_pacman_info(ControlData* cd)
 {    
-    if(pacman_info->new)
+    if(cd->pacman_info.new)
     {
-        write(pacman_out, pacman_info, sizeof(*pacman_info));
-        *pacman_info = init_pacman_info();
+        write(cd->pipes->pacman_out, &cd->pacman_info, sizeof(cd->pacman_info));
+        cd->pacman_info = init_pacman_info();
     }
 }
 
-void food_handler(int* score, int* eaten_dots, int* ghost_streak, Characters characters, char game_food[MAP_HEIGHT][MAP_WIDTH], GhostInfo *ghost_info, TempText *temp_text, ControlTimers* timers)
+void food_handler(ControlData* cd)
 {  
     int i,j ;
     Position pe_pos;
 
     for(i=-1; i<=1; i++)
     {
-        pe_pos.x = characters.pacman->e.p.x+i;
-        pe_pos.y = characters.pacman->e.p.y;
+        pe_pos.x = cd->characters.pacman.e.p.x+i;
+        pe_pos.y = cd->characters.pacman.e.p.y;
         pe_pos = get_pac_eff_pos(pe_pos);
 
-        switch(game_food[pe_pos.y][pe_pos.x])
+        switch(cd->game_food[pe_pos.y][pe_pos.x])
         {
             case '~':
-                *score += 10;
-                *eaten_dots +=1;
-                game_food[pe_pos.y][pe_pos.x] = ' ';
-                if(*eaten_dots == 70 || *eaten_dots == 170){
+                cd->score += 10;
+                cd->eaten_dots +=1;
+                cd->game_food[pe_pos.y][pe_pos.x] = ' ';
+                if(cd->eaten_dots == 70 || cd->eaten_dots == 170){
                     //spawna un frutto va tutto in funzione col controllo
-                    create_fruit(game_food, timers);
+                    create_fruit(cd);
                 }
                 beep();
                 break;
             case '`': 
-                *score += 50;
-                *ghost_streak = 0;
-                ghost_info->fright = true;
-                ghost_info->new = true;    
-                game_food[pe_pos.y][pe_pos.x] = ' ';
-                timers->fright_timer = start_timer(6);
+                cd->score += 50;
+                cd->ghost_streak = 0;
+                cd->ghost_info.fright = true;
+                cd->ghost_info.new = true;    
+                cd->game_food[pe_pos.y][pe_pos.x] = ' ';
+                cd->timers.fright_timer = start_timer(6);
                 break;
             case '^':
-                *score += 100; //*lvl?
+                cd->score += 100; //*lvl?
 
-                sunprint_area(temp_text->p.y, temp_text->p.x, strlen(temp_text->text), game_food, characters);
-                create_temp_text(temp_text, pe_pos.x-1, pe_pos.y+GUI_HEIGHT, "200", 2e3, 13);
+                sunprint_area(cd->temp_text.p.y, cd->temp_text.p.x, strlen(cd->temp_text.text), cd);
+                create_temp_text(&cd->temp_text, pe_pos.x-1, pe_pos.y+GUI_HEIGHT, "200", 2e3, 13);
                 for(j=-1; j<=1; j++)
-                    game_food[pe_pos.y][pe_pos.x+j] = ' '; 
+                    cd->game_food[pe_pos.y][pe_pos.x+j] = ' '; 
                 
                 mvaddch(pe_pos.y+GUI_HEIGHT, pe_pos.x+i, ' ');
                 refresh();
@@ -266,55 +276,55 @@ void food_handler(int* score, int* eaten_dots, int* ghost_streak, Characters cha
     }
 }
 
-void collision_handler(Characters* characters, PacManInfo *pacman_info, GhostInfo* ghost_info, int* score, TempText* temp_text, char game_food[MAP_HEIGHT][MAP_WIDTH], int* ghost_streak)
+void collision_handler(ControlData* cd)
 {
     int i;
     CharGhost* ghost;
 
-    for(i = 0; i < characters->num_ghosts; i++)
+    for(i = 0; i < cd->characters.num_ghosts; i++)
     {
-        ghost = &characters->ghosts[i];
+        ghost = &cd->characters.ghosts[i];
 
-        if(characters->pacman->e.p.x == ghost->e.p.x && characters->pacman->e.p.y == ghost->e.p.y)
+        if(cd->characters.pacman.e.p.x == ghost->e.p.x && cd->characters.pacman.e.p.y == ghost->e.p.y)
         {
             if(ghost->mode == M_FRIGHT)
             {
-                (*ghost_streak)++;
-                *score += pow(2,(*ghost_streak))*100;    //200 400 800 1600
+                cd->ghost_streak++;
+                cd->score += pow(2,cd->ghost_streak)*100;    //200 400 800 1600
                 ghost->mode = M_DEAD;
-                ghost_info->death = i;
-                ghost_info->new = true;
+                cd->ghost_info.death = i;
+                cd->ghost_info.new = true;
 
-                eat_pause(*characters, pacman_info, ghost_info, temp_text, game_food, pow(2,(*ghost_streak))*100);
+                eat_pause(cd, pow(2,(cd->ghost_streak))*100);
                 // morto il fantasma
             }
-            else if(ghost->mode != M_DEAD && !characters->pacman->dead)
+            else if(ghost->mode != M_DEAD && !cd->characters.pacman.dead)
             {
                 //perdi una vita
-                characters->pacman->dead = true;
-                pacman_info->death = true;
-                pacman_info->new = true;
-                ghost_info->restart = true;
-                ghost_info->new = true;
+                cd->characters.pacman.dead = true;
+                cd->pacman_info.death = true;
+                cd->pacman_info.new = true;
+                cd->ghost_info.restart = true;
+                cd->ghost_info.new = true;
                 //pacman viene riportato alla pos. inziiale idem
             }
         }
     }
 }
 
-void eat_pause(Characters characters, PacManInfo* pacman_info, GhostInfo* ghost_info, TempText* temp_text, char game_food[MAP_HEIGHT][MAP_WIDTH], int points)
+void eat_pause(ControlData* cd, int points)
 {   
     char points_string[6] = {};     
     sprintf(points_string, "%d", points);
-    sunprint_area(temp_text->p.y, temp_text->p.x, strlen(temp_text->text), game_food, characters);
-    create_temp_text(temp_text, characters.pacman->e.p.x-1, characters.pacman->e.p.y+GUI_HEIGHT, points_string, 0.6e3, 12);
-    ghost_info->sleeptime = 0.6e6;    
-    ghost_info->new = true;
-    pacman_info->sleeptime = 0.6e6;    
-    pacman_info->new = true;
+    sunprint_area(cd->temp_text.p.y, cd->temp_text.p.x, strlen(cd->temp_text.text), cd);
+    create_temp_text(&cd->temp_text, cd->characters.pacman.e.p.x-1, cd->characters.pacman.e.p.y+GUI_HEIGHT, points_string, 0.6e3, 12);
+    cd->ghost_info.sleeptime = 0.6e6;    
+    cd->ghost_info.new = true;
+    cd->pacman_info.sleeptime = 0.6e6;    
+    cd->pacman_info.new = true;
 }
 
-void create_fruit(char game_food[MAP_HEIGHT][MAP_WIDTH], ControlTimers* timers)
+void create_fruit(ControlData* cd)
 {
     attron(COLOR_REDTEXT);
     mvaddch(23, FRUIT_POS_X-1, S_FRUIT[0][0]);
@@ -323,9 +333,9 @@ void create_fruit(char game_food[MAP_HEIGHT][MAP_WIDTH], ControlTimers* timers)
     attron(COLOR_GREENTEXT);
     mvaddch(23, FRUIT_POS_X, S_FRUIT[0][1]);
     attroff(COLOR_GREENTEXT);
-    game_food[FRUIT_POS_Y][FRUIT_POS_X-1] = S_FRUIT[0][0];
-    game_food[FRUIT_POS_Y][FRUIT_POS_X] = S_FRUIT[0][1];
-    game_food[FRUIT_POS_Y][FRUIT_POS_X+1] = S_FRUIT[0][2];
+    cd->game_food[FRUIT_POS_Y][FRUIT_POS_X-1] = S_FRUIT[0][0];
+    cd->game_food[FRUIT_POS_Y][FRUIT_POS_X] = S_FRUIT[0][1];
+    cd->game_food[FRUIT_POS_Y][FRUIT_POS_X+1] = S_FRUIT[0][2];
 
-    timers->fruit_timer = start_timer(10e3);
+    cd->timers.fruit_timer = start_timer(10e3);
 }

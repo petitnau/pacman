@@ -130,14 +130,14 @@ void unprint_area(int y, int x, int size, char game_food[MAP_HEIGHT][MAP_WIDTH])
     }
 }
 
-void print_ui(int score, Characters characters)
+void print_ui(ControlData* cd)
 {
     int i;
 
     char scorestr[10];
     char nupstr[10];
 
-    sprintf(scorestr, "%d", score/10);
+    sprintf(scorestr, "%d", cd->score/10);
     sprintf(nupstr, "1UP");
     print_gui_string(0,11, nupstr);
     print_gui_string(3,13, "0");
@@ -145,13 +145,15 @@ void print_ui(int score, Characters characters)
     print_gui_string(3,33, "0");
     print_gui_string(3,31, scorestr);
     print_gui_string(0,37, "HIGH SCORE");
-    print_lives(characters.pacman->lives);
-    print_pacman(*characters.pacman);
+    print_lives(cd->characters.pacman.lives);
+    print_pacman(cd->characters.pacman);
     
-    for(i = 0; i < characters.num_ghosts; i++)
+    for(i = 0; i < cd->characters.num_ghosts; i++)
     {                 
-        print_ghost(characters.ghosts[i]);
+        print_ghost(cd->characters.ghosts[i]);
     }
+
+    print_temp_text(cd->temp_text);
 }
 
 void create_temp_text(TempText* temp_text, int x, int y, char* string, int time, int color)
@@ -174,14 +176,14 @@ void print_temp_text(TempText temp_text)
     attroff(COLOR_PAIR(temp_text.color));
 }
 
-void sunprint_area(int y, int x, int size, char game_food[MAP_HEIGHT][MAP_WIDTH], Characters characters)
+void sunprint_area(int y, int x, int size, ControlData* cd)
 {
     int i;
 
-    unprint_area(y-GUI_HEIGHT,x,size,game_food);
-    print_pacman(*characters.pacman);
-    for(i = 0; i < characters.num_ghosts; i++)
+    unprint_area(y-GUI_HEIGHT,x,size, cd->game_food);
+    print_pacman(cd->characters.pacman);
+    for(i = 0; i < cd->characters.num_ghosts; i++)
     {
-        print_ghost(characters.ghosts[i]);
+        print_ghost(cd->characters.ghosts[i]);
     }
 }

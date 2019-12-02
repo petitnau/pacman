@@ -161,7 +161,8 @@ int main()
     close(pacman_cmd_pipe[P_RD]);
     close(cmd_pipe[P_WR]);
     close(log_pipe[P_WR]);
-    control_main(pacman_ch_pipe[P_RD], pacman_info_pipe[P_WR], ghost_ch_pipe[P_RD], ghost_info_pipe[P_WR], cmd_pipe[P_RD], pacman_cmd_pipe[P_WR], log_pipe[P_RD]);
+    ControlPipes pipes = {pacman_ch_pipe[P_RD], pacman_info_pipe[P_WR], ghost_ch_pipe[P_RD], ghost_info_pipe[P_WR], cmd_pipe[P_RD], pacman_cmd_pipe[P_WR], log_pipe[P_RD]};
+    control_main(pipes);
     
     getchar();
     kill(p_pacman, 1);
