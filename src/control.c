@@ -12,18 +12,18 @@
 #include "list.h"
 
 void manage_cmd_in(int, int, GhostInfo*, PacManInfo*);
-void manage_pacman_in(int, int*, Characters, GhostInfo*, char[MAP_HEIGHT][MAP_WIDTH], int*, TempText*);
+void manage_pacman_in(int, int*, int*, Characters, GhostInfo*, char[MAP_HEIGHT][MAP_WIDTH], int*, TempText*, ControlTimers*);
 void manage_ghost_in(int, Characters*, char[MAP_HEIGHT][MAP_WIDTH]);
 
-void manage_timers(TempText, Characters, char[MAP_HEIGHT][MAP_WIDTH]);
+void manage_timers(TempText, ControlTimers*, Characters, char[MAP_HEIGHT][MAP_WIDTH], int*);
 
 void send_ghost_info(int, GhostInfo*);
 void send_pacman_info(int, PacManInfo*);
 
-void collision_handler(Characters*, PacManInfo*, GhostInfo*, int*, TempText*, char[MAP_HEIGHT][MAP_WIDTH]);
-void food_handler(int*, int*, Characters, char[MAP_HEIGHT][MAP_WIDTH], GhostInfo*, TempText*);
+void collision_handler(Characters*, PacManInfo*, GhostInfo*, int*, TempText*, char[MAP_HEIGHT][MAP_WIDTH], int*);
+void food_handler(int*, int*, int*, Characters, char[MAP_HEIGHT][MAP_WIDTH], GhostInfo*, TempText*, ControlTimers*);
 void food_setup();
-void eat_pause(Characters, PacManInfo*, GhostInfo*, TempText*, char[MAP_HEIGHT][MAP_WIDTH]);
+void eat_pause(Characters, PacManInfo*, GhostInfo*, TempText*, char[MAP_HEIGHT][MAP_WIDTH], int);
 
 void manage_logs(int log_in, MessageList* log_list)
 {
@@ -62,10 +62,12 @@ void control_main(int pacman_in, int pacman_out, int ghost_in, int ghost_out, in
     characters.ghosts = malloc(sizeof(CharGhost)*4);
     
     TempText temp_text = {};
+    ControlTimers timers = {};
 
     int score = 0;
     char game_food[MAP_HEIGHT][MAP_WIDTH];
     int eaten_dots = 0;
+    int ghost_streak = 0;
 
     food_setup(game_food);
 
@@ -75,10 +77,10 @@ void control_main(int pacman_in, int pacman_out, int ghost_in, int ghost_out, in
     while(1)
     {  
         manage_cmd_in(cmd_in, p_cmd_out, &ghost_info, &pacman_info);
-        manage_pacman_in(pacman_in, &eaten_dots, characters, &ghost_info, game_food, &score, &temp_text);
+        manage_pacman_in(pacman_in, &eaten_dots, &ghost_streak, characters, &ghost_info, game_food, &score, &temp_text, &timers);
         manage_ghost_in(ghost_in, &characters, game_food);
-        manage_timers(temp_text, characters, game_food);
-        collision_handler(&characters, &pacman_info, &ghost_info, &score, &temp_text, game_food);
+        manage_timers(temp_text, &timers, characters, game_food, &ghost_streak);
+        collision_handler(&characters, &pacman_info, &ghost_info, &score, &temp_text, game_food, &ghost_streak);
         send_pacman_info(pacman_out, &pacman_info);
         send_ghost_info(ghost_out, &ghost_info);
         print_ui(score, characters);
@@ -87,13 +89,13 @@ void control_main(int pacman_in, int pacman_out, int ghost_in, int ghost_out, in
         manage_logs(log_in, &log_list);
         if(eaten_dots == 240)
         {
-            mvprintw(23, 23, "GAME OVER! VITTORIA");
+            mvprintw(23, 18, "GAME OVER! VITTORIA");
             refresh();
             return;
         }
         if(pacman.lives < 0){
             attron(COLOR_REDTEXT);
-            mvprintw(23, 23, "G A M E   O V E R !");
+            mvprintw(23, 18, "G A M E   O V E R !");
             attroff(COLOR_REDTEXT);
             refresh();
             return;
@@ -144,7 +146,7 @@ void manage_cmd_in(int cmd_in, int p_cmd_out, GhostInfo* ghost_info, PacManInfo*
     }
 }
 
-void manage_pacman_in(int pacman_in, int* eaten_dots, Characters characters, GhostInfo* info_pkg, char game_food[MAP_HEIGHT][MAP_WIDTH], int* score, TempText* temp_text)
+void manage_pacman_in(int pacman_in, int* eaten_dots, int* ghost_streak, Characters characters, GhostInfo* info_pkg, char game_food[MAP_HEIGHT][MAP_WIDTH], int* score, TempText* temp_text, ControlTimers* timers)
 {
     CharPacman pacman_pkg;
 
@@ -152,7 +154,7 @@ void manage_pacman_in(int pacman_in, int* eaten_dots, Characters characters, Gho
     {
         unprint_area(characters.pacman->e.p.y, characters.pacman->e.p.x-1, 3, game_food);
         *characters.pacman = pacman_pkg;
-        food_handler(score, eaten_dots, characters, game_food, info_pkg, temp_text);
+        food_handler(score, eaten_dots, ghost_streak, characters, game_food, info_pkg, temp_text, timers);
         
         info_pkg->pacman = characters.pacman->e;
         info_pkg->new = true;
@@ -173,13 +175,28 @@ void manage_ghost_in(int ghost_in, Characters* characters, char game_food[MAP_HE
     }
 }
 
-void manage_timers(TempText temp_text, Characters characters, char game_food[MAP_HEIGHT][MAP_WIDTH])
+void manage_timers(TempText temp_text, ControlTimers* timers, Characters characters, char game_food[MAP_HEIGHT][MAP_WIDTH], int* ghost_streak)
 {
     if(temp_text.timer != 0)
         if(!check_timer(temp_text.timer))
         {
             sunprint_area(temp_text.p.y, temp_text.p.x, strlen(temp_text.text), game_food, characters);
             temp_text.timer = 0;
+        }
+    if(timers->fruit_timer != 0)
+        if(!check_timer(timers->fruit_timer))
+        {
+            game_food[FRUIT_POS_Y][FRUIT_POS_X-1] = ' ';
+            game_food[FRUIT_POS_Y][FRUIT_POS_X] = ' ';
+            game_food[FRUIT_POS_Y][FRUIT_POS_X+1] = ' ';
+            unprint_area(FRUIT_POS_Y, FRUIT_POS_X-1, 3, game_food);
+            timers->fruit_timer = 0;
+        }
+    if(timers->fright_timer != 0)
+        if(!check_timer(timers->fright_timer))
+        {
+            *ghost_streak = 0;
+            timers->fright_timer = 0;;
         }
 }
 
@@ -202,7 +219,7 @@ void send_pacman_info(int pacman_out, PacManInfo* pacman_info)
     }
 }
 
-void food_handler(int* score, int* eaten_dots, Characters characters, char game_food[MAP_HEIGHT][MAP_WIDTH], GhostInfo *ghost_info, TempText *temp_text)
+void food_handler(int* score, int* eaten_dots, int* ghost_streak, Characters characters, char game_food[MAP_HEIGHT][MAP_WIDTH], GhostInfo *ghost_info, TempText *temp_text, ControlTimers* timers)
 {  
     int i,j ;
     Position pe_pos;
@@ -221,19 +238,17 @@ void food_handler(int* score, int* eaten_dots, Characters characters, char game_
                 game_food[pe_pos.y][pe_pos.x] = ' ';
                 if(*eaten_dots == 70 || *eaten_dots == 170){
                     //spawna un frutto va tutto in funzione col controllo
-                    print_fruit();
-                    game_food[FRUIT_POS_Y][FRUIT_POS_X-1] = S_FRUIT[0][0];
-                    game_food[FRUIT_POS_Y][FRUIT_POS_X] = S_FRUIT[0][1];
-                    game_food[FRUIT_POS_Y][FRUIT_POS_X+1] = S_FRUIT[0][2];
+                    create_fruit(game_food, timers);
                 }
                 beep();
                 break;
             case '`': 
                 *score += 50;
-                
+                *ghost_streak = 0;
                 ghost_info->fright = true;
                 ghost_info->new = true;    
                 game_food[pe_pos.y][pe_pos.x] = ' ';
+                timers->fright_timer = start_timer(6);
                 break;
             case '^':
                 *score += 100; //*lvl?
@@ -251,7 +266,7 @@ void food_handler(int* score, int* eaten_dots, Characters characters, char game_
     }
 }
 
-void collision_handler(Characters* characters, PacManInfo *pacman_info, GhostInfo* ghost_info, int* score, TempText* temp_text, char game_food[MAP_HEIGHT][MAP_WIDTH])
+void collision_handler(Characters* characters, PacManInfo *pacman_info, GhostInfo* ghost_info, int* score, TempText* temp_text, char game_food[MAP_HEIGHT][MAP_WIDTH], int* ghost_streak)
 {
     int i;
     CharGhost* ghost;
@@ -264,12 +279,13 @@ void collision_handler(Characters* characters, PacManInfo *pacman_info, GhostInf
         {
             if(ghost->mode == M_FRIGHT)
             {
-                *score += 200; //200 400 800 1600
+                (*ghost_streak)++;
+                *score += pow(2,(*ghost_streak))*100;    //200 400 800 1600
                 ghost->mode = M_DEAD;
                 ghost_info->death = i;
                 ghost_info->new = true;
 
-                eat_pause(*characters, pacman_info, ghost_info, temp_text, game_food);
+                eat_pause(*characters, pacman_info, ghost_info, temp_text, game_food, pow(2,(*ghost_streak))*100);
                 // morto il fantasma
             }
             else if(ghost->mode != M_DEAD && !characters->pacman->dead)
@@ -286,12 +302,30 @@ void collision_handler(Characters* characters, PacManInfo *pacman_info, GhostInf
     }
 }
 
-void eat_pause(Characters characters, PacManInfo* pacman_info, GhostInfo* ghost_info, TempText* temp_text, char game_food[MAP_HEIGHT][MAP_WIDTH])
-{        
+void eat_pause(Characters characters, PacManInfo* pacman_info, GhostInfo* ghost_info, TempText* temp_text, char game_food[MAP_HEIGHT][MAP_WIDTH], int points)
+{   
+    char points_string[6] = {};     
+    sprintf(points_string, "%d", points);
     sunprint_area(temp_text->p.y, temp_text->p.x, strlen(temp_text->text), game_food, characters);
-    create_temp_text(temp_text, characters.pacman->e.p.x-1, characters.pacman->e.p.y+GUI_HEIGHT, "200", 0.6e3, 12);
+    create_temp_text(temp_text, characters.pacman->e.p.x-1, characters.pacman->e.p.y+GUI_HEIGHT, points_string, 0.6e3, 12);
     ghost_info->sleeptime = 0.6e6;    
     ghost_info->new = true;
     pacman_info->sleeptime = 0.6e6;    
     pacman_info->new = true;
+}
+
+void create_fruit(char game_food[MAP_HEIGHT][MAP_WIDTH], ControlTimers* timers)
+{
+    attron(COLOR_REDTEXT);
+    mvaddch(23, FRUIT_POS_X-1, S_FRUIT[0][0]);
+    mvaddch(17+GUI_HEIGHT, FRUIT_POS_X+1, S_FRUIT[0][2]);
+    attroff(COLOR_REDTEXT);
+    attron(COLOR_GREENTEXT);
+    mvaddch(23, FRUIT_POS_X, S_FRUIT[0][1]);
+    attroff(COLOR_GREENTEXT);
+    game_food[FRUIT_POS_Y][FRUIT_POS_X-1] = S_FRUIT[0][0];
+    game_food[FRUIT_POS_Y][FRUIT_POS_X] = S_FRUIT[0][1];
+    game_food[FRUIT_POS_Y][FRUIT_POS_X+1] = S_FRUIT[0][2];
+
+    timers->fruit_timer = start_timer(10e3);
 }

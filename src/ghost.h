@@ -54,5 +54,6 @@ CharGhost init_ghost_char();
 GhostInfo init_ghost_info();
 void ghost_main(int, int, int);
 _Bool can_move_ghost(CharGhost, Direction);
+_Bool is_in_pen(CharGhost);
 
 #endif
