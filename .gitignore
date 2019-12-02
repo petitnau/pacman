@@ -11,3 +11,4 @@ obj/entity.o
 obj/list.o
 obj/drawings.o
 obj/interface.o
+obj/menu.o
