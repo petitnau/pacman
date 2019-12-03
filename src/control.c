@@ -47,7 +47,7 @@ void init_control_data(ControlData* cd, ControlPipes* pipes)
     int eaten_dots = 0;
     int ghost_streak = 0;
 
-    food_setup(game_food);
+    food_setup(cd);
 }
 
 void manage_logs(int log_in, MessageList* log_list)
