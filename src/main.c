@@ -56,8 +56,8 @@ int main()
 {
     int i;
     int mode;
-    pid_t p_player, p_pacman, p_ghosts;
-    int pacman_ch_pipe[2], pacman_info_pipe[2], ghost_ch_pipe[2], ghost_info_pipe[2], pacman_cmd_pipe[2], cmd_pipe[2], log_pipe[2];
+    pid_t p_player, p_pacman, p_ghosts, p_bullet;
+    int pacman_ch_pipe[2], pacman_info_pipe[2], ghost_ch_pipe[2], ghost_info_pipe[2], pacman_cmd_pipe[2], cmd_pipe[2], log_pipe[2], bullet_info [2], bullet_pos[2];
 
     init();
 
@@ -96,6 +96,10 @@ int main()
     fcntl(ghost_info_pipe[1], F_SETFL, O_NONBLOCK);
     fcntl(log_pipe[0], F_SETFL, O_NONBLOCK);
     fcntl(log_pipe[1], F_SETFL, O_NONBLOCK);
+    fcntl(bullet_info[P_RD], F_SETFL, O_NONBLOCK);
+    fcntl(bullet_info[P_WR], F_SETFL, O_NONBLOCK);
+    fcntl(bullet_pos[P_RD], F_SETFL, O_NONBLOCK);
+    fcntl(bullet_pos[P_WR], F_SETFL, O_NONBLOCK);
 
     switch(p_pacman = fork())
     {
@@ -112,6 +116,10 @@ int main()
             close(cmd_pipe[P_RD]);
             close(cmd_pipe[P_WR]);
             close(log_pipe[P_RD]);
+            close(bullet_info[P_RD]);
+            close(bullet_info[P_WR]);
+            close(bullet_pos[P_RD]);
+            close(bullet_pos[P_WR]);
             pacman_main(pacman_cmd_pipe[P_RD], pacman_info_pipe[P_RD], pacman_ch_pipe[P_WR], log_pipe[P_WR]);
     }   
 
@@ -131,6 +139,10 @@ int main()
             close(cmd_pipe[P_RD]);
             close(cmd_pipe[P_WR]);
             close(log_pipe[P_RD]);
+            close(bullet_info[P_RD]);
+            close(bullet_info[P_WR]);
+            close(bullet_pos[P_RD]);
+            close(bullet_pos[P_WR]);
             ghost_main(ghost_info_pipe[P_RD], ghost_ch_pipe[P_WR], log_pipe[P_WR]);
     }
 
@@ -151,7 +163,35 @@ int main()
             close(pacman_cmd_pipe[P_WR]);
             close(cmd_pipe[P_RD]);
             close(log_pipe[P_RD]);
+            close(bullet_info[P_RD]);
+            close(bullet_info[P_WR]);
+            close(bullet_pos[P_RD]);
+            close(bullet_pos[P_WR]);
             player_main(cmd_pipe[P_WR], log_pipe[P_WR]);
+    }
+    
+    switch(p_bullet = fork())
+    {
+        case -1:
+            _exit(FORK_ERROR);
+        case 0:
+            close(pacman_ch_pipe[P_RD]);      
+            close(pacman_ch_pipe[P_WR]);
+            close(pacman_info_pipe[P_WR]);   
+            close(pacman_info_pipe[P_RD]); 
+            close(ghost_ch_pipe[P_RD]);      
+            close(ghost_ch_pipe[P_WR]);      
+            close(ghost_info_pipe[P_RD]);
+            close(ghost_info_pipe[P_WR]);
+            close(pacman_cmd_pipe[P_RD]);
+            close(pacman_cmd_pipe[P_WR]);
+            close(cmd_pipe[P_RD]);
+            close(cmd_pipe[P_WR]);
+            close(log_pipe[P_RD]);
+            close(log_pipe[P_WR]);
+            close(bullet_info[P_WR]);
+            close(bullet_pos[P_RD]);
+            bullet_main(bullet_info[P_RD], bullet_pos[P_WR]);
     }
 
     close(pacman_ch_pipe[P_WR]);
