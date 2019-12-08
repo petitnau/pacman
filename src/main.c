@@ -32,6 +32,7 @@ void init()
     init_color(COLOR_MAGENTA, 1000, 700, 700);
     init_color(COLOR_ORANGE, 1000, 700, 300);
     init_color(COLOR_PINK, 1000, 800, 800);
+    init_color(COLOR_WHITE, 1000, 1000, 1000);
 
     init_pair(1, COLOR_BLUE, COLOR_BLACK);
     init_pair(2, COLOR_WHITE, COLOR_BLACK);
@@ -48,6 +49,10 @@ void init()
     init_pair(11, COLOR_GREEN, COLOR_BLACK);
     init_pair(12, COLOR_CYAN, COLOR_BLACK);
     init_pair(13, COLOR_MAGENTA, COLOR_BLACK);
+
+    init_pair(14, COLOR_YELLOW, COLOR_YELLOW);
+    init_pair(15, COLOR_WHITE, COLOR_WHITE);
+    init_pair(16, COLOR_BLACK, COLOR_BLACK);
 
     refresh();
 }
