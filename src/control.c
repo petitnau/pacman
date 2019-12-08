@@ -25,7 +25,7 @@ void send_pacman_info(ControlData*);
 
 void collision_handler(ControlData*);
 void food_handler(ControlData*);
-void food_setup();
+void food_setup(char[MAP_HEIGHT][MAP_WIDTH]);
 void eat_pause(ControlData*, int);
 void create_fruit(ControlData*);
 
@@ -42,12 +42,11 @@ void init_control_data(ControlData* cd, ControlPipes* pipes)
     cd->timers.fruit_timer = 0;
     cd->pipes = pipes;
 
-    int score = 0;
-    char game_food[MAP_HEIGHT][MAP_WIDTH];
-    int eaten_dots = 0;
-    int ghost_streak = 0;
+    cd->score = 0;
+    cd->eaten_dots = 0;
+    cd->ghost_streak = 0;
 
-    food_setup(cd);
+    food_setup(cd->game_food);
 }
 
 void manage_logs(int log_in, MessageList* log_list)
@@ -113,12 +112,12 @@ void control_main(ControlPipes pipes)
     }
 }
 
-void food_setup(ControlData* cd)
+void food_setup(char food[MAP_HEIGHT][MAP_WIDTH])
 {
     int i;
     for (i = 0; i < MAP_HEIGHT; i++)
     {
-        strcpy(cd->game_food[i], PELLETS[i]);
+        strcpy(food[i], PELLETS[i]);
     } 
 }
 
