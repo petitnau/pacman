@@ -68,8 +68,8 @@ int main()
 
     mode = main_menu();
 
-    print_map();
-    print_pellets();
+    //print_map();
+    //print_pellets();
     refresh();
     
     if(pipe(pacman_ch_pipe) == -1)

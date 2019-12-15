@@ -3,9 +3,7 @@
 
 #include "pacman.h"
 #include "ghost.h"
-
-#define MAP_WIDTH 55
-#define MAP_HEIGHT 31
+#include "utils.h"
 
 #define FRUIT_POS_Y 17
 #define FRUIT_POS_X 27

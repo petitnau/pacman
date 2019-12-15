@@ -7,6 +7,10 @@
 #define K_DOWN 66
 #define K_RIGHT 67
 #define K_LEFT 68
+#define k_ESC 27
+
+#define MAP_WIDTH 55
+#define MAP_HEIGHT 31
 
 #define NUM_GHOSTS 4
 #define PACMAN_ID 0
@@ -44,7 +48,7 @@ void print_gui_string(int, int, char*);
 void print_map_at(int, int);
 void print_lives(int n);
 void print_map();
-void print_pellets();
+void print_pellets(char[MAP_HEIGHT][MAP_WIDTH]);
 char get_map_at(int, int);
 Position get_pac_eff_pos(Position);
 int mod(int, int);

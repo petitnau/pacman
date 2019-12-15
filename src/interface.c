@@ -131,12 +131,16 @@ void unprint_area(int y, int x, int size, char game_food[MAP_HEIGHT][MAP_WIDTH])
 }
 
 void print_ui(ControlData* cd)
-{
+{    //wborder(win, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '); // Erase frame around the window
+
     int i;
 
     char scorestr[10];
-    char nupstr[10];
+    char nupstr[10];    
 
+    erase(); //Cancella tutto
+    print_map();
+    print_pellets(cd->game_food);
     sprintf(scorestr, "%d", cd->score/10);
     sprintf(nupstr, "1UP");
     print_gui_string(0,11, nupstr);

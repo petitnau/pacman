@@ -11,6 +11,7 @@
 #include "entity.h"
 #include "interface.h"
 #include "list.h"
+#include "menu.h"
 
 void init_control_data(ControlData*, ControlPipes*);
 
@@ -94,6 +95,7 @@ void control_main(ControlPipes pipes)
         send_pacman_info(&cd);
         send_ghost_info(&cd);
         print_ui(&cd);
+        refresh();
 
         manage_logs(pipes.log_in, &log_list);
         if(cd.eaten_dots == 240)
@@ -123,6 +125,7 @@ void food_setup(char food[MAP_HEIGHT][MAP_WIDTH])
 
 void manage_cmd_in(ControlData* cd)
 {
+    _Bool flag = false;
     Direction direction;
     char c_in;
 
@@ -142,8 +145,22 @@ void manage_cmd_in(ControlData* cd)
             case K_RIGHT:
                 direction = RIGHT;
                 break;
+            case 'p':
+            //case k_ESC:
+                cd->ghost_info.pause = true;
+                cd->ghost_info.new = true;
+                cd->pacman_info.pause = true;
+                cd->pacman_info.new = true; 
+                send_ghost_info(cd);
+                send_pacman_info(cd);
+                pause_menu(cd);
+                cd->ghost_info.resume = true;
+                cd->ghost_info.new = true;
+                cd->pacman_info.resume = true;
+                cd->pacman_info.new = true;
+                break;
         }
-        if(c_in == K_UP || c_in == K_DOWN || c_in == K_RIGHT || c_in == K_LEFT)
+        if((c_in == K_UP || c_in == K_DOWN || c_in == K_RIGHT || c_in == K_LEFT))
         {
             cd->ghost_info.resume = true;
             cd->ghost_info.new = true;
@@ -151,7 +168,6 @@ void manage_cmd_in(ControlData* cd)
             cd->pacman_info.new = true;
             write(cd->pipes->p_cmd_out, &direction, sizeof(direction));
         }
-
     }
 }
 

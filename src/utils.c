@@ -84,20 +84,20 @@ void print_map()
            print_map_at(i, j);
 }
 
-void print_pellets_at(int x, int y)
+void print_pellets_at(int x, int y, char game_food[MAP_HEIGHT][MAP_WIDTH])
 {
-    if(PELLETS[y][x] != ' ')
-        mvaddch(y+GUI_HEIGHT, x, NCURSES_ACS(PELLETS[y][x]));
+    if(game_food[y][x] != ' ')
+        mvaddch(y+GUI_HEIGHT, x, NCURSES_ACS(game_food[y][x]));
 }
 
-void print_pellets()
+void print_pellets(char game_food[MAP_HEIGHT][MAP_WIDTH])
 {
     int i, j;
     attron(COLOR_PELLETS);
 
     for(i=0; i<MAP_WIDTH; i++)
         for(j=0; j<MAP_HEIGHT; j++)
-            print_pellets_at(i,j);
+            print_pellets_at(i,j, game_food);
         
     attroff(COLOR_PELLETS);
 }

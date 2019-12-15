@@ -1,4 +1,5 @@
 #include <curses.h>
+#include <string.h>
 #include <pthread.h>
 #include <unistd.h>
 #include "menu.h"
@@ -191,5 +192,64 @@ int main_menu()
     wrefresh(win);
     delwin(win);
 
+    return c_selection;
+}
+
+int pause_menu(ControlData* cd)
+{
+    int c_selection = 0;
+    int n_selection = 0;
+    int num_choices = 2;
+    char c;
+    int i;
+
+    char *options[2] = { "-Riprendi", "-Esci"};
+    
+    WINDOW* win = newwin(9, 19, 17, 18); //y x, sty, stx
+        
+    box(win, 0, 0);
+
+    for( i = 0; i < 2; i++)
+            {
+                if(i == c_selection)
+                    wattron(win, COLOR_BLINKY);
+                mvwprintw(win, 3+i, 5, options[i]);
+                wattroff(win, COLOR_BLINKY);
+            }
+            wrefresh(win);
+    
+    do
+    {
+        while(read(cd->pipes->cmd_in, &c, sizeof(c)) != -1)
+        {
+            
+
+            switch(c)
+            {
+                case K_UP: 
+                    if(c_selection > 0)
+                    {
+                        c_selection--;
+                    }
+                    break;
+                case K_DOWN:
+                    if(c_selection < num_choices - 1)
+                    {
+                       c_selection++;
+                    }
+                    break;
+            }
+            for( i = 0; i < 2; i++)
+            {
+                if(i == c_selection)
+                    wattron(win, COLOR_BLINKY);
+                mvwprintw(win, 3+i, 5, options[i]);
+                wattroff(win, COLOR_BLINKY);
+            }
+            wrefresh(win);
+        }
+    }
+    while(c != '\n');
+    
     return c_selection;
 }
