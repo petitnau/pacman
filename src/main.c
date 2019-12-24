@@ -69,7 +69,7 @@ int main()
     mode = main_menu();
 
     //print_map();
-    //print_pellets();
+    //print_food();
     refresh();
     
     if(pipe(pacman_ch_pipe) == -1)
@@ -86,6 +86,10 @@ int main()
         _exit(PIPE_ERROR);
     if(pipe(log_pipe) == -1)
         _exit(PIPE_ERROR);
+    if(pipe(bullet_pos) == -1)
+        _exit(PIPE_ERROR);
+    if(pipe(bullet_info) == -1)
+        _exit(PIPE_ERROR);
 
     fcntl(pacman_ch_pipe[0], F_SETFL, O_NONBLOCK);
     fcntl(pacman_ch_pipe[1], F_SETFL, O_NONBLOCK);
@@ -101,10 +105,10 @@ int main()
     fcntl(ghost_info_pipe[1], F_SETFL, O_NONBLOCK);
     fcntl(log_pipe[0], F_SETFL, O_NONBLOCK);
     fcntl(log_pipe[1], F_SETFL, O_NONBLOCK);
-    fcntl(bullet_info[P_RD], F_SETFL, O_NONBLOCK);
-    fcntl(bullet_info[P_WR], F_SETFL, O_NONBLOCK);
-    fcntl(bullet_pos[P_RD], F_SETFL, O_NONBLOCK);
-    fcntl(bullet_pos[P_WR], F_SETFL, O_NONBLOCK);
+    fcntl(bullet_info[0], F_SETFL, O_NONBLOCK);
+    fcntl(bullet_info[1], F_SETFL, O_NONBLOCK);
+    fcntl(bullet_pos[0], F_SETFL, O_NONBLOCK);
+    fcntl(bullet_pos[1], F_SETFL, O_NONBLOCK);
 
     switch(p_pacman = fork())
     {
@@ -206,7 +210,17 @@ int main()
     close(pacman_cmd_pipe[P_RD]);
     close(cmd_pipe[P_WR]);
     close(log_pipe[P_WR]);
-    ControlPipes pipes = {pacman_ch_pipe[P_RD], pacman_info_pipe[P_WR], ghost_ch_pipe[P_RD], ghost_info_pipe[P_WR], cmd_pipe[P_RD], pacman_cmd_pipe[P_WR], log_pipe[P_RD]};
+    close(bullet_info[P_RD]);
+    close(bullet_pos[P_WR]);
+    ControlPipes pipes = {pacman_ch_pipe[P_RD], 
+                        pacman_info_pipe[P_WR], 
+                        ghost_ch_pipe[P_RD], 
+                        ghost_info_pipe[P_WR], 
+                        cmd_pipe[P_RD], 
+                        pacman_cmd_pipe[P_WR], 
+                        log_pipe[P_RD],
+                        bullet_pos[P_RD],
+                        bullet_info[P_WR]};
     control_main(pipes);
     
     getchar();

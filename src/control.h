@@ -20,6 +20,7 @@ typedef struct
 {
     CharPacman pacman;
     CharGhost* ghosts;
+    BulletList bullets;
     int num_ghosts;
 } Characters;
 
@@ -38,6 +39,8 @@ typedef struct
     int cmd_in;
     int p_cmd_out;
     int log_in;
+    int bullet_in;
+    int bullet_out;
 } ControlPipes;
 
 typedef struct

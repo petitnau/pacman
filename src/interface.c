@@ -94,6 +94,7 @@ void print_ghost(CharGhost ghost)
 
 void unprint_area(int y, int x, int size, char game_food[MAP_HEIGHT][MAP_WIDTH])
 {
+    /*
     Position pos;
     int i;
     char c;
@@ -128,19 +129,21 @@ void unprint_area(int y, int x, int size, char game_food[MAP_HEIGHT][MAP_WIDTH])
             print_map_at(pos.x, pos.y);
         }
     }
+    */
 }
 
 void print_ui(ControlData* cd)
-{    //wborder(win, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '); // Erase frame around the window
+{    
+    //wborder(win, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '); // Erase frame around the window
 
     int i;
 
     char scorestr[10];
     char nupstr[10];    
 
-    erase(); //Cancella tutto
+    //erase(); //Cancella tutto
     print_map();
-    print_pellets(cd->game_food);
+    print_food(cd->game_food);
     sprintf(scorestr, "%d", cd->score/10);
     sprintf(nupstr, "1UP");
     print_gui_string(0,11, nupstr);
@@ -182,6 +185,7 @@ void print_temp_text(TempText temp_text)
 
 void sunprint_area(int y, int x, int size, ControlData* cd)
 {
+    /*
     int i;
 
     unprint_area(y-GUI_HEIGHT,x,size, cd->game_food);
@@ -190,4 +194,5 @@ void sunprint_area(int y, int x, int size, ControlData* cd)
     {
         print_ghost(cd->characters.ghosts[i]);
     }
+    */
 }

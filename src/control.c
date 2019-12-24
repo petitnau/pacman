@@ -9,6 +9,7 @@
 #include "pacman.h"
 #include "ghost.h"
 #include "entity.h"
+#include "bullet.h"
 #include "interface.h"
 #include "list.h"
 #include "menu.h"
@@ -58,11 +59,11 @@ void manage_logs(int log_in, MessageList* log_list)
 
     while(read(log_in, &msg_pkg, sizeof(char)*50) != -1)
     {
-        list_push(log_list, msg_pkg);
+        m_list_push(log_list, msg_pkg);
     }    
 
     while(log_list->count > MAP_HEIGHT-2)
-        list_pop(log_list);
+        m_list_pop(log_list);
 
     i = 0;
     MessageNode* aux = log_list->tail;
@@ -83,18 +84,21 @@ void control_main(ControlPipes pipes)
     
     
     MessageList log_list;
-    list_init(&log_list);
+    m_list_init(&log_list);
+    b_list_init(&cd.characters.bullets);
 
     while(1)
     {  
         manage_cmd_in(&cd);
         manage_pacman_in(&cd);/* &eaten_dots, &ghost_streak, characters, &ghost_info, game_food, &score, &temp_text, &timers); */
         manage_ghost_in(&cd);
+        manage_bullet_in(&cd);
         manage_timers(&cd);
         collision_handler(&cd);
         send_pacman_info(&cd);
         send_ghost_info(&cd);
         print_ui(&cd);
+        mvprintw(0,60, "%d", cd.characters.bullets.count);
         refresh();
 
         manage_logs(pipes.log_in, &log_list);
@@ -128,6 +132,7 @@ void manage_cmd_in(ControlData* cd)
     _Bool flag = false;
     Direction direction;
     char c_in;
+    BulletInfo bullet_info = {};
 
     while(read(cd->pipes->cmd_in, &c_in, sizeof(c_in)) != -1)
     {
@@ -158,6 +163,15 @@ void manage_cmd_in(ControlData* cd)
                 cd->ghost_info.new = true;
                 cd->pacman_info.resume = true;
                 cd->pacman_info.new = true;
+                break;
+            case 'l':
+                bullet_info.create_bullet = true;
+                bullet_info.x = 20;
+                bullet_info.y = 20;
+                bullet_info.dir = UP;              
+                fprintf(stderr, "ciao");
+
+                write(cd->pipes->bullet_out, &bullet_info, sizeof(bullet_info));
                 break;
         }
         if((c_in == K_UP || c_in == K_DOWN || c_in == K_RIGHT || c_in == K_LEFT))
@@ -197,6 +211,17 @@ void manage_ghost_in(ControlData* cd)
 
         if(ghost_pkg.ghost_id+1 > cd->characters.num_ghosts)
             cd->characters.num_ghosts = ghost_pkg.ghost_id+1;
+    }
+}
+
+void manage_bullet_in(ControlData* cd)
+{
+    Bullet bullet_pkg;
+
+    while(read(cd->pipes->ghost_in, &bullet_pkg, sizeof(bullet_pkg)) != -1)
+    {
+        b_list_update(&cd->characters.bullets, bullet_pkg);
+        usleep(5e6);
     }
 }
 

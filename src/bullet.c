@@ -1,34 +1,9 @@
 #include <pthread.h>
 #include <unistd.h>
+#include <stdio.h>
 
 #include "entity.h"
 #include "bullet.h"
-
-typedef struct 
-{
-    _Bool new;
-    _Bool create_bullet;
-    int x;
-    int y;
-    int dir;
-    _Bool destroy_bullet;
-    int destroy_id;
-} BulletInfo;
-
-typedef struct
-{
-    pthread_t id;
-    Position p;
-    int direction;
-} Bullet;
-
-typedef struct
-{
-    int bullet_pos;
-    Bullet bullet;
-} BulletThreadPar;
-
-
 
 //int bullet_main(BulletPipes pipes)
 int bullet_main(int bullet_info, int bullet_pos)
@@ -74,6 +49,8 @@ void manage_b_info_in(int bullet_info, int bullet_pos)
     {
         if(info.create_bullet)
         {
+     
+            fprintf(stderr, "test");
             BulletThreadPar* bullet_par = malloc(sizeof(BulletThreadPar));
             pthread_create(NULL, NULL, &bullet_thread, bullet_par);
         }

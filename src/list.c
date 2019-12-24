@@ -3,14 +3,15 @@
 #include <string.h>
 
 #include "list.h"
+#include "bullet.h"
 
-void list_init(MessageList *list)
+void m_list_init(MessageList *list)
 {
     list->head = NULL;
     list->tail = NULL;
     list->count = 0;
 }
-void list_push(MessageList* list, char msg[50])
+void m_list_push(MessageList* list, char msg[50])
 {
     MessageNode *new_node = malloc(sizeof(MessageNode));
     strcpy(new_node->msg, msg);
@@ -25,7 +26,7 @@ void list_push(MessageList* list, char msg[50])
     list->tail = new_node;
     list->count++;
 }
-void list_pop(MessageList* list)
+void m_list_pop(MessageList* list)
 {
     MessageNode* aux = list->head;
 
@@ -40,7 +41,7 @@ void list_pop(MessageList* list)
     free(aux);
     list->count--;
 }
-int list_count(MessageList list)
+int m_list_count(MessageList list)
 {
     MessageNode* aux = list.head;
     int c=0;
@@ -51,4 +52,81 @@ int list_count(MessageList list)
         aux = aux->next;
     }
     return c;
+}
+
+///////////////
+
+void b_list_init(BulletList *list)
+{
+    list->head = NULL;
+    list->tail = NULL;
+    list->count = 0;
+}
+void b_list_push(BulletList* list, Bullet bullet)
+{
+    BulletNode *new_node = malloc(sizeof(BulletNode));
+    new_node->bullet = bullet;
+    new_node->next = NULL;
+    new_node->prev = list->tail;
+
+    if(list->head == NULL)
+        list->head = new_node;
+    else
+        list->tail->next = new_node;
+    
+    list->tail = new_node;
+    list->count++;
+}
+void b_list_pop(BulletList* list)
+{
+    BulletNode* aux = list->head;
+
+    if(list->head != NULL)
+        list->head = list->head->next;
+
+    if(list->head == NULL)
+        list->tail = NULL;
+    else
+        list->head->prev = NULL;
+
+    free(aux);
+    list->count--;
+}
+
+int b_list_count(BulletList list)
+{
+    BulletNode* aux = list.head;
+    int c=0;
+
+    while(aux != NULL)
+    {
+        c++;
+        aux = aux->next;
+    }
+    return c;
+}
+
+BulletNode* b_list_search(BulletList list, int id)
+{
+    BulletNode* aux = list.head;
+
+    while(aux != NULL)
+    {
+        if(aux->bullet.id == id)
+            break;
+        aux = aux->next;
+    }
+
+    return aux;
+}
+
+void b_list_update(BulletList* list, Bullet bullet)
+{
+    BulletNode* node = b_list_search(*list, bullet.id);
+    if(node == NULL)
+        b_list_push(list, bullet);
+    else
+    {
+        node->bullet = bullet;
+    }
 }
