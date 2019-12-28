@@ -42,7 +42,7 @@ void b_list_init(BulletList*);
 void b_list_push(BulletList*, Bullet);
 void b_list_pop(BulletList*);
 int b_list_count(BulletList);
-BulletNode* b_list_search(BulletList, int);
+BulletNode* b_list_search(BulletList, unsigned long);
 void b_list_update(BulletList*, Bullet);
 
 #endif

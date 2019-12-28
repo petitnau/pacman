@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "list.h"
@@ -106,7 +107,7 @@ int b_list_count(BulletList list)
     return c;
 }
 
-BulletNode* b_list_search(BulletList list, int id)
+BulletNode* b_list_search(BulletList list, unsigned long id)
 {
     BulletNode* aux = list.head;
 
@@ -124,7 +125,9 @@ void b_list_update(BulletList* list, Bullet bullet)
 {
     BulletNode* node = b_list_search(*list, bullet.id);
     if(node == NULL)
+    {
         b_list_push(list, bullet);
+    }
     else
     {
         node->bullet = bullet;

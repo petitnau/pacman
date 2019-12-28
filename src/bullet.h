@@ -9,8 +9,7 @@ typedef struct
 {
     _Bool new;
     _Bool create_bullet;
-    int x;
-    int y;
+    Position p;
     int dir;
     _Bool destroy_bullet;
     int destroy_id;
@@ -20,7 +19,7 @@ typedef struct
 {
     pthread_t id;
     Position p;
-    int direction;
+    int dir;
 } Bullet;
 
 typedef struct

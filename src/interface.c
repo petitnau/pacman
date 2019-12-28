@@ -25,6 +25,20 @@ void print_pacman(CharPacman pacman)
     attroff(COLOR_PACMAN);
 }
 
+void print_bullet(Bullet bullet)
+{
+    Position pos = bullet.p;
+    int i;
+    char sprite[3];
+    
+    attron(COLOR_PACMAN);
+    
+    pos = get_pac_eff_pos(pos);
+    mvaddch(pos.y+GUI_HEIGHT,pos.x, '*');
+    
+    attroff(COLOR_PACMAN);
+}
+
 void print_ghost(CharGhost ghost)
 {
     Position pos;
@@ -158,6 +172,12 @@ void print_ui(ControlData* cd)
     for(i = 0; i < cd->characters.num_ghosts; i++)
     {                 
         print_ghost(cd->characters.ghosts[i]);
+    }
+    BulletNode* aux = cd->characters.bullets.head;
+    while(aux != NULL)
+    {                 
+        print_bullet(aux->bullet);
+        aux = aux->next;
     }
 
     print_temp_text(cd->temp_text);

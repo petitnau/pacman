@@ -36,7 +36,9 @@ void init_control_data(ControlData* cd, ControlPipes* pipes)
     cd->characters.pacman = init_pacman_char();
     cd->pacman_info = init_pacman_info();
     cd->ghost_info = init_ghost_info();
-
+    cd->characters.bullets.head = NULL;
+    cd->characters.bullets.tail = NULL;
+    cd->characters.bullets.count = 0;
     cd->characters.ghosts = malloc(sizeof(CharGhost)*4);
     
     cd->temp_text.timer = 0;
@@ -99,6 +101,8 @@ void control_main(ControlPipes pipes)
         send_ghost_info(&cd);
         print_ui(&cd);
         mvprintw(0,60, "%d", cd.characters.bullets.count);
+        if(cd.characters.bullets.head != NULL)
+            mvprintw(0,60, "%d %d", cd.characters.bullets.head->bullet.p.x, cd.characters.bullets.head->bullet.p.y);
         refresh();
 
         manage_logs(pipes.log_in, &log_list);
@@ -166,10 +170,8 @@ void manage_cmd_in(ControlData* cd)
                 break;
             case 'l':
                 bullet_info.create_bullet = true;
-                bullet_info.x = 20;
-                bullet_info.y = 20;
-                bullet_info.dir = UP;              
-                fprintf(stderr, "ciao");
+                bullet_info.p = cd->characters.pacman.e.p;
+                bullet_info.dir = cd->characters.pacman.e.dir;              
 
                 write(cd->pipes->bullet_out, &bullet_info, sizeof(bullet_info));
                 break;
@@ -218,10 +220,9 @@ void manage_bullet_in(ControlData* cd)
 {
     Bullet bullet_pkg;
 
-    while(read(cd->pipes->ghost_in, &bullet_pkg, sizeof(bullet_pkg)) != -1)
+    while(read(cd->pipes->bullet_in, &bullet_pkg, sizeof(bullet_pkg)) != -1)
     {
         b_list_update(&cd->characters.bullets, bullet_pkg);
-        usleep(5e6);
     }
 }
 
