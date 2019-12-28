@@ -222,7 +222,15 @@ void manage_bullet_in(ControlData* cd)
 
     while(read(cd->pipes->bullet_in, &bullet_pkg, sizeof(bullet_pkg)) != -1)
     {
-        b_list_update(&cd->characters.bullets, bullet_pkg);
+        if(!bullet_pkg.dead)
+        {
+            b_list_update(&cd->characters.bullets, bullet_pkg);
+        }
+        else
+        {
+            b_list_remove(&cd->characters.bullets, b_list_search(cd->characters.bullets, bullet_pkg));
+        }
+        
     }
 }
 

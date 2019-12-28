@@ -3,6 +3,8 @@
 #include <stdio.h>
 
 #include "entity.h"
+#include "utils.h"
+#include "interface.h"
 #include "bullet.h"
 
 //int bullet_main(BulletPipes pipes)
@@ -20,7 +22,7 @@ void* bullet_thread(void* parameters)
 
     BulletThreadPar* b_par = (BulletThreadPar*) parameters;
 
-    while(1)
+    while(!b_par->bullet.dead)
     {
         switch(b_par->bullet.dir)
         {
@@ -37,7 +39,10 @@ void* bullet_thread(void* parameters)
                 b_par->bullet.p.x--;
                 break;
         }
-        
+
+        if(!is_empty_space(MAP[b_par->bullet.p.y][b_par->bullet.p.x]))
+            b_par->bullet.dead = true;
+            
         write(b_par->bullet_pos, &b_par->bullet, sizeof(b_par->bullet));
         
         movepause = 3e4;
@@ -60,6 +65,7 @@ void manage_b_info_in(int bullet_info, int bullet_pos)
             bullet_par->bullet_pos = bullet_pos;
             bullet_par->bullet.p = info.p;
             bullet_par->bullet.dir = info.dir;
+            bullet_par->bullet.dead = false;
             pthread_create(&bullet_par->bullet.id, NULL, &bullet_thread, bullet_par);
         }
         if(info.destroy_bullet)

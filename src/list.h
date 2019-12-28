@@ -40,9 +40,9 @@ int m_list_count(MessageList);
 
 void b_list_init(BulletList*);
 void b_list_push(BulletList*, Bullet);
-void b_list_pop(BulletList*);
+void b_list_remove(BulletList*, BulletNode*);
 int b_list_count(BulletList);
-BulletNode* b_list_search(BulletList, unsigned long);
+BulletNode* b_list_search(BulletList, Bullet);
 void b_list_update(BulletList*, Bullet);
 
 #endif

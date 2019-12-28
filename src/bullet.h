@@ -20,6 +20,7 @@ typedef struct
     pthread_t id;
     Position p;
     int dir;
+    _Bool dead;
 } Bullet;
 
 typedef struct

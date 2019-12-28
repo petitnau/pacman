@@ -78,19 +78,19 @@ void b_list_push(BulletList* list, Bullet bullet)
     list->tail = new_node;
     list->count++;
 }
-void b_list_pop(BulletList* list)
+void b_list_remove(BulletList* list, BulletNode* node)
 {
-    BulletNode* aux = list->head;
-
-    if(list->head != NULL)
-        list->head = list->head->next;
-
-    if(list->head == NULL)
-        list->tail = NULL;
+    if(node->prev != NULL)
+        node->prev->next = node->next;
     else
-        list->head->prev = NULL;
+        list->head = node->next;
 
-    free(aux);
+    if(node->next != NULL)
+        node->next->prev = node->prev;
+    else
+        list->tail = node->prev;
+
+    free(node);
     list->count--;
 }
 
@@ -107,13 +107,13 @@ int b_list_count(BulletList list)
     return c;
 }
 
-BulletNode* b_list_search(BulletList list, unsigned long id)
+BulletNode* b_list_search(BulletList list, Bullet bullet)
 {
     BulletNode* aux = list.head;
 
     while(aux != NULL)
     {
-        if(aux->bullet.id == id)
+        if(aux->bullet.id == bullet.id)
             break;
         aux = aux->next;
     }
@@ -123,7 +123,7 @@ BulletNode* b_list_search(BulletList list, unsigned long id)
 
 void b_list_update(BulletList* list, Bullet bullet)
 {
-    BulletNode* node = b_list_search(*list, bullet.id);
+    BulletNode* node = b_list_search(*list, bullet);
     if(node == NULL)
     {
         b_list_push(list, bullet);
