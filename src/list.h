@@ -39,7 +39,7 @@ void m_list_pop(MessageList*);
 int m_list_count(MessageList);
 
 void b_list_init(BulletList*);
-void b_list_push(BulletList*, Bullet);
+BulletNode* b_list_push(BulletList*, Bullet);
 void b_list_remove(BulletList*, BulletNode*);
 int b_list_count(BulletList);
 BulletNode* b_list_search(BulletList, Bullet);

@@ -9,10 +9,11 @@ typedef struct
 {
     _Bool new;
     _Bool create_bullet;
+    _Bool enemy;
     Position p;
     int dir;
     _Bool destroy_bullet;
-    int destroy_id;
+    unsigned long destroy_id;
 } BulletInfo;
 
 typedef struct
@@ -21,12 +22,7 @@ typedef struct
     Position p;
     int dir;
     _Bool dead;
+    _Bool enemy;
 } Bullet;
-
-typedef struct
-{
-    int bullet_pos;
-    Bullet bullet;
-} BulletThreadPar;
 
 #endif

@@ -173,27 +173,27 @@ _Bool accept_turn(CharPacman pacman, Direction direction)
     return false;
 }
 
-void pacman_move(Entity* entity)
+void pacman_move(Entity* pacman)
 {         
-    if(can_move_pacman(*entity, entity->dir))
+    if(can_move_pacman(*pacman, pacman->dir))
     {        
-        switch(entity->dir)
+        switch(pacman->dir)
         {
             case UP:
-                entity->p.y--;
+                pacman->p.y--;
                 break;
             case LEFT:
-                entity->p.x--;
+                pacman->p.x--;
                 break;
             case DOWN:
-                entity->p.y++;
+                pacman->p.y++;
                 break;
             case RIGHT:
-                entity->p.x++;
+                pacman->p.x++;
                 break;
         }
     }
-    map_loop(entity);
+    map_loop(&pacman->p);
 }
 
 _Bool can_move_pacman(Entity entity, Direction direction)

@@ -60,6 +60,6 @@ void reverse_direction(Direction*);
 unsigned long long start_timer(unsigned long long l);
 _Bool check_timer(unsigned long long l);
 _Bool is_empty_space(char);
-void map_loop(Entity*);
+void map_loop(Position*);
 
 #endif

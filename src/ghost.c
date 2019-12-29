@@ -282,7 +282,7 @@ void ghost_move(CharGhost* ghost)
                 break;
         }
     }
-    map_loop(&ghost->e);
+    map_loop(&ghost->e.p);
 }
 
 _Bool is_empty_space_ghost(char c)

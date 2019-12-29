@@ -191,15 +191,15 @@ _Bool is_empty_space(char c)
     return c == ' ' || c == '#';
 }
 
-void map_loop(Entity* entity)
+void map_loop(Position* position)
 {
-    if(entity->p.x == 0)
-        entity->p.x = MAP_WIDTH;
-    else if(entity->p.x == MAP_WIDTH)
-        entity->p.x = 0;
+    if(position->x == -1)
+        position->x = MAP_WIDTH-1;
+    else if(position->x == MAP_WIDTH)
+        position->x = 0;
 
-    if(entity->p.y == 0)
-        entity->p.y = MAP_HEIGHT;
-    else if(entity->p.y == MAP_HEIGHT)
-        entity->p.y= 0;
+    if(position->y == 0-1)
+        position->y = MAP_HEIGHT-1;
+    else if(position->y == MAP_HEIGHT)
+        position->y= 0;
 }

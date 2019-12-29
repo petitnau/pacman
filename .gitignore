@@ -13,3 +13,4 @@ obj/drawings.o
 obj/interface.o
 obj/menu.o
 obj/bullet.o
+log

@@ -100,6 +100,7 @@ void control_main(ControlPipes pipes)
         send_pacman_info(&cd);
         send_ghost_info(&cd);
         print_ui(&cd);
+        mvprintw(2,60, "%d", cd.characters.pacman.e.p.x);
         mvprintw(0,60, "%d", cd.characters.bullets.count);
         if(cd.characters.bullets.head != NULL)
             mvprintw(0,60, "%d %d", cd.characters.bullets.head->bullet.p.x, cd.characters.bullets.head->bullet.p.y);
@@ -171,7 +172,13 @@ void manage_cmd_in(ControlData* cd)
             case 'l':
                 bullet_info.create_bullet = true;
                 bullet_info.p = cd->characters.pacman.e.p;
-                bullet_info.dir = cd->characters.pacman.e.dir;              
+                bullet_info.dir = cd->characters.pacman.e.dir;   
+                bullet_info.enemy = false;
+
+                if(bullet_info.dir == RIGHT)
+                    bullet_info.p.x++;
+                else if(bullet_info.dir == LEFT)
+                    bullet_info.p.x--;           
 
                 write(cd->pipes->bullet_out, &bullet_info, sizeof(bullet_info));
                 break;
@@ -230,7 +237,6 @@ void manage_bullet_in(ControlData* cd)
         {
             b_list_remove(&cd->characters.bullets, b_list_search(cd->characters.bullets, bullet_pkg));
         }
-        
     }
 }
 
@@ -327,7 +333,7 @@ void food_handler(ControlData* cd)
 
 void collision_handler(ControlData* cd)
 {
-    int i;
+    int i,j;
     CharGhost* ghost;
 
     for(i = 0; i < cd->characters.num_ghosts; i++)
@@ -338,27 +344,74 @@ void collision_handler(ControlData* cd)
         {
             if(ghost->mode == M_FRIGHT)
             {
-                cd->ghost_streak++;
-                cd->score += pow(2,cd->ghost_streak)*100;    //200 400 800 1600
-                ghost->mode = M_DEAD;
-                cd->ghost_info.death = i;
-                cd->ghost_info.new = true;
+                kill_ghost(cd, i);
 
                 eat_pause(cd, pow(2,(cd->ghost_streak))*100);
                 // morto il fantasma
             }
             else if(ghost->mode != M_DEAD && !cd->characters.pacman.dead)
             {
-                //perdi una vita
-                cd->characters.pacman.dead = true;
-                cd->pacman_info.death = true;
-                cd->pacman_info.new = true;
-                cd->ghost_info.restart = true;
-                cd->ghost_info.new = true;
-                //pacman viene riportato alla pos. inziiale idem
+                kill_pacman(cd);
             }
         }
     }
+    
+    BulletNode* aux = cd->characters.bullets.head;
+    while(aux != NULL)
+    {
+        if(!aux->bullet.dead)
+        {
+            if(!aux->bullet.enemy)
+            {
+                for(j = 0; j < cd->characters.num_ghosts; j++)
+                {
+                    if(cd->characters.ghosts[j].mode != M_DEAD && aux->bullet.p.x == cd->characters.ghosts[j].e.p.x && aux->bullet.p.y == cd->characters.ghosts[j].e.p.y)
+                    {
+                        kill_bullet(cd, aux);
+                        kill_ghost(cd, j);
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                if(aux->bullet.p.x == cd->characters.pacman.e.p.x && aux->bullet.p.y == cd->characters.pacman.e.p.y)
+                {
+                    kill_bullet(cd, aux);
+                    kill_pacman(cd);
+                }
+            }
+        }
+        aux = aux->next;
+    }
+}
+
+void kill_pacman(ControlData* cd)
+{
+    cd->characters.pacman.dead = true;
+    cd->pacman_info.death = true;
+    cd->pacman_info.new = true;
+    cd->ghost_info.restart = true;
+    cd->ghost_info.new = true;
+}
+void kill_ghost(ControlData* cd, int i)
+{
+    cd->ghost_streak++;
+    cd->score += pow(2,cd->ghost_streak)*100;    //200 400 800 1600
+    cd->characters.ghosts[i].mode = M_DEAD;
+    cd->ghost_info.death = i;
+    cd->ghost_info.new = true;
+}
+void kill_bullet(ControlData* cd, BulletNode* aux)
+{
+    BulletInfo bullet_info;
+    
+    bullet_info.create_bullet = false;
+    bullet_info.destroy_bullet = true;
+    bullet_info.destroy_id = aux->bullet.id;
+    aux->bullet.dead = true;
+
+    write(cd->pipes->bullet_out, &bullet_info, sizeof(bullet_info));
 }
 
 void eat_pause(ControlData* cd, int points)

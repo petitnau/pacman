@@ -63,7 +63,7 @@ void b_list_init(BulletList *list)
     list->tail = NULL;
     list->count = 0;
 }
-void b_list_push(BulletList* list, Bullet bullet)
+BulletNode* b_list_push(BulletList* list, Bullet bullet)
 {
     BulletNode *new_node = malloc(sizeof(BulletNode));
     new_node->bullet = bullet;
@@ -77,9 +77,14 @@ void b_list_push(BulletList* list, Bullet bullet)
     
     list->tail = new_node;
     list->count++;
+
+    return new_node;
 }
 void b_list_remove(BulletList* list, BulletNode* node)
 {
+    if(node == NULL)
+        return;
+        
     if(node->prev != NULL)
         node->prev->next = node->next;
     else
