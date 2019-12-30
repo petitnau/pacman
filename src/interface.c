@@ -31,13 +31,18 @@ void print_bullet(Bullet bullet)
     int i;
     char sprite[3];
     
-    attron(COLOR_PACMAN);
+    if(bullet.enemy)
+        attron(COLOR_PAIR(10));
+    else
+        attron(COLOR_PAIR(17));
     
     pos = get_pac_eff_pos(pos);
-    mvaddch(pos.y+GUI_HEIGHT,pos.x, '*');
-    
-    attroff(COLOR_PACMAN);
-}
+    mvaddch(pos.y+GUI_HEIGHT,pos.x, '+');
+
+    if(bullet.enemy)
+        attroff(COLOR_PAIR(10));
+    else
+        attroff(COLOR_PAIR(17));}
 
 void print_ghost(CharGhost ghost)
 {
@@ -169,15 +174,16 @@ void print_ui(ControlData* cd)
     print_lives(cd->characters.pacman.lives);
     print_pacman(cd->characters.pacman);
     
-    for(i = 0; i < cd->characters.num_ghosts; i++)
-    {                 
-        print_ghost(cd->characters.ghosts[i]);
-    }
     BulletNode* aux = cd->characters.bullets.head;
     while(aux != NULL)
     {                 
         print_bullet(aux->bullet);
         aux = aux->next;
+    }
+    
+    for(i = 0; i < cd->characters.num_ghosts; i++)
+    {                 
+        print_ghost(cd->characters.ghosts[i]);
     }
 
     print_temp_text(cd->temp_text);

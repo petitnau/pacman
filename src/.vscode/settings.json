@@ -2,6 +2,8 @@
     "files.associations": {
         "bullet.h": "c",
         "list.h": "c",
-        "unistd.h": "c"
+        "unistd.h": "c",
+        "semaphore.h": "c",
+        "stdio.h": "c"
     }
 }

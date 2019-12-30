@@ -138,3 +138,16 @@ void b_list_update(BulletList* list, Bullet bullet)
         node->bullet = bullet;
     }
 }
+void b_list_empty(BulletList* list)
+{
+    BulletNode *aux = list->head, *aux2;
+
+    while(aux != NULL)
+    {
+        aux2 = aux->next;
+        free(aux);
+        aux = aux2;        
+    }
+
+    b_list_init(list);
+}

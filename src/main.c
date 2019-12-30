@@ -53,6 +53,7 @@ void init()
     init_pair(14, COLOR_YELLOW, COLOR_YELLOW);
     init_pair(15, COLOR_WHITE, COLOR_WHITE);
     init_pair(16, COLOR_BLACK, COLOR_BLACK);
+    init_pair(17, COLOR_YELLOW, COLOR_BLACK);
 
     refresh();
 }
@@ -62,7 +63,7 @@ int main()
     int i;
     int mode;
     pid_t p_player, p_pacman, p_ghosts, p_bullet;
-    int pacman_ch_pipe[2], pacman_info_pipe[2], ghost_ch_pipe[2], ghost_info_pipe[2], pacman_cmd_pipe[2], cmd_pipe[2], log_pipe[2], bullet_info [2], bullet_pos[2];
+    int pacman_ch_pipe[2], pacman_info_pipe[2], ghost_ch_pipe[2], ghost_info_pipe[2], cmd_pipe[2], log_pipe[2], bullet_info [2], bullet_pos[2];
 
     init();
 
@@ -80,8 +81,6 @@ int main()
         _exit(PIPE_ERROR);
     if(pipe(ghost_info_pipe) == -1)
         _exit(PIPE_ERROR);
-    if(pipe(pacman_cmd_pipe) == -1)
-        _exit(PIPE_ERROR);
     if(pipe(cmd_pipe) == -1)
         _exit(PIPE_ERROR);
     if(pipe(log_pipe) == -1)
@@ -97,8 +96,6 @@ int main()
     fcntl(pacman_info_pipe[1], F_SETFL, O_NONBLOCK);
     fcntl(ghost_ch_pipe[0], F_SETFL, O_NONBLOCK);
     fcntl(ghost_ch_pipe[1], F_SETFL, O_NONBLOCK);
-    fcntl(pacman_cmd_pipe[0], F_SETFL, O_NONBLOCK);
-    fcntl(pacman_cmd_pipe[1], F_SETFL, O_NONBLOCK);
     fcntl(cmd_pipe[0], F_SETFL, O_NONBLOCK);
     fcntl(cmd_pipe[1], F_SETFL, O_NONBLOCK);
     fcntl(ghost_info_pipe[0], F_SETFL, O_NONBLOCK);
@@ -121,15 +118,13 @@ int main()
             close(ghost_ch_pipe[P_WR]);      
             close(ghost_info_pipe[P_RD]);
             close(ghost_info_pipe[P_WR]);
-            close(pacman_cmd_pipe[P_WR]);
             close(cmd_pipe[P_RD]);
             close(cmd_pipe[P_WR]);
             close(log_pipe[P_RD]);
             close(bullet_info[P_RD]);
-            close(bullet_info[P_WR]);
             close(bullet_pos[P_RD]);
             close(bullet_pos[P_WR]);
-            pacman_main(pacman_cmd_pipe[P_RD], pacman_info_pipe[P_RD], pacman_ch_pipe[P_WR], log_pipe[P_WR]);
+            pacman_main(pacman_info_pipe[P_RD], pacman_ch_pipe[P_WR], bullet_info[P_WR], log_pipe[P_WR]);
     }   
 
     switch(p_ghosts = fork())
@@ -143,16 +138,13 @@ int main()
             close(pacman_info_pipe[P_RD]);   
             close(ghost_ch_pipe[P_RD]);      
             close(ghost_info_pipe[P_WR]);
-            close(pacman_cmd_pipe[P_RD]);
-            close(pacman_cmd_pipe[P_WR]);
             close(cmd_pipe[P_RD]);
             close(cmd_pipe[P_WR]);
             close(log_pipe[P_RD]);
             close(bullet_info[P_RD]);
-            close(bullet_info[P_WR]);
             close(bullet_pos[P_RD]);
             close(bullet_pos[P_WR]);
-            ghost_main(ghost_info_pipe[P_RD], ghost_ch_pipe[P_WR], log_pipe[P_WR]);
+            ghost_main(ghost_info_pipe[P_RD], ghost_ch_pipe[P_WR], bullet_info[P_WR], log_pipe[P_WR]);
     }
 
     switch(p_player = fork())
@@ -168,8 +160,6 @@ int main()
             close(ghost_ch_pipe[P_WR]);      
             close(ghost_info_pipe[P_RD]);
             close(ghost_info_pipe[P_WR]);
-            close(pacman_cmd_pipe[P_RD]);
-            close(pacman_cmd_pipe[P_WR]);
             close(cmd_pipe[P_RD]);
             close(log_pipe[P_RD]);
             close(bullet_info[P_RD]);
@@ -192,8 +182,6 @@ int main()
             close(ghost_ch_pipe[P_WR]);      
             close(ghost_info_pipe[P_RD]);
             close(ghost_info_pipe[P_WR]);
-            close(pacman_cmd_pipe[P_RD]);
-            close(pacman_cmd_pipe[P_WR]);
             close(cmd_pipe[P_RD]);
             close(cmd_pipe[P_WR]);
             close(log_pipe[P_RD]);
@@ -206,8 +194,7 @@ int main()
     close(pacman_ch_pipe[P_WR]);
     close(pacman_info_pipe[P_RD]); 
     close(ghost_ch_pipe[P_WR]);
-    close(ghost_info_pipe[P_RD]);  
-    close(pacman_cmd_pipe[P_RD]);
+    close(ghost_info_pipe[P_RD]);
     close(cmd_pipe[P_WR]);
     close(log_pipe[P_WR]);
     close(bullet_info[P_RD]);
@@ -217,7 +204,6 @@ int main()
                         ghost_ch_pipe[P_RD], 
                         ghost_info_pipe[P_WR], 
                         cmd_pipe[P_RD], 
-                        pacman_cmd_pipe[P_WR], 
                         log_pipe[P_RD],
                         bullet_pos[P_RD],
                         bullet_info[P_WR]};

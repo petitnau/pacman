@@ -84,7 +84,6 @@ void control_main(ControlPipes pipes)
     ControlData cd; 
     init_control_data(&cd, &pipes);
     
-    
     MessageList log_list;
     m_list_init(&log_list);
     b_list_init(&cd.characters.bullets);
@@ -100,10 +99,7 @@ void control_main(ControlPipes pipes)
         send_pacman_info(&cd);
         send_ghost_info(&cd);
         print_ui(&cd);
-        mvprintw(2,60, "%d", cd.characters.pacman.e.p.x);
-        mvprintw(0,60, "%d", cd.characters.bullets.count);
-        if(cd.characters.bullets.head != NULL)
-            mvprintw(0,60, "%d %d", cd.characters.bullets.head->bullet.p.x, cd.characters.bullets.head->bullet.p.y);
+        mvprintw(0,60, "%d          ", cd.characters.bullets.count);
         refresh();
 
         manage_logs(pipes.log_in, &log_list);
@@ -134,27 +130,34 @@ void food_setup(char food[MAP_HEIGHT][MAP_WIDTH])
 
 void manage_cmd_in(ControlData* cd)
 {
-    _Bool flag = false;
-    Direction direction;
+    _Bool new_pkg = false;
     char c_in;
-    BulletInfo bullet_info = {};
 
     while(read(cd->pipes->cmd_in, &c_in, sizeof(c_in)) != -1)
     {
         switch(c_in)
         {
             case K_UP:
-                direction = UP;
+                new_pkg = true;
+                cd->pacman_info.direction = UP;
                 break;
             case K_LEFT:
-                direction = LEFT;
+                new_pkg = true;
+                cd->pacman_info.direction = LEFT;
                 break;
             case K_DOWN:
-                direction = DOWN;
+                new_pkg = true;
+                cd->pacman_info.direction = DOWN;
                 break;
             case K_RIGHT:
-                direction = RIGHT;
+                new_pkg = true;
+                cd->pacman_info.direction = RIGHT;
                 break;
+            case 'l':
+                new_pkg = true;
+                cd->pacman_info.shoot = true;
+                break;
+            /*
             case 'p':
             //case k_ESC:
                 cd->ghost_info.pause = true;
@@ -169,27 +172,15 @@ void manage_cmd_in(ControlData* cd)
                 cd->pacman_info.resume = true;
                 cd->pacman_info.new = true;
                 break;
-            case 'l':
-                bullet_info.create_bullet = true;
-                bullet_info.p = cd->characters.pacman.e.p;
-                bullet_info.dir = cd->characters.pacman.e.dir;   
-                bullet_info.enemy = false;
-
-                if(bullet_info.dir == RIGHT)
-                    bullet_info.p.x++;
-                else if(bullet_info.dir == LEFT)
-                    bullet_info.p.x--;           
-
-                write(cd->pipes->bullet_out, &bullet_info, sizeof(bullet_info));
-                break;
+            */
         }
-        if((c_in == K_UP || c_in == K_DOWN || c_in == K_RIGHT || c_in == K_LEFT))
+        if(new_pkg)
         {
             cd->ghost_info.resume = true;
             cd->ghost_info.new = true;
             cd->pacman_info.resume = true;
             cd->pacman_info.new = true;
-            write(cd->pipes->p_cmd_out, &direction, sizeof(direction));
+            new_pkg = false;
         }
     }
 }
@@ -351,6 +342,14 @@ void collision_handler(ControlData* cd)
             }
             else if(ghost->mode != M_DEAD && !cd->characters.pacman.dead)
             {
+                BulletNode *aux = cd->characters.bullets.head;
+
+                while(aux != NULL)
+                {
+                    fprintf(stderr, "test"); //TODO non funziona niente 
+                    kill_bullet(cd, aux);
+                    aux = aux->next;
+                }
                 kill_pacman(cd);
             }
         }

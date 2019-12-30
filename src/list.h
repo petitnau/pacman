@@ -44,5 +44,6 @@ void b_list_remove(BulletList*, BulletNode*);
 int b_list_count(BulletList);
 BulletNode* b_list_search(BulletList, Bullet);
 void b_list_update(BulletList*, Bullet);
+void b_list_empty(BulletList*);
 
 #endif

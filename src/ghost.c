@@ -2,14 +2,15 @@
 #include <pthread.h>
 #include <stdlib.h>
 #include <semaphore.h>
+#include <stdio.h>
 #include "ghost.h"
 #include "entity.h"
 #include "utils.h"
 #include "interface.h"
 #include "ai.h"
 
-void manage_g_info_in(int, GhostShared*, GhostTimers*);
-void manage_g_timers(GhostTimers*, GhostShared*);
+void manage_g_info_in(int, GhostShared*);
+void manage_g_timers(GhostShared*, CharGhost*);
 void ghost_choose_dir(CharGhost*, GhostShared*);
 void manage_position_events(CharGhost*);
 void ghost_wait(CharGhost, GhostShared* ghost_shared);
@@ -26,7 +27,8 @@ CharGhost init_ghost_char(int id)
     ghost.e.id = id;
     set_ghost_start(&ghost.e);
     ghost.mode = M_CHASE;
-    ghost.frighted = false;
+    ghost.timers.fright = 0;
+    ghost.timers.shoot = start_timer(1e3);
     //ghost.paused = true;
     return ghost;
 }
@@ -54,17 +56,17 @@ GhostInfo init_ghost_info()
     return info;
 }
 
-void ghost_main(int info_in, int pos_out, int log_out) //int num_fantasmi
+void ghost_main(int info_in, int pos_out, int bullet_out, int log_out) //int num_fantasmi
 {
     int num_fantasmi = 4;
     GhostInfo info_pkg = init_ghost_info();
-    GhostTimers timers = {};
     GhostShared ghost_shared = {};
     ghost_shared.ghost_number = 0;
     ghost_shared.pacman = init_pacman_char().e;
     ghost_shared.paused = true;
     ghost_shared.mode = M_CHASE;
     ghost_shared.pos_out = pos_out;
+    ghost_shared.bullet_out = bullet_out;
     ghost_shared.log_out = log_out;
     pthread_t fantasma;
     sem_init(&ghost_shared.mutex, 0, 1);
@@ -77,8 +79,7 @@ void ghost_main(int info_in, int pos_out, int log_out) //int num_fantasmi
 
     while(1)
     {
-        manage_g_info_in(info_in, &ghost_shared, &timers);
-        manage_g_timers(&timers, &ghost_shared);
+        manage_g_info_in(info_in, &ghost_shared);
     }
 }
 
@@ -100,6 +101,7 @@ void* ghost_thread(void* parameters)
     {       
         sem_wait(&ghost_shared->mutex);
         manage_shared_info(ghost_shared, &ghost);
+        manage_g_timers(ghost_shared, &ghost);
         ghost_choose_dir(&ghost, ghost_shared); 
         if(!ghost_shared->paused) ghost_move(&ghost);
         manage_position_events(&ghost);
@@ -112,22 +114,23 @@ void* ghost_thread(void* parameters)
 void manage_shared_info(GhostShared* ghost_shared, CharGhost* ghost)
 {
     //sem_wait(&ghost_shared->mutex);
-    
+    /*
     if(ghost->mode != M_DEAD)
     {
-        if(ghost_shared->fright && !ghost->frighted)
+        if(ghost_shared->fright && ghost->frighted)
         {
             ghost->mode = M_FRIGHT;
-            ghost->frighted = true;
+            
+            ghost->frighted = false;
         }
         else if(!ghost_shared->fright)
             ghost->mode = ghost_shared->mode;
-    }
+    }*/
 
     //sem_post(&ghost_shared->mutex);
 }
 
-void manage_g_info_in(int info_in, GhostShared* ghost_shared, GhostTimers* timers)
+void manage_g_info_in(int info_in, GhostShared* ghost_shared)
 {
     GhostInfo info;
     static int i=0;
@@ -142,15 +145,13 @@ void manage_g_info_in(int info_in, GhostShared* ghost_shared, GhostTimers* timer
         }
         if(info.fright)
         {
-            timers->fright = start_timer(6e3);
-            ghost_shared->fright = true; 
             for(i=0; i < ghost_shared->ghost_number; i++)
             {
                 if(ghost_shared->ghosts[i]->mode != M_DEAD && !is_in_pen(*ghost_shared->ghosts[i]))
                 {
-                    ghost_shared->ghosts[i]->frighted = false;
+                    ghost_shared->ghosts[i]->timers.fright = start_timer(6e3);
+                    ghost_shared->ghosts[i]->mode = M_FRIGHT;
                     reverse_direction(&(ghost_shared->ghosts[i]->e.dir));
-                    
                 }
             } 
         }
@@ -163,7 +164,6 @@ void manage_g_info_in(int info_in, GhostShared* ghost_shared, GhostTimers* timer
             ghost_shared->paused = true;
             ghost_shared->fright = false;
             ghost_shared->mode = M_CHASE;
-            timers->fright = 0;
         }
         if(info.pause)
         {
@@ -185,23 +185,50 @@ void manage_g_info_in(int info_in, GhostShared* ghost_shared, GhostTimers* timer
     sem_post(&ghost_shared->mutex);
 }
 
-void manage_g_timers(GhostTimers* timers, GhostShared* ghost_shared)
+void manage_g_timers(GhostShared* ghost_shared, CharGhost* ghost)
 {
+    BulletInfo bullet_info = {};
     int i;
 
-    if(timers->fright != 0)
+    if(ghost->timers.fright != 0)
     {
-        if(!check_timer(timers->fright))
+        if(!check_timer(ghost->timers.fright))
         {
-            sem_wait(&ghost_shared->mutex);
-            for(i=0; i < ghost_shared->ghost_number; i++)
-            {            
-                ghost_shared->ghosts[i]->frighted = false;
-            }
-            ghost_shared->fright = false; //ciclo di chase saltato?   
-            sem_post(&ghost_shared->mutex);
+            if(ghost->mode != M_DEAD)
+                ghost->mode = ghost_shared->mode;
+            ghost->timers.fright = 0; 
+        }
+    }
+    if(ghost->timers.shoot != 0)
+    {
+        if(ghost->mode == M_CHASE && !check_timer(ghost->timers.shoot))
+        {
+            for(i = 0; i < 4; i++)
+            {
+                bullet_info.create_bullet = true;
+                bullet_info.p = ghost->e.p;
+                bullet_info.dir = i;
+                bullet_info.enemy = true;
 
-            timers->fright = 0; 
+                switch(bullet_info.dir)
+                {
+                    case UP:
+                        bullet_info.p.y--;
+                        break;
+                    case LEFT:
+                        bullet_info.p.x-=2;
+                        break;
+                    case DOWN:
+                        bullet_info.p.y++;
+                        break;
+                    case RIGHT:
+                        bullet_info.p.x+=2;
+                        break;
+                }       
+                
+                write(ghost_shared->bullet_out, &bullet_info, sizeof(bullet_info));
+            }
+            ghost->timers.shoot = start_timer(1e3); 
         }
     }
 }

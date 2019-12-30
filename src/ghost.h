@@ -26,16 +26,17 @@ typedef struct
 
 typedef struct
 {
-    Entity e;
-    int ghost_id;
-    GhostMode mode;
-    _Bool frighted;
-} CharGhost;
+    unsigned long long fright;
+    unsigned long long int shoot;
+} GhostTimers;
 
 typedef struct
 {
-    unsigned long long fright;
-} GhostTimers;
+    Entity e;
+    int ghost_id;
+    GhostMode mode;
+    GhostTimers timers;
+} CharGhost;
 
 typedef struct
 {
@@ -47,12 +48,13 @@ typedef struct
     sem_t mutex;
     _Bool paused;
     int pos_out;
+    int bullet_out;
     int log_out;
 } GhostShared;
 
 CharGhost init_ghost_char();
 GhostInfo init_ghost_info();
-void ghost_main(int, int, int);
+void ghost_main(int, int, int, int);
 _Bool can_move_ghost(CharGhost, Direction);
 _Bool is_in_pen(CharGhost);
 

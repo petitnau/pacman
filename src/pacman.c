@@ -1,13 +1,13 @@
 #include <stdbool.h>
 #include <unistd.h>
+#include <stdio.h>
 
 #include "pacman.h"
 #include "entity.h"
 #include "utils.h"
 #include "interface.h"
 
-void manage_p_info_in(int, CharPacman*);
-void manage_p_cmd_in(int, CharPacman*, Direction*);
+void manage_p_info_in(int, int, CharPacman*);
 void switch_direction(CharPacman*);
 void pac_wait(CharPacman);
 _Bool accept_turn(CharPacman, Direction);
@@ -35,21 +35,21 @@ PacManInfo init_pacman_info()
     info.death = false;
     info.pause = false;
     info.resume = false;
+    info.shoot = false;
+    info.direction = -1;
     info.sleeptime = 0;
     return info;
 }
-void pacman_main(int cmd_in, int info_in, int pos_out, int log_out)
+void pacman_main(int info_in, int pos_out, int bullet_out, int log_out)
 {
     CharPacman pacman = init_pacman_char();
     PacManInfo info_pkg = init_pacman_info();
-    Direction cmd_pkg;
     int i;
 
     while(1)
     {
         //Legge solo l'ultimo inserito nella pipe e controlla se è una mossa valida
-        manage_p_info_in(info_in, &pacman);
-        manage_p_cmd_in(cmd_in, &pacman, &cmd_pkg);
+        manage_p_info_in(info_in, bullet_out, &pacman);
         switch_direction(&pacman);
         if (!pacman.paused) pacman_move(&pacman.e);
         write(pos_out, &pacman, sizeof(pacman)); //invia la posizione a control
@@ -57,12 +57,14 @@ void pacman_main(int cmd_in, int info_in, int pos_out, int log_out)
     }
 }
 
-void manage_p_info_in(int info_in, CharPacman *pacman)
+void manage_p_info_in(int info_in, int bullet_out, CharPacman *pacman)
 { 
     PacManInfo info_pkg;
+    BulletInfo bullet_info = {};
 
     while(read(info_in, &info_pkg, sizeof(info_pkg)) != -1)
     {                
+        //Pacman viene mangiato
         if(info_pkg.death)
         {
             pacman->e.p.x = PACMAN_START_X;
@@ -72,28 +74,54 @@ void manage_p_info_in(int info_in, CharPacman *pacman)
             pacman->paused = true;
             pacman->lives--;
         }
+        //Il gioco va in pausa
         if(info_pkg.pause)
         {
             pacman->paused = true;
         }
+        //Il gioco viene riavviato
         if(info_pkg.resume)
         {
             pacman->paused = false;
         }
+        //Pacman fermo
         if(info_pkg.sleeptime > 0)
         {
             usleep(info_pkg.sleeptime);
         }
-    }
-}
-
-void manage_p_cmd_in(int cmd_in, CharPacman* pacman, Direction* cmd_pkg)
-{
-    while(read(cmd_in, cmd_pkg, sizeof(*cmd_pkg)) != -1)
-    {            
-        if(accept_turn(*pacman, *cmd_pkg))
+        //Pacman sparo
+        if(info_pkg.shoot)
         {
-            pacman->next_dir = *cmd_pkg;
+            bullet_info.create_bullet = true;
+            bullet_info.p = pacman->e.p;
+            bullet_info.dir = pacman->e.dir;   
+            bullet_info.enemy = false;
+
+            switch(bullet_info.dir)
+            {
+                case UP:
+                    bullet_info.p.y--;
+                    break;
+                case LEFT:
+                    bullet_info.p.x-=2;
+                    break;
+                case DOWN:
+                    bullet_info.p.y++;
+                    break;
+                case RIGHT:
+                    bullet_info.p.x+=2;
+                    break;
+            }       
+
+            write(bullet_out, &bullet_info, sizeof(bullet_info));
+        }
+        //Pacman riceve una nuova direzione da control
+        if(info_pkg.direction != -1)
+        {  
+            if(accept_turn(*pacman, info_pkg.direction))
+            {
+                pacman->next_dir = info_pkg.direction;
+            }
         }
     }
 }

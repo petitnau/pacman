@@ -37,7 +37,6 @@ typedef struct
     int ghost_in;
     int ghost_out;
     int cmd_in;
-    int p_cmd_out;
     int log_in;
     int bullet_in;
     int bullet_out;

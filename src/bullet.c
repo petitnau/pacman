@@ -62,7 +62,7 @@ void* bullet_thread(void* parameters)
             
         write(b_par->bullet_pos, b_par->bullet, sizeof(*(b_par->bullet)));
         
-        movepause = 3e4;
+        movepause = 9e4;
         if(b_par->bullet->dir == UP || b_par->bullet->dir == DOWN) //gestisce la velocità di pacman
             movepause*=2;  
         

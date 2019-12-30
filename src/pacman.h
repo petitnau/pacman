@@ -27,7 +27,9 @@ typedef struct
     _Bool death;
     _Bool pause;
     _Bool resume;
+    _Bool shoot;
     int sleeptime;
+    int direction;
 } PacManInfo;
 
 CharPacman init_pacman_char();
