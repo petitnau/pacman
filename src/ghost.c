@@ -190,6 +190,9 @@ void manage_g_timers(GhostShared* ghost_shared, CharGhost* ghost)
     BulletInfo bullet_info = {};
     int i;
 
+    if(ghost_shared->paused)
+        return;
+
     if(ghost->timers.fright != 0)
     {
         if(!check_timer(ghost->timers.fright))
@@ -201,7 +204,7 @@ void manage_g_timers(GhostShared* ghost_shared, CharGhost* ghost)
     }
     if(ghost->timers.shoot != 0)
     {
-        if(ghost->mode == M_CHASE && !check_timer(ghost->timers.shoot))
+        if(!is_in_pen(*ghost) && ghost->e.p.x % 2 == 0 && ghost->mode == M_CHASE && !check_timer(ghost->timers.shoot))
         {
             for(i = 0; i < 4; i++)
             {

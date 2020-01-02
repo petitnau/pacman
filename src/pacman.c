@@ -22,6 +22,7 @@ CharPacman init_pacman_char()
     pacman.e.p.x = PACMAN_START_X;
     pacman.e.p.y = PACMAN_START_Y;
     pacman.lives = PACMAN_START_LIVES;
+    pacman.armor = PACMAN_START_ARMOR;
     pacman.next_dir = PACMAN_START_DIR;
     pacman.paused = true;
     pacman.dead = false;
@@ -32,10 +33,12 @@ PacManInfo init_pacman_info()
 {
     PacManInfo info;
     info.new = false;
-    info.death = false;
+    info.hit = false;
+    info.collide = false;
     info.pause = false;
     info.resume = false;
     info.shoot = false;
+    info.reset = false;
     info.direction = -1;
     info.sleeptime = 0;
     return info;
@@ -65,14 +68,23 @@ void manage_p_info_in(int info_in, int bullet_out, CharPacman *pacman)
     while(read(info_in, &info_pkg, sizeof(info_pkg)) != -1)
     {                
         //Pacman viene mangiato
-        if(info_pkg.death)
+        if(info_pkg.hit)
         {
-            pacman->e.p.x = PACMAN_START_X;
-            pacman->e.p.y = PACMAN_START_Y;
-            pacman->e.dir = PACMAN_START_DIR;
-            pacman->next_dir = PACMAN_START_DIR;
-            pacman->paused = true;
+            fprintf(stderr, "1");
+            if(pacman->armor <= 0)
+            {
+                pacman->lives--;
+                pacman->dead = true;
+            }
+            else
+            {
+                pacman->armor--;
+            }
+        }
+        if(info_pkg.collide)
+        {
             pacman->lives--;
+            pacman->dead = true;
         }
         //Il gioco va in pausa
         if(info_pkg.pause)
@@ -89,7 +101,7 @@ void manage_p_info_in(int info_in, int bullet_out, CharPacman *pacman)
         {
             usleep(info_pkg.sleeptime);
         }
-        //Pacman sparo
+        //Pacman sparocharacters.pacman
         if(info_pkg.shoot)
         {
             bullet_info.create_bullet = true;
@@ -114,6 +126,16 @@ void manage_p_info_in(int info_in, int bullet_out, CharPacman *pacman)
             }       
 
             write(bullet_out, &bullet_info, sizeof(bullet_info));
+        }
+        if(info_pkg.reset)
+        {
+            pacman->armor = PACMAN_START_ARMOR;
+            pacman->e.p.x = PACMAN_START_X;
+            pacman->e.p.y = PACMAN_START_Y;
+            pacman->e.dir = PACMAN_START_DIR;
+            pacman->next_dir = PACMAN_START_DIR;
+            pacman->dead = false;
+            pacman->paused = true;
         }
         //Pacman riceve una nuova direzione da control
         if(info_pkg.direction != -1)

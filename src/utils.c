@@ -40,19 +40,25 @@ void print_gui_string(int y, int x, char* str)
     attroff(COLOR_TEXT);
 }
 
-void print_lives(int n)
+void print_lives(CharPacman pacman)
 {
     int i;
 
     attron(COLOR_PACMAN);
 
-    for(i = 0; i < n; i++)
+    for(i = 0; i < pacman.lives; i++)
         mvprintw(37,4+(i*4), S_PACMAN[LEFT]);
 
     attroff(COLOR_PACMAN);
 
-    for(i = n; i < MAX_HP; i++)
+    for(i = pacman.lives; i < MAX_HP; i++)
         mvprintw(37,4+(i*4), "   ");
+
+    for(i = 0; i < pacman.armor; i++)
+        mvprintw(37, 15+(i*2), "V");
+
+    for(i = pacman.armor; i < PACMAN_START_ARMOR; i++)
+        mvprintw(37,15+(i*2), " ");
 }
 
 void print_map_at(int x, int y)

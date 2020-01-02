@@ -46,7 +46,7 @@
 
 void print_gui_string(int, int, char*); 
 void print_map_at(int, int);
-void print_lives(int n);
+void print_lives(CharPacman);
 void print_map();
 void print_food(char[MAP_HEIGHT][MAP_WIDTH]);
 char get_map_at(int, int);

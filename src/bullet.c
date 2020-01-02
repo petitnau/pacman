@@ -62,7 +62,7 @@ void* bullet_thread(void* parameters)
             
         write(b_par->bullet_pos, b_par->bullet, sizeof(*(b_par->bullet)));
         
-        movepause = 9e4;
+        movepause = 3e4;
         if(b_par->bullet->dir == UP || b_par->bullet->dir == DOWN) //gestisce la velocità di pacman
             movepause*=2;  
         
@@ -108,11 +108,9 @@ void manage_b_info_in(int bullet_info, int bullet_pos, BulletList* list)
             pthread_mutex_lock(&bullet_mutex);
             bullet.id = info.destroy_id;
             aux = b_list_search(*list, bullet);
-            aux->bullet.dead = true;
+            if(aux != NULL)
+                aux->bullet.dead = true;
             pthread_mutex_unlock(&bullet_mutex);
-
-            pthread_join(info.destroy_id, NULL);
-            
         }
     }
 }

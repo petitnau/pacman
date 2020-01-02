@@ -31,18 +31,22 @@ void print_bullet(Bullet bullet)
     int i;
     char sprite[3];
     
-    if(bullet.enemy)
-        attron(COLOR_PAIR(10));
-    else
-        attron(COLOR_PAIR(17));
-    
-    pos = get_pac_eff_pos(pos);
-    mvaddch(pos.y+GUI_HEIGHT,pos.x, '+');
+    if(!bullet.dead)
+    {
+        if(bullet.enemy)
+            attron(COLOR_PAIR(10));
+        else
+            attron(COLOR_PAIR(17));
+        
+        pos = get_pac_eff_pos(pos);
+        mvaddch(pos.y+GUI_HEIGHT,pos.x, '+');
 
-    if(bullet.enemy)
-        attroff(COLOR_PAIR(10));
-    else
-        attroff(COLOR_PAIR(17));}
+        if(bullet.enemy)
+            attroff(COLOR_PAIR(10));
+        else
+            attroff(COLOR_PAIR(17));
+    }        
+}
 
 void print_ghost(CharGhost ghost)
 {
@@ -171,8 +175,7 @@ void print_ui(ControlData* cd)
     print_gui_string(3,33, "0");
     print_gui_string(3,31, scorestr);
     print_gui_string(0,37, "HIGH SCORE");
-    print_lives(cd->characters.pacman.lives);
-    print_pacman(cd->characters.pacman);
+    print_lives(cd->characters.pacman);
     
     BulletNode* aux = cd->characters.bullets.head;
     while(aux != NULL)
@@ -181,6 +184,8 @@ void print_ui(ControlData* cd)
         aux = aux->next;
     }
     
+    print_pacman(cd->characters.pacman);
+
     for(i = 0; i < cd->characters.num_ghosts; i++)
     {                 
         print_ghost(cd->characters.ghosts[i]);

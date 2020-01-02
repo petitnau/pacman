@@ -99,7 +99,7 @@ void control_main(ControlPipes pipes)
         send_pacman_info(&cd);
         send_ghost_info(&cd);
         print_ui(&cd);
-        mvprintw(0,60, "%d          ", cd.characters.bullets.count);
+        mvprintw(0,60, "%d          ", cd.characters.pacman.armor);
         refresh();
 
         manage_logs(pipes.log_in, &log_list);
@@ -153,7 +153,7 @@ void manage_cmd_in(ControlData* cd)
                 new_pkg = true;
                 cd->pacman_info.direction = RIGHT;
                 break;
-            case 'l':
+            case ' ':
                 new_pkg = true;
                 cd->pacman_info.shoot = true;
                 break;
@@ -197,6 +197,11 @@ void manage_pacman_in(ControlData* cd)
         
         cd->ghost_info.pacman = cd->characters.pacman.e;
         cd->ghost_info.new = true;
+
+        if(pacman_pkg.dead)
+        {
+            reset_game(cd);
+        }
     }
 }
 
@@ -324,7 +329,8 @@ void food_handler(ControlData* cd)
 
 void collision_handler(ControlData* cd)
 {
-    int i,j;
+    _Bool flag = false;
+    int i, j;
     CharGhost* ghost;
 
     for(i = 0; i < cd->characters.num_ghosts; i++)
@@ -338,24 +344,17 @@ void collision_handler(ControlData* cd)
                 kill_ghost(cd, i);
 
                 eat_pause(cd, pow(2,(cd->ghost_streak))*100);
-                // morto il fantasma
             }
             else if(ghost->mode != M_DEAD && !cd->characters.pacman.dead)
             {
-                BulletNode *aux = cd->characters.bullets.head;
-
-                while(aux != NULL)
-                {
-                    fprintf(stderr, "test"); //TODO non funziona niente 
-                    kill_bullet(cd, aux);
-                    aux = aux->next;
-                }
-                kill_pacman(cd);
+                cd->pacman_info.new = true;
+                cd->pacman_info.collide = true;
+                cd->characters.pacman.dead = true;
             }
         }
     }
     
-    BulletNode* aux = cd->characters.bullets.head;
+    BulletNode *aux = cd->characters.bullets.head, *aux2 = cd->characters.bullets.head;
     while(aux != NULL)
     {
         if(!aux->bullet.dead)
@@ -371,13 +370,25 @@ void collision_handler(ControlData* cd)
                         break;
                     }
                 }
+                while(aux2 != NULL) //Distruzione spari quando collidono di pacman e ghost
+                {
+                    if(aux2->bullet.enemy && aux->bullet.p.x == aux2->bullet.p.x && aux->bullet.p.y == aux2->bullet.p.y)
+                    {
+                        kill_bullet(cd, aux);
+                        kill_bullet(cd, aux2);
+                        break;
+                    }
+
+                    aux2 = aux2->next;
+                }
             }
             else
             {
                 if(aux->bullet.p.x == cd->characters.pacman.e.p.x && aux->bullet.p.y == cd->characters.pacman.e.p.y)
-                {
+                {               
+                    cd->pacman_info.new = true;
+                    cd->pacman_info.hit = true;
                     kill_bullet(cd, aux);
-                    kill_pacman(cd);
                 }
             }
         }
@@ -385,14 +396,23 @@ void collision_handler(ControlData* cd)
     }
 }
 
-void kill_pacman(ControlData* cd)
+void reset_game(ControlData* cd)
 {
-    cd->characters.pacman.dead = true;
-    cd->pacman_info.death = true;
-    cd->pacman_info.new = true;
+    BulletNode *aux = cd->characters.bullets.head, *aux2;
+
+    while(aux != NULL)
+    {
+        kill_bullet(cd, aux);
+        aux2 = aux;
+        aux = aux->next;
+    }
+
     cd->ghost_info.restart = true;
     cd->ghost_info.new = true;
+    cd->pacman_info.reset = true;
+    cd->pacman_info.new = true;
 }
+
 void kill_ghost(ControlData* cd, int i)
 {
     cd->ghost_streak++;
