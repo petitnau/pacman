@@ -165,7 +165,7 @@ void print_ui(ControlData* cd)
     char nupstr[10];    
 
     //erase(); //Cancella tutto
-    print_map();
+    print_map(cd->options.map);
     print_food(cd->game_food);
     sprintf(scorestr, "%d", cd->score/10);
     sprintf(nupstr, "1UP");

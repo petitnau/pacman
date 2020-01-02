@@ -61,9 +61,9 @@ void print_lives(CharPacman pacman)
         mvprintw(37,15+(i*2), " ");
 }
 
-void print_map_at(int x, int y)
+void print_map_at(int x, int y, char map[MAP_HEIGHT][MAP_WIDTH])
 {
-    char c = MAP[y][x];
+    char c = map[y][x];
 
     attron(COLOR_MAP);
 
@@ -81,13 +81,13 @@ void print_map_at(int x, int y)
     attroff(COLOR_MAP);
 }
 
-void print_map()
+void print_map(char map[MAP_HEIGHT][MAP_WIDTH])
 {
     int i,j;
 
     for(i=0; i<MAP_WIDTH; i++)
         for(j=0; j<MAP_HEIGHT; j++)
-           print_map_at(i, j);
+           print_map_at(i, j, map);
 }
 
 void print_food_at(int x, int y, char game_food[MAP_HEIGHT][MAP_WIDTH])
@@ -125,12 +125,12 @@ void print_food(char game_food[MAP_HEIGHT][MAP_WIDTH])
 }
 
 
-char get_map_at(int x, int y)
+char get_map_at(int x, int y, char map[MAP_HEIGHT][MAP_WIDTH])
 {
     Position orig_pos = {x,y};
     Position mod_pos = get_pac_eff_pos(orig_pos);
 
-    return MAP[mod_pos.y][mod_pos.x];
+    return map[mod_pos.y][mod_pos.x];
 }
 
 Position get_pac_eff_pos(Position pos)

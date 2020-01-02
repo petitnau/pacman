@@ -5,6 +5,7 @@
 #include <semaphore.h>
 #include "utils.h"
 #include "list.h"
+#include "options.h"
 
 static const Position GHOST_START_POS[4] = {{27,11},{27,14},{24,14},{30,14}};
 
@@ -41,6 +42,7 @@ typedef struct
 typedef struct
 {
     CharGhost** ghosts;
+    Options options;
     int ghost_number;
     Entity pacman;
     GhostMode mode;
@@ -54,8 +56,8 @@ typedef struct
 
 CharGhost init_ghost_char();
 GhostInfo init_ghost_info();
-void ghost_main(int, int, int, int);
-_Bool can_move_ghost(CharGhost, Direction);
+void ghost_main(Options ,int, int, int, int);
+_Bool can_move_ghost(CharGhost, Direction, char map[MAP_HEIGHT][MAP_WIDTH]);
 _Bool is_in_pen(CharGhost);
 
 #endif

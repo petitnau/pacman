@@ -11,9 +11,9 @@
 #include "menu.h" 
 #include "pacman.h" 
 #include "control.h"
-#include "utils.h"
 #include "player.h"
 #include "ghost.h"
+#include "options.h"
 
 void init()
 {
@@ -64,11 +64,11 @@ int main()
     int mode;
     pid_t p_player, p_pacman, p_ghosts, p_bullet;
     int pacman_ch_pipe[2], pacman_info_pipe[2], ghost_ch_pipe[2], ghost_info_pipe[2], cmd_pipe[2], log_pipe[2], bullet_info [2], bullet_pos[2];
-
     init();
+    Options options;
 
     mode = main_menu();
-
+    options =  choose_options(mode);
     //print_map();
     //print_food();
     refresh();
@@ -124,7 +124,7 @@ int main()
             close(bullet_info[P_RD]);
             close(bullet_pos[P_RD]);
             close(bullet_pos[P_WR]);
-            pacman_main(pacman_info_pipe[P_RD], pacman_ch_pipe[P_WR], bullet_info[P_WR], log_pipe[P_WR]);
+            pacman_main(options, pacman_info_pipe[P_RD], pacman_ch_pipe[P_WR], bullet_info[P_WR], log_pipe[P_WR]);
     }   
 
     switch(p_ghosts = fork())
@@ -144,7 +144,7 @@ int main()
             close(bullet_info[P_RD]);
             close(bullet_pos[P_RD]);
             close(bullet_pos[P_WR]);
-            ghost_main(ghost_info_pipe[P_RD], ghost_ch_pipe[P_WR], bullet_info[P_WR], log_pipe[P_WR]);
+            ghost_main(options,ghost_info_pipe[P_RD], ghost_ch_pipe[P_WR], bullet_info[P_WR], log_pipe[P_WR]);
     }
 
     switch(p_player = fork())
@@ -207,7 +207,11 @@ int main()
                         log_pipe[P_RD],
                         bullet_pos[P_RD],
                         bullet_info[P_WR]};
-    control_main(pipes);
+
+                 fprintf(stderr, "bbb");
+
+    control_main(pipes, options);
+    
     
     getchar();
     kill(p_pacman, 1);

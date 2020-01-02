@@ -2,6 +2,7 @@
 #define PACMAN_H
 
 #include "utils.h"
+#include "options.h"
 
 #define PACMAN_START_X 27
 #define PACMAN_START_Y 23
@@ -38,6 +39,6 @@ typedef struct
 
 CharPacman init_pacman_char();
 PacManInfo init_pacman_info();
-void pacman_main(int, int, int, int);
+void pacman_main(Options options, int, int, int, int);
 
 #endif

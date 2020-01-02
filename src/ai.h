@@ -22,9 +22,9 @@ Position scatter_target(int id);
 Position eaten_target();
 Position offset_position(Position, Direction, int);
 
-Direction choose_direction_random(CharGhost);
-Direction choose_direction_target(CharGhost, Position); //Si può usare entity
-void ghost_possible_dirs(CharGhost, _Bool [4]);
+Direction choose_direction_random(CharGhost, char map[MAP_HEIGHT][MAP_WIDTH]);
+Direction choose_direction_target(CharGhost, Position, char map[MAP_HEIGHT][MAP_WIDTH]); //Si può usare entity
+void ghost_possible_dirs(CharGhost, _Bool [4], char map[MAP_HEIGHT][MAP_WIDTH]);
 
 
 #endif

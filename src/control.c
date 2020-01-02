@@ -10,11 +10,11 @@
 #include "ghost.h"
 #include "entity.h"
 #include "bullet.h"
-#include "interface.h"
 #include "list.h"
 #include "menu.h"
+#include "interface.h"
 
-void init_control_data(ControlData*, ControlPipes*);
+void init_control_data(ControlData*, ControlPipes*, Options);
 
 void manage_cmd_in(ControlData*);
 void manage_pacman_in(ControlData*);
@@ -31,15 +31,16 @@ void food_setup(char[MAP_HEIGHT][MAP_WIDTH]);
 void eat_pause(ControlData*, int);
 void create_fruit(ControlData*);
 
-void init_control_data(ControlData* cd, ControlPipes* pipes)
+void init_control_data(ControlData* cd, ControlPipes* pipes, Options options)
 {
     cd->characters.pacman = init_pacman_char();
     cd->pacman_info = init_pacman_info();
     cd->ghost_info = init_ghost_info();
+    cd->options = options;
     cd->characters.bullets.head = NULL;
     cd->characters.bullets.tail = NULL;
     cd->characters.bullets.count = 0;
-    cd->characters.ghosts = malloc(sizeof(CharGhost)*4);
+    cd->characters.ghosts = malloc(sizeof(CharGhost)*options.num_ghosts);
     
     cd->temp_text.timer = 0;
     cd->timers.fright_timer = 0;
@@ -49,7 +50,7 @@ void init_control_data(ControlData* cd, ControlPipes* pipes)
     cd->score = 0;
     cd->eaten_dots = 0;
     cd->ghost_streak = 0;
-
+    
     food_setup(cd->game_food);
 }
 
@@ -79,14 +80,16 @@ void manage_logs(int log_in, MessageList* log_list)
     refresh();
 }
 
-void control_main(ControlPipes pipes)
+void control_main(ControlPipes pipes, Options options)
 {
     ControlData cd; 
-    init_control_data(&cd, &pipes);
+
+    init_control_data(&cd, &pipes, options);
     
     MessageList log_list;
     m_list_init(&log_list);
     b_list_init(&cd.characters.bullets);
+
 
     while(1)
     {  

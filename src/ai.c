@@ -64,14 +64,14 @@ Position offset_position (Position position, Direction direction, int quantity)
     return position;
 }
 
-Direction choose_direction_random (CharGhost ghost)
+Direction choose_direction_random (CharGhost ghost, char map[MAP_HEIGHT][MAP_WIDTH])
 {
     int i;
     int rand_dir;
     int num_possible = 0;
     _Bool possible_dirs[4] = {};
 
-    ghost_possible_dirs(ghost, possible_dirs);
+    ghost_possible_dirs(ghost, possible_dirs, map);
 
     for (i=0; i < 4; i++)
         if (possible_dirs[i])
@@ -93,13 +93,13 @@ Direction choose_direction_random (CharGhost ghost)
     }
 }
 
-void ghost_possible_dirs(CharGhost ghost, _Bool possible_dirs[4])
+void ghost_possible_dirs(CharGhost ghost, _Bool possible_dirs[4], char map[MAP_HEIGHT][MAP_WIDTH])
 {
     int i;
 
     for (i=0; i < 4; i++)      
     {
-        possible_dirs[i] = can_move_ghost(ghost, i);        
+        possible_dirs[i] = can_move_ghost(ghost, i, map);        
     }
 
     switch(ghost.e.dir)
@@ -115,7 +115,7 @@ void ghost_possible_dirs(CharGhost ghost, _Bool possible_dirs[4])
     }
 }
 
-Direction choose_direction_target (CharGhost ghost, Position target)
+Direction choose_direction_target (CharGhost ghost, Position target, char map[MAP_HEIGHT][MAP_WIDTH])
 {
     int i;
     float dir_dist[4];
@@ -126,7 +126,7 @@ Direction choose_direction_target (CharGhost ghost, Position target)
 
     _Bool possible_dirs[4] = {};
 
-    ghost_possible_dirs(ghost, possible_dirs);
+    ghost_possible_dirs(ghost, possible_dirs, map);
 
     for (i=0; i < 4; i++)
     {

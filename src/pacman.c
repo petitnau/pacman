@@ -6,13 +6,14 @@
 #include "entity.h"
 #include "utils.h"
 #include "interface.h"
+#include "options.h"
 
-void manage_p_info_in(int, int, CharPacman*);
-void switch_direction(CharPacman*);
+void manage_p_info_in(int, int, CharPacman*, char[MAP_HEIGHT][MAP_WIDTH]);
+void switch_direction(CharPacman*, char map[MAP_HEIGHT][MAP_WIDTH]);
 void pac_wait(CharPacman);
-_Bool accept_turn(CharPacman, Direction);
-void pacman_move(Entity*);
-_Bool can_move_pacman(Entity, Direction);
+_Bool accept_turn(CharPacman, Direction, char[MAP_HEIGHT][MAP_WIDTH]);
+void pacman_move(Entity*, char map[MAP_HEIGHT][MAP_WIDTH]);
+_Bool can_move_pacman(Entity, Direction, char[MAP_HEIGHT][MAP_WIDTH]);
 
 CharPacman init_pacman_char()
 {
@@ -43,7 +44,7 @@ PacManInfo init_pacman_info()
     info.sleeptime = 0;
     return info;
 }
-void pacman_main(int info_in, int pos_out, int bullet_out, int log_out)
+void pacman_main(Options options, int info_in, int pos_out, int bullet_out, int log_out)
 {
     CharPacman pacman = init_pacman_char();
     PacManInfo info_pkg = init_pacman_info();
@@ -52,15 +53,15 @@ void pacman_main(int info_in, int pos_out, int bullet_out, int log_out)
     while(1)
     {
         //Legge solo l'ultimo inserito nella pipe e controlla se è una mossa valida
-        manage_p_info_in(info_in, bullet_out, &pacman);
-        switch_direction(&pacman);
-        if (!pacman.paused) pacman_move(&pacman.e);
+        manage_p_info_in(info_in, bullet_out, &pacman, options.map);
+        switch_direction(&pacman, options.map);
+        if (!pacman.paused) pacman_move(&pacman.e, options.map);
         write(pos_out, &pacman, sizeof(pacman)); //invia la posizione a control
         pac_wait(pacman);
     }
 }
 
-void manage_p_info_in(int info_in, int bullet_out, CharPacman *pacman)
+void manage_p_info_in(int info_in, int bullet_out, CharPacman *pacman, char map[MAP_HEIGHT][MAP_WIDTH])
 { 
     PacManInfo info_pkg;
     BulletInfo bullet_info = {};
@@ -140,7 +141,7 @@ void manage_p_info_in(int info_in, int bullet_out, CharPacman *pacman)
         //Pacman riceve una nuova direzione da control
         if(info_pkg.direction != -1)
         {  
-            if(accept_turn(*pacman, info_pkg.direction))
+            if(accept_turn(*pacman, info_pkg.direction, map))
             {
                 pacman->next_dir = info_pkg.direction;
             }
@@ -148,9 +149,9 @@ void manage_p_info_in(int info_in, int bullet_out, CharPacman *pacman)
     }
 }
 
-void switch_direction(CharPacman* pacman)
+void switch_direction(CharPacman* pacman, char map[MAP_HEIGHT][MAP_WIDTH])
 {
-    if(can_move_pacman(pacman->e, pacman->next_dir))   //controlla se può fare movimento nella nuova direzione
+    if(can_move_pacman(pacman->e, pacman->next_dir, map))   //controlla se può fare movimento nella nuova direzione
         pacman->e.dir = pacman->next_dir;
 }
 
@@ -164,7 +165,7 @@ void pac_wait(CharPacman pacman)
     usleep(movepause);
 }
 
-_Bool accept_turn(CharPacman pacman, Direction direction)
+_Bool accept_turn(CharPacman pacman, Direction direction, char map[MAP_HEIGHT][MAP_WIDTH])
 {
     int i;
 
@@ -176,9 +177,9 @@ _Bool accept_turn(CharPacman pacman, Direction direction)
             else
                 for(i=0; i<VERTICALCUT; i++)
                 {
-                    if(pacman.e.dir == RIGHT && is_empty_space(get_map_at(pacman.e.p.x+i, pacman.e.p.y-1)))
+                    if(pacman.e.dir == RIGHT && is_empty_space(get_map_at(pacman.e.p.x+i, pacman.e.p.y-1, map)))
                             return true;
-                    else if(pacman.e.dir == LEFT && is_empty_space(get_map_at(pacman.e.p.x-i, pacman.e.p.y-1)))
+                    else if(pacman.e.dir == LEFT && is_empty_space(get_map_at(pacman.e.p.x-i, pacman.e.p.y-1, map)))
                             return true;
                 }
             break;
@@ -188,9 +189,9 @@ _Bool accept_turn(CharPacman pacman, Direction direction)
             else
                 for(i=0; i<HORIZONTALCUT; i++)
                 {
-                    if(pacman.e.dir == UP && is_empty_space(get_map_at(pacman.e.p.x-2, pacman.e.p.y-i)))
+                    if(pacman.e.dir == UP && is_empty_space(get_map_at(pacman.e.p.x-2, pacman.e.p.y-i, map)))
                             return true;
-                    else if(pacman.e.dir == DOWN && is_empty_space(get_map_at(pacman.e.p.x-2, pacman.e.p.y+i)))
+                    else if(pacman.e.dir == DOWN && is_empty_space(get_map_at(pacman.e.p.x-2, pacman.e.p.y+i, map)))
                             return true;
                 }
             break;
@@ -200,9 +201,9 @@ _Bool accept_turn(CharPacman pacman, Direction direction)
             else
                 for(i=0; i<VERTICALCUT; i++)
                 {
-                    if(pacman.e.dir == RIGHT && is_empty_space(get_map_at(pacman.e.p.x+i, pacman.e.p.y+1)))
+                    if(pacman.e.dir == RIGHT && is_empty_space(get_map_at(pacman.e.p.x+i, pacman.e.p.y+1, map)))
                             return true;
-                    else if(pacman.e.dir == LEFT && is_empty_space(get_map_at(pacman.e.p.x-i, pacman.e.p.y+1)))
+                    else if(pacman.e.dir == LEFT && is_empty_space(get_map_at(pacman.e.p.x-i, pacman.e.p.y+1, map)))
                             return true;
                 }
             break;
@@ -212,9 +213,9 @@ _Bool accept_turn(CharPacman pacman, Direction direction)
             else
                 for(i=0; i<HORIZONTALCUT; i++)
                 {
-                    if(pacman.e.dir == UP && is_empty_space(get_map_at(pacman.e.p.x+2, pacman.e.p.y-i)))
+                    if(pacman.e.dir == UP && is_empty_space(get_map_at(pacman.e.p.x+2, pacman.e.p.y-i, map)))
                             return true;
-                    else if(pacman.e.dir == DOWN && is_empty_space(get_map_at(pacman.e.p.x+2, pacman.e.p.y+i)))
+                    else if(pacman.e.dir == DOWN && is_empty_space(get_map_at(pacman.e.p.x+2, pacman.e.p.y+i, map)))
                             return true;
                 }
             break;
@@ -223,9 +224,9 @@ _Bool accept_turn(CharPacman pacman, Direction direction)
     return false;
 }
 
-void pacman_move(Entity* pacman)
+void pacman_move(Entity* pacman, char map[MAP_HEIGHT][MAP_WIDTH])
 {         
-    if(can_move_pacman(*pacman, pacman->dir))
+    if(can_move_pacman(*pacman, pacman->dir, map))
     {        
         switch(pacman->dir)
         {
@@ -246,7 +247,7 @@ void pacman_move(Entity* pacman)
     map_loop(&pacman->p);
 }
 
-_Bool can_move_pacman(Entity entity, Direction direction)
+_Bool can_move_pacman(Entity entity, Direction direction, char map[MAP_HEIGHT][MAP_WIDTH])
 {
     int i;
 
@@ -255,23 +256,23 @@ _Bool can_move_pacman(Entity entity, Direction direction)
         case UP:
             for(i=-1; i<=1; i++)
             {
-                if(!is_empty_space(get_map_at(entity.p.x+i, entity.p.y-1)))
+                if(!is_empty_space(get_map_at(entity.p.x+i, entity.p.y-1, map)))
                     return false;
             }
             break;
         case LEFT:
-            if(!is_empty_space(get_map_at(entity.p.x-2, entity.p.y)))
+            if(!is_empty_space(get_map_at(entity.p.x-2, entity.p.y, map)))
                 return false;
             break;
         case DOWN:
             for(i=-1; i<=1; i++)
             {
-                if(!is_empty_space(get_map_at(entity.p.x+i, entity.p.y+1)))
+                if(!is_empty_space(get_map_at(entity.p.x+i, entity.p.y+1, map)))
                     return false;
             }
             break;
         case RIGHT:
-            if(!is_empty_space(get_map_at(entity.p.x+2, entity.p.y)))
+            if(!is_empty_space(get_map_at(entity.p.x+2, entity.p.y, map)))
                 return false;
             break;
     }

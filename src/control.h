@@ -4,6 +4,7 @@
 #include "pacman.h"
 #include "ghost.h"
 #include "utils.h"
+#include "options.h"
 
 #define FRUIT_POS_Y 17
 #define FRUIT_POS_X 27
@@ -47,6 +48,7 @@ typedef struct
     GhostInfo ghost_info;
     PacManInfo pacman_info;
     Characters characters;
+    Options options;
 
     char game_food[MAP_HEIGHT][MAP_WIDTH];
     int score;
@@ -59,6 +61,6 @@ typedef struct
     ControlPipes* pipes;
 } ControlData;
 
-void control_main(ControlPipes);
+void control_main(ControlPipes, Options);
 
 #endif

@@ -57,7 +57,7 @@ void* bullet_thread(void* parameters)
         }
         map_loop(&b_par->bullet->p);
 
-        if(!is_empty_space(MAP[b_par->bullet->p.y][b_par->bullet->p.x]))
+        if(!is_empty_space(MAP_PACMAN[b_par->bullet->p.y][b_par->bullet->p.x]))
             b_par->bullet->dead = true;
             
         write(b_par->bullet_pos, b_par->bullet, sizeof(*(b_par->bullet)));

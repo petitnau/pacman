@@ -14,7 +14,7 @@ void manage_g_timers(GhostShared*, CharGhost*);
 void ghost_choose_dir(CharGhost*, GhostShared*);
 void manage_position_events(CharGhost*);
 void ghost_wait(CharGhost, GhostShared* ghost_shared);
-void ghost_move(CharGhost*);
+void ghost_move(CharGhost*, char[MAP_HEIGHT][MAP_WIDTH]);
 _Bool is_empty_space_ghost(char);
 void* ghost_thread(void*);
 void manage_shared_info(GhostShared* ghost_shared, CharGhost* ghost);
@@ -56,15 +56,17 @@ GhostInfo init_ghost_info()
     return info;
 }
 
-void ghost_main(int info_in, int pos_out, int bullet_out, int log_out) //int num_fantasmi
+void ghost_main(Options options, int info_in, int pos_out, int bullet_out, int log_out) //int num_fantasmi
 {
     int num_fantasmi = 4;
     GhostInfo info_pkg = init_ghost_info();
     GhostShared ghost_shared = {};
+    ghost_shared.options = options;
     ghost_shared.ghost_number = 0;
     ghost_shared.pacman = init_pacman_char().e;
     ghost_shared.paused = true;
     ghost_shared.mode = M_CHASE;
+    ghost_shared.pos_out = pos_out;
     ghost_shared.pos_out = pos_out;
     ghost_shared.bullet_out = bullet_out;
     ghost_shared.log_out = log_out;
@@ -103,7 +105,7 @@ void* ghost_thread(void* parameters)
         manage_shared_info(ghost_shared, &ghost);
         manage_g_timers(ghost_shared, &ghost);
         ghost_choose_dir(&ghost, ghost_shared); 
-        if(!ghost_shared->paused) ghost_move(&ghost);
+        if(!ghost_shared->paused) ghost_move(&ghost, ghost_shared->options.map);
         manage_position_events(&ghost);
         write(ghost_shared->pos_out, &ghost, sizeof(ghost)); //invia la posizione a control
         sem_post(&ghost_shared->mutex);
@@ -238,31 +240,32 @@ void manage_g_timers(GhostShared* ghost_shared, CharGhost* ghost)
 
 void ghost_choose_dir(CharGhost* ghost, GhostShared* ghost_shared)
 {
+
     switch(ghost->mode)
     {
         case M_FRIGHT:
-            ghost->e.dir = choose_direction_random(*ghost);
+            ghost->e.dir = choose_direction_random(*ghost, ghost_shared->options.map);
             break;
         case M_DEAD:
-            ghost->e.dir = choose_direction_target(*ghost, HOME_TARGET);
+            ghost->e.dir = choose_direction_target(*ghost, HOME_TARGET, ghost_shared->options.map);
             break;
         case M_SCATTER:
-            ghost->e.dir = choose_direction_target(*ghost, SCATTER[ghost->e.id]);
+            ghost->e.dir = choose_direction_target(*ghost, SCATTER[ghost->e.id], ghost_shared->options.map);
             break;
         case M_CHASE:
             switch(ghost->e.id)
             {
                 case 0: 
-                    ghost->e.dir = choose_direction_target(*ghost, blinky_target(ghost_shared->pacman));
+                    ghost->e.dir = choose_direction_target(*ghost, blinky_target(ghost_shared->pacman), ghost_shared->options.map);
                     break;
                 case 1:
-                    ghost->e.dir = choose_direction_target(*ghost, pinky_target(ghost_shared->pacman));
+                    ghost->e.dir = choose_direction_target(*ghost, pinky_target(ghost_shared->pacman), ghost_shared->options.map);
                     break;
                 case 2:
-                    ghost->e.dir = choose_direction_target(*ghost, inky_target(ghost_shared->pacman, ghost_shared->ghosts[0]->e));
+                    ghost->e.dir = choose_direction_target(*ghost, inky_target(ghost_shared->pacman, ghost_shared->ghosts[0]->e), ghost_shared->options.map);
                     break;
                 case 3:
-                    ghost->e.dir = choose_direction_target(*ghost, clyde_target(ghost_shared->pacman, ghost_shared->ghosts[3]->e));
+                    ghost->e.dir = choose_direction_target(*ghost, clyde_target(ghost_shared->pacman, ghost_shared->ghosts[3]->e), ghost_shared->options.map);
                     break;
             }
             break;
@@ -292,9 +295,9 @@ void ghost_wait(CharGhost ghost, GhostShared* ghost_shared)
     usleep(movepause);
 }
 
-void ghost_move(CharGhost* ghost)
+void ghost_move(CharGhost* ghost, char map[MAP_HEIGHT][MAP_WIDTH])
 {         
-    if(can_move_ghost(*ghost, ghost->e.dir))
+    if(can_move_ghost(*ghost, ghost->e.dir, map))
     {        
         switch(ghost->e.dir)
         {
@@ -320,7 +323,7 @@ _Bool is_empty_space_ghost(char c)
     return is_empty_space(c) || c=='^' || c=='<' || c=='>';
 }
 
-_Bool can_move_ghost(CharGhost ghost, Direction direction)
+_Bool can_move_ghost(CharGhost ghost, Direction direction, char map[MAP_HEIGHT][MAP_WIDTH])
 {
     int i;
 
@@ -329,31 +332,31 @@ _Bool can_move_ghost(CharGhost ghost, Direction direction)
         case UP:
             for(i=-1; i<=1; i++)
             {
-                if(!is_empty_space_ghost(get_map_at(ghost.e.p.x+i, ghost.e.p.y-1)))
+                if(!is_empty_space_ghost(get_map_at(ghost.e.p.x+i, ghost.e.p.y-1, map)))
                     return false;
             }
-            if(get_map_at(ghost.e.p.x, ghost.e.p.y) == '#')
+            if(get_map_at(ghost.e.p.x, ghost.e.p.y, map) == '#')
                 return false;
             break;
         case LEFT:
-            if(!is_empty_space_ghost(get_map_at(ghost.e.p.x-2, ghost.e.p.y)))
+            if(!is_empty_space_ghost(get_map_at(ghost.e.p.x-2, ghost.e.p.y, map)))
                 return false;
-            if(ghost.mode != M_DEAD && get_map_at(ghost.e.p.x-2, ghost.e.p.y) == '>')
+            if(ghost.mode != M_DEAD && get_map_at(ghost.e.p.x-2, ghost.e.p.y, map) == '>')
                 return false;
             break;
         case DOWN:
             for(i=-1; i<=1; i++)
             {
-                if(!is_empty_space_ghost(get_map_at(ghost.e.p.x+i,ghost.e.p.y+1)))
+                if(!is_empty_space_ghost(get_map_at(ghost.e.p.x+i,ghost.e.p.y+1, map)))
                     return false;
-                if(ghost.mode != M_DEAD && get_map_at(ghost.e.p.x+i, ghost.e.p.y+1) == '^')
+                if(ghost.mode != M_DEAD && get_map_at(ghost.e.p.x+i, ghost.e.p.y+1, map) == '^')
                     return false;
             }
             break;
         case RIGHT:
-            if(!is_empty_space_ghost(get_map_at(ghost.e.p.x+2, ghost.e.p.y)))
+            if(!is_empty_space_ghost(get_map_at(ghost.e.p.x+2, ghost.e.p.y, map)))
                 return false;
-            if(ghost.mode != M_DEAD && get_map_at(ghost.e.p.x+2, ghost.e.p.y) == '<')
+            if(ghost.mode != M_DEAD && get_map_at(ghost.e.p.x+2, ghost.e.p.y, map) == '<')
                 return false;
             break;
     }
