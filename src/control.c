@@ -157,8 +157,11 @@ void manage_cmd_in(ControlData* cd)
                 cd->pacman_info.direction = RIGHT;
                 break;
             case ' ':
-                new_pkg = true;
-                cd->pacman_info.shoot = true;
+                if(cd->options.options_shoot.enabled)
+                {
+                    new_pkg = true;
+                    cd->pacman_info.shoot = true;
+                }
                 break;
             /*
             case 'p':
