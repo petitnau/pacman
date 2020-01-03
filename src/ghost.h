@@ -23,6 +23,7 @@ typedef struct
     _Bool resume;
     int death;
     int sleeptime;
+    
 } GhostInfo;
 
 typedef struct

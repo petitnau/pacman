@@ -115,46 +115,6 @@ void print_ghost(CharGhost ghost)
     }
 }
 
-void unprint_area(int y, int x, int size, char game_food[MAP_HEIGHT][MAP_WIDTH])
-{
-    /*
-    Position pos;
-    int i;
-    char c;
-
-    for(i=0; i<size; i++)
-    {
-        pos.x=x+i;
-        pos.y=y;
-        pos = get_pac_eff_pos(pos);
-        
-        c = game_food[pos.y][pos.x];
-        if(c == '^')
-        {
-            attron(COLOR_GREENTEXT);
-            mvaddch(pos.y+GUI_HEIGHT, pos.x, c);
-            attroff(COLOR_GREENTEXT);
-        }
-        else if(c == '.')
-        {
-            attron(COLOR_REDTEXT);
-            mvaddch(pos.y+GUI_HEIGHT, pos.x, c);
-            attroff(COLOR_REDTEXT);
-        }
-        else if(c == '~' || c == '`')
-        {
-            attron(COLOR_PELLETS);
-            mvaddch(pos.y+GUI_HEIGHT, pos.x, NCURSES_ACS(c));
-            attroff(COLOR_PELLETS);
-        }
-        else if(c == ' ')
-        {
-            print_map_at(pos.x, pos.y);
-        }
-    }
-    */
-}
-
 void print_ui(ControlData* cd)
 {    
     //wborder(win, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '); // Erase frame around the window

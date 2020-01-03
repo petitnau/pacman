@@ -197,7 +197,6 @@ void manage_pacman_in(ControlData* cd)
 
     while(read(cd->pipes->pacman_in, &pacman_pkg, sizeof(pacman_pkg)) != -1)
     {
-        unprint_area(cd->characters.pacman.e.p.y, cd->characters.pacman.e.p.x-1, 3, cd->game_food);
         cd->characters.pacman = pacman_pkg;
         food_handler(cd);
         
@@ -217,7 +216,6 @@ void manage_ghost_in(ControlData* cd)
 
     while(read(cd->pipes->ghost_in, &ghost_pkg, sizeof(ghost_pkg)) != -1)
     {
-        unprint_area(cd->characters.ghosts[ghost_pkg.ghost_id].e.p.y, cd->characters.ghosts[ghost_pkg.ghost_id].e.p.x-1, 3, cd->game_food);
         cd->characters.ghosts[ghost_pkg.ghost_id] = ghost_pkg;
 
         if(ghost_pkg.ghost_id+1 > cd->characters.num_ghosts)
@@ -255,7 +253,6 @@ void manage_timers(ControlData* cd)
             cd->game_food[FRUIT_POS_Y][FRUIT_POS_X-1] = ' ';
             cd->game_food[FRUIT_POS_Y][FRUIT_POS_X] = ' ';
             cd->game_food[FRUIT_POS_Y][FRUIT_POS_X+1] = ' ';
-            unprint_area(FRUIT_POS_Y, FRUIT_POS_X-1, 3, cd->game_food);
             cd->timers.fruit_timer = 0;
         }
     if(cd->timers.fright_timer != 0)
@@ -335,7 +332,7 @@ void collision_handler(ControlData* cd)
 {
     _Bool flag = false;
     int i, j;
-    CharGhost* ghost;
+    CharGhost *ghost;
 
     for(i = 0; i < cd->characters.num_ghosts; i++)
     {

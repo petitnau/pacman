@@ -12,7 +12,7 @@
 void manage_g_info_in(int, GhostShared*);
 void manage_g_timers(GhostShared*, CharGhost*);
 void ghost_choose_dir(CharGhost*, GhostShared*);
-void manage_position_events(CharGhost*);
+void manage_position_events(GhostShared*, CharGhost*);
 void ghost_wait(CharGhost, GhostShared*);
 void ghost_move(CharGhost*, char[MAP_HEIGHT][MAP_WIDTH]);
 _Bool is_empty_space_ghost(char);
@@ -101,7 +101,7 @@ void* ghost_thread(void* parameters)
         manage_g_timers(ghost_shared, &ghost);
         ghost_choose_dir(&ghost, ghost_shared); 
         if(!ghost_shared->paused) ghost_move(&ghost, ghost_shared->options.map);
-        manage_position_events(&ghost);
+        manage_position_events(ghost_shared, &ghost);
         write(ghost_shared->pos_out, &ghost, sizeof(ghost)); //invia la posizione a control
         sem_post(&ghost_shared->mutex);
         ghost_wait(ghost, ghost_shared);
@@ -184,7 +184,7 @@ void manage_g_timers(GhostShared* ghost_shared, CharGhost* ghost)
     {
         if(!is_in_pen(*ghost) && ghost->e.p.x % 2 == 0 && ghost->mode == M_CHASE && !check_timer(ghost->timers.shoot))
         {
-            for(i = 0; i < 4; i++)
+            for(i = 0; i < ghost_shared->num_ghosts; i++)
             {
                 bullet_info.create_bullet = true;
                 bullet_info.p = ghost->e.p;
@@ -248,13 +248,32 @@ void ghost_choose_dir(CharGhost* ghost, GhostShared* ghost_shared)
     }
 }
 
-void manage_position_events(CharGhost* ghost)
+void manage_position_events(GhostShared* ghost_shared, CharGhost* ghost)
 {
     if(ghost->e.p.x == HOME_TARGET.x && ghost->e.p.y == HOME_TARGET.y && ghost->mode == M_DEAD)
     {
         ghost->e.dir = UP;
         ghost->mode = M_CHASE;
     }
+
+    int i;
+    if(!(ghost->e.p.x == HOME_TARGET.x && ghost->e.p.y == HOME_TARGET.y))
+    {
+        for(i = 0; i < ghost_shared->num_ghosts; i++)
+        {
+            if(i != ghost->ghost_id)
+            {
+                if(ghost->e.p.x == &ghost_shared->ghosts[i]->e.p.x && ghost->e.p.y == &ghost_shared->ghosts[i]->e.p.y)
+                {
+                    fprintf(stderr, "BOING");
+                     reverse_direction(&ghost->e.dir);
+                     reverse_direction(&ghost_shared->ghosts[i]->e.dir);
+                }
+            } 
+        
+        }
+    }
+  
 }
 
 void ghost_wait(CharGhost ghost, GhostShared* ghost_shared)
