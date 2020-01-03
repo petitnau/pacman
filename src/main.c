@@ -33,6 +33,7 @@ void init()
     init_color(COLOR_ORANGE, 1000, 700, 300);
     init_color(COLOR_PINK, 1000, 800, 800);
     init_color(COLOR_WHITE, 1000, 1000, 1000);
+    init_color(COLOR_GRAY, 350, 250, 250);
 
     init_pair(1, COLOR_BLUE, COLOR_BLACK);
     init_pair(2, COLOR_WHITE, COLOR_BLACK);
@@ -54,6 +55,7 @@ void init()
     init_pair(15, COLOR_WHITE, COLOR_WHITE);
     init_pair(16, COLOR_BLACK, COLOR_BLACK);
     init_pair(17, COLOR_YELLOW, COLOR_BLACK);
+    init_pair(18, COLOR_BLACK, COLOR_GRAY);
 
     refresh();
 }
@@ -68,7 +70,7 @@ int main()
     Options options;
 
     mode = main_menu();
-    options =  choose_options(mode);
+    options = choose_options(mode);
     //print_map();
     //print_food();
     refresh();
@@ -207,8 +209,6 @@ int main()
                         log_pipe[P_RD],
                         bullet_pos[P_RD],
                         bullet_info[P_WR]};
-
-                 fprintf(stderr, "bbb");
 
     control_main(pipes, options);
     

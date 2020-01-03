@@ -71,7 +71,6 @@ void manage_p_info_in(int info_in, int bullet_out, CharPacman *pacman, char map[
         //Pacman viene mangiato
         if(info_pkg.hit)
         {
-            fprintf(stderr, "1");
             if(pacman->armor <= 0)
             {
                 pacman->lives--;

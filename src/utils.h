@@ -29,6 +29,7 @@
 
 #define COLOR_PINK 8
 #define COLOR_ORANGE 9
+#define COLOR_GRAY 10
 
 #define COLOR_MAP COLOR_PAIR(1)
 #define COLOR_TEXT COLOR_PAIR(2)

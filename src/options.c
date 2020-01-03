@@ -24,7 +24,7 @@ Options pacman_options()
     options.options_shoot.shoot = false;
     options.options_shoot.armor = 0;
     options.options_spawn.spawn = false;
-    options.num_ghosts = 0;
+    options.num_ghosts = 4;
     options.options_spawn.time_spawn = 0;
     options.boing = false;
     options.death_timer = 0;

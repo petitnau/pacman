@@ -53,12 +53,20 @@ void print_lives(CharPacman pacman)
 
     for(i = pacman.lives; i < MAX_HP; i++)
         mvprintw(37,4+(i*4), "   ");
+    
+    attron(COLOR_PAIR(18));
 
     for(i = 0; i < pacman.armor; i++)
-        mvprintw(37, 15+(i*2), "V");
+    {
+        mvaddch(37,15+(i*4), '[');
+        mvaddch(37,16+(i*4), NCURSES_ACS('~'));
+        mvaddch(37,17+(i*4), ']');
+    }
+    
+    attroff(COLOR_PAIR(18));
 
     for(i = pacman.armor; i < PACMAN_START_ARMOR; i++)
-        mvprintw(37,15+(i*2), " ");
+        mvprintw(37,15+(i*4), "   ");
 }
 
 void print_map_at(int x, int y, char map[MAP_HEIGHT][MAP_WIDTH])

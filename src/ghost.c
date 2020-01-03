@@ -58,7 +58,6 @@ GhostInfo init_ghost_info()
 
 void ghost_main(Options options, int info_in, int pos_out, int bullet_out, int log_out) //int num_fantasmi
 {
-    int num_fantasmi = 4;
     GhostInfo info_pkg = init_ghost_info();
     GhostShared ghost_shared = {};
     ghost_shared.options = options;
@@ -72,7 +71,7 @@ void ghost_main(Options options, int info_in, int pos_out, int bullet_out, int l
     ghost_shared.log_out = log_out;
     pthread_t fantasma;
     sem_init(&ghost_shared.mutex, 0, 1);
-    ghost_shared.ghosts = malloc(sizeof(CharGhost*)*num_fantasmi);
+    ghost_shared.ghosts = malloc(sizeof(CharGhost*)*options.ghost_number);
 
     pthread_create(&fantasma, NULL, &ghost_thread, &ghost_shared);
     pthread_create(&fantasma, NULL, &ghost_thread, &ghost_shared);
