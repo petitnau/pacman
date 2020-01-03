@@ -6,13 +6,13 @@
 
 typedef struct 
 {
-    _Bool shoot;
+    _Bool enabled;
     int armor;
 }OptionsShoot;
 
 typedef struct 
 {
-    _Bool spawn;
+    _Bool enabled;
     int time_spawn;
 }OptionsSpawn;
 

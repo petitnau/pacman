@@ -37,7 +37,7 @@ typedef struct
     int direction;
 } PacManInfo;
 
-CharPacman init_pacman_char();
+CharPacman init_pacman_char(Options);
 PacManInfo init_pacman_info();
 void pacman_main(Options options, int, int, int, int);
 

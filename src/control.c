@@ -33,7 +33,7 @@ void create_fruit(ControlData*);
 
 void init_control_data(ControlData* cd, ControlPipes* pipes, Options options)
 {
-    cd->characters.pacman = init_pacman_char();
+    cd->characters.pacman = init_pacman_char(options);
     cd->pacman_info = init_pacman_info();
     cd->ghost_info = init_ghost_info();
     cd->options = options;

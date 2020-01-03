@@ -43,7 +43,7 @@ typedef struct
 {
     CharGhost** ghosts;
     Options options;
-    int ghost_number;
+    int num_ghosts;
     Entity pacman;
     GhostMode mode;
     _Bool fright;

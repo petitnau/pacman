@@ -15,7 +15,7 @@ _Bool accept_turn(CharPacman, Direction, char[MAP_HEIGHT][MAP_WIDTH]);
 void pacman_move(Entity*, char map[MAP_HEIGHT][MAP_WIDTH]);
 _Bool can_move_pacman(Entity, Direction, char[MAP_HEIGHT][MAP_WIDTH]);
 
-CharPacman init_pacman_char()
+CharPacman init_pacman_char(Options options)
 {
     CharPacman pacman;
     pacman.e.id = PACMAN_ID;
@@ -23,7 +23,7 @@ CharPacman init_pacman_char()
     pacman.e.p.x = PACMAN_START_X;
     pacman.e.p.y = PACMAN_START_Y;
     pacman.lives = PACMAN_START_LIVES;
-    pacman.armor = PACMAN_START_ARMOR;
+    pacman.armor = options.options_shoot.armor;
     pacman.next_dir = PACMAN_START_DIR;
     pacman.paused = true;
     pacman.dead = false;
@@ -46,7 +46,7 @@ PacManInfo init_pacman_info()
 }
 void pacman_main(Options options, int info_in, int pos_out, int bullet_out, int log_out)
 {
-    CharPacman pacman = init_pacman_char();
+    CharPacman pacman = init_pacman_char(options);
     PacManInfo info_pkg = init_pacman_info();
     int i;
 

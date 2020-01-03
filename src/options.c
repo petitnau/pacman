@@ -21,11 +21,11 @@ Options pacman_options()
 {
     int i;
     Options options;
-    options.options_shoot.shoot = false;
+    options.options_shoot.enabled = false;
     options.options_shoot.armor = 0;
-    options.options_spawn.spawn = false;
-    options.num_ghosts = 4;
+    options.options_spawn.enabled = false;
     options.options_spawn.time_spawn = 0;
+    options.num_ghosts = 4;
     options.boing = false;
     options.death_timer = 0;
     
@@ -41,11 +41,11 @@ Options gunman_options()
 {
     int i;
     Options options;
-    options.options_shoot.shoot = true;
+    options.options_shoot.enabled = true;
     options.options_shoot.armor = 5;
-    options.options_spawn.spawn = true;
-    options.num_ghosts = 4;
+    options.options_spawn.enabled = true;
     options.options_spawn.time_spawn = 3;
+    options.num_ghosts = 4;
     options.boing = true;
     options.death_timer = 3;
 
