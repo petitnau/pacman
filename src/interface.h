@@ -119,7 +119,6 @@ static const char PELLETS[MAP_HEIGHT][MAP_WIDTH+1] = {
 void print_pacman(CharPacman);
 void print_ghost(CharGhost);
 void unprint_area(int, int, int, char[MAP_HEIGHT][MAP_WIDTH]);
-void sunprint_area(int, int, int, ControlData*);
 void print_ui(ControlData*);
 void print_temp_text(TempText);
 void create_temp_text(TempText*, int, int, char*, int, int);

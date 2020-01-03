@@ -164,7 +164,6 @@ void print_ui(ControlData* cd)
     char scorestr[10];
     char nupstr[10];    
 
-    //erase(); //Cancella tutto
     print_map(cd->options.map);
     print_food(cd->game_food);
     sprintf(scorestr, "%d", cd->score/10);
@@ -212,18 +211,4 @@ void print_temp_text(TempText temp_text)
         refresh();
     }
     attroff(COLOR_PAIR(temp_text.color));
-}
-
-void sunprint_area(int y, int x, int size, ControlData* cd)
-{
-    /*
-    int i;
-
-    unprint_area(y-GUI_HEIGHT,x,size, cd->game_food);
-    print_pacman(cd->characters.pacman);
-    for(i = 0; i < cd->characters.num_ghosts; i++)
-    {
-        print_ghost(cd->characters.ghosts[i]);
-    }
-    */
 }

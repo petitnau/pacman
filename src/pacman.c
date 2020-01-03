@@ -8,7 +8,7 @@
 #include "interface.h"
 #include "options.h"
 
-void manage_p_info_in(int, int, CharPacman*, char[MAP_HEIGHT][MAP_WIDTH]);
+void manage_p_info_in(Options, int, int, CharPacman*, char[MAP_HEIGHT][MAP_WIDTH]);
 void switch_direction(CharPacman*, char map[MAP_HEIGHT][MAP_WIDTH]);
 void pac_wait(CharPacman);
 _Bool accept_turn(CharPacman, Direction, char[MAP_HEIGHT][MAP_WIDTH]);
@@ -53,7 +53,7 @@ void pacman_main(Options options, int info_in, int pos_out, int bullet_out, int 
     while(1)
     {
         //Legge solo l'ultimo inserito nella pipe e controlla se è una mossa valida
-        manage_p_info_in(info_in, bullet_out, &pacman, options.map);
+        manage_p_info_in(options, info_in, bullet_out, &pacman, options.map);
         switch_direction(&pacman, options.map);
         if (!pacman.paused) pacman_move(&pacman.e, options.map);
         write(pos_out, &pacman, sizeof(pacman)); //invia la posizione a control
@@ -61,7 +61,7 @@ void pacman_main(Options options, int info_in, int pos_out, int bullet_out, int 
     }
 }
 
-void manage_p_info_in(int info_in, int bullet_out, CharPacman *pacman, char map[MAP_HEIGHT][MAP_WIDTH])
+void manage_p_info_in(Options options,int info_in, int bullet_out, CharPacman *pacman, char map[MAP_HEIGHT][MAP_WIDTH])
 { 
     PacManInfo info_pkg;
     BulletInfo bullet_info = {};
@@ -129,7 +129,7 @@ void manage_p_info_in(int info_in, int bullet_out, CharPacman *pacman, char map[
         }
         if(info_pkg.reset)
         {
-            pacman->armor = PACMAN_START_ARMOR;
+            pacman->armor = options.options_shoot.armor;
             pacman->e.p.x = PACMAN_START_X;
             pacman->e.p.y = PACMAN_START_Y;
             pacman->e.dir = PACMAN_START_DIR;

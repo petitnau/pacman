@@ -247,7 +247,6 @@ void manage_timers(ControlData* cd)
     if(cd->temp_text.timer != 0)
         if(!check_timer(cd->temp_text.timer))
         {
-            sunprint_area(cd->temp_text.p.y, cd->temp_text.p.x, strlen(cd->temp_text.text), cd);
             cd->temp_text.timer = 0;
         }
     if(cd->timers.fruit_timer != 0)
@@ -320,7 +319,6 @@ void food_handler(ControlData* cd)
             case '^':
                 cd->score += 100; //*lvl?
 
-                sunprint_area(cd->temp_text.p.y, cd->temp_text.p.x, strlen(cd->temp_text.text), cd);
                 create_temp_text(&cd->temp_text, pe_pos.x-1, pe_pos.y+GUI_HEIGHT, "200", 2e3, 13);
                 for(j=-1; j<=1; j++)
                     cd->game_food[pe_pos.y][pe_pos.x+j] = ' '; 
@@ -443,7 +441,6 @@ void eat_pause(ControlData* cd, int points)
 {   
     char points_string[6] = {};     
     sprintf(points_string, "%d", points);
-    sunprint_area(cd->temp_text.p.y, cd->temp_text.p.x, strlen(cd->temp_text.text), cd);
     create_temp_text(&cd->temp_text, cd->characters.pacman.e.p.x-1, cd->characters.pacman.e.p.y+GUI_HEIGHT, points_string, 0.6e3, 12);
     cd->ghost_info.sleeptime = 0.6e6;    
     cd->ghost_info.new = true;
