@@ -19,6 +19,8 @@ _Bool is_empty_space_ghost(char);
 void* ghost_thread(void*);
 void set_ghost_start(Entity*);
 
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
 CharGhost init_ghost_char(int id)
 {
     CharGhost ghost;
@@ -69,7 +71,7 @@ void ghost_main(Options options, int info_in, int pos_out, int bullet_out, int l
     ghost_shared.bullet_out = bullet_out;
     ghost_shared.log_out = log_out;
     pthread_t fantasma;
-    sem_init(&ghost_shared.mutex, 0, 1);
+    sem_init(&mutex, 0, 1);
     ghost_shared.ghosts = malloc(sizeof(CharGhost*)*options.num_ghosts);
 
     for(i = 0; i < options.num_ghosts; i++)
@@ -89,21 +91,21 @@ void* ghost_thread(void* parameters)
     int i = 0;  
 
     //Assegno ad ogni ghost un ghost_id univoco
-    sem_wait(&ghost_shared->mutex);
+    sem_wait(&mutex);
     ghost = init_ghost_char(ghost_shared->num_ghosts);
     ghost_shared->ghosts[ghost.ghost_id] = &ghost;
     ghost_shared->num_ghosts++;
-    sem_post(&ghost_shared->mutex);
+    sem_post(&mutex);
 
     while(1)
     {       
-        sem_wait(&ghost_shared->mutex);
+        sem_wait(&mutex);
         manage_g_timers(ghost_shared, &ghost);
         ghost_choose_dir(&ghost, ghost_shared); 
         if(!ghost_shared->paused) ghost_move(&ghost, ghost_shared->options.map);
         manage_position_events(ghost_shared, &ghost);
         write(ghost_shared->pos_out, &ghost, sizeof(ghost)); //invia la posizione a control
-        sem_post(&ghost_shared->mutex);
+        sem_post(&mutex);
         ghost_wait(ghost, ghost_shared);
     }
 }
@@ -114,7 +116,7 @@ void manage_g_info_in(int info_in, GhostShared* ghost_shared)
     static int i=0;
     int k;
         
-    sem_wait(&ghost_shared->mutex);
+    sem_wait(&mutex);
     while(read(info_in, &info, sizeof(info)) != -1)
     {
         if(info.death != -1)
@@ -160,7 +162,7 @@ void manage_g_info_in(int info_in, GhostShared* ghost_shared)
         }
         ghost_shared->pacman = info.pacman;
     }
-    sem_post(&ghost_shared->mutex);
+    sem_post(&mutex);
 }
 
 void manage_g_timers(GhostShared* ghost_shared, CharGhost* ghost)
@@ -184,7 +186,7 @@ void manage_g_timers(GhostShared* ghost_shared, CharGhost* ghost)
     {
         if(!is_in_pen(*ghost) && ghost->e.p.x % 2 == 0 && ghost->mode == M_CHASE && !check_timer(ghost->timers.shoot))
         {
-            for(i = 0; i < ghost_shared->num_ghosts; i++)
+            for(i = 0; i < 4; i++)
             {
                 bullet_info.create_bullet = true;
                 bullet_info.p = ghost->e.p;
@@ -250,24 +252,33 @@ void ghost_choose_dir(CharGhost* ghost, GhostShared* ghost_shared)
 
 void manage_position_events(GhostShared* ghost_shared, CharGhost* ghost)
 {
+    int i, j;
+    _Bool colliding;
     if(ghost->e.p.x == HOME_TARGET.x && ghost->e.p.y == HOME_TARGET.y && ghost->mode == M_DEAD)
     {
         ghost->e.dir = UP;
         ghost->mode = M_CHASE;
     }
 
-    int i;
-    if(!(ghost->e.p.x == HOME_TARGET.x && ghost->e.p.y == HOME_TARGET.y))
+    if(ghost_shared->options.boing && !is_in_pen(*ghost))
     {
         for(i = 0; i < ghost_shared->num_ghosts; i++)
         {
             if(i != ghost->ghost_id)
-            {
-                if(ghost->e.p.x == &ghost_shared->ghosts[i]->e.p.x && ghost->e.p.y == &ghost_shared->ghosts[i]->e.p.y)
+            {            
+                colliding = false;
+                if(ghost->e.dir != ghost_shared->ghosts[i]->e.dir)
                 {
-                    fprintf(stderr, "BOING");
-                     reverse_direction(&ghost->e.dir);
-                     reverse_direction(&ghost_shared->ghosts[i]->e.dir);
+                    for(j=-2; j<=2; j++)
+                    {
+                        if(ghost->e.p.x == ghost_shared->ghosts[i]->e.p.x && ghost->e.p.y == ghost_shared->ghosts[i]->e.p.y )
+                            colliding = true;
+                    }
+                    if(colliding)
+                    {
+                        reverse_direction(&ghost->e.dir);
+                        reverse_direction(&ghost_shared->ghosts[i]->e.dir);
+                    }
                 }
             } 
         

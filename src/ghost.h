@@ -23,7 +23,6 @@ typedef struct
     _Bool resume;
     int death;
     int sleeptime;
-    
 } GhostInfo;
 
 typedef struct
@@ -48,7 +47,6 @@ typedef struct
     Entity pacman;
     GhostMode mode;
     _Bool fright;
-    sem_t mutex;
     _Bool paused;
     int pos_out;
     int bullet_out;

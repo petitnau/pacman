@@ -348,9 +348,9 @@ void collision_handler(ControlData* cd)
             }
             else if(ghost->mode != M_DEAD && !cd->characters.pacman.dead)
             {
-                cd->pacman_info.new = true;
-                cd->pacman_info.collide = true;
-                cd->characters.pacman.dead = true;
+                //cd->pacman_info.new = true;
+                //cd->pacman_info.collide = true;
+                //cd->characters.pacman.dead = true;
             }
         }
     }
