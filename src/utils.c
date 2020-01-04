@@ -212,8 +212,87 @@ void map_loop(Position* position)
     else if(position->x == MAP_WIDTH)
         position->x = 0;
 
-    if(position->y == 0-1)
+    if(position->y == -1)
         position->y = MAP_HEIGHT-1;
     else if(position->y == MAP_HEIGHT)
         position->y= 0;
+}
+
+void swap(int *a, int *b)
+{
+    int c;
+
+    c = *a;
+    *a = *b;
+    *b = c;
+}
+
+void diff_matrix(int r, int c, char a_mat[r][c], char b_mat[r][c], char x_mat[r][c])
+{
+    int i, j;
+    for(i=0; i<r; i++)
+    {
+        for(j=0; j<c; j++)
+        {
+            x_mat[r][c] = (a_mat[r][c] != b_mat[r][c]) ? 'X' : ' ';
+        }
+    }
+}
+
+void get_rand_nums(int min, int max, int n, int rands[n])
+{
+    int size = max-min;
+    int *possible = malloc(sizeof(int)*size);
+    int i;
+
+    for(i=0; i<size; i++)
+    {
+        possible[i] = i+min;
+    }
+
+    for(i=0; i<size-1 && i<n; i++)
+    {
+        swap(possible[i], possible[rand_between(i+1, size-1)]);
+
+        rands[i] = possible[i];
+    }
+}
+
+int count_mat_occ(int r, int c, char mat[r][c], char ch)
+{
+    int count = 0;
+    int i, j;
+    for(i=0; i<r; i++)
+    {
+        for(j=0; j<c; j++)
+        {
+            if(mat[i][j] == ch)
+                count++;
+        }
+    }
+
+    return count;
+}
+
+Position get_i_ch_pos(int r, int c, char mat[r][c], char ch, int i)
+{
+    Position pos;
+    int j, k;
+    for(j=0; j<r; j++)
+    {
+        for(k=0; k<c; k++)
+        {
+            if(mat[j][k] == ch)
+            {
+                i--;
+                if(i<0)
+                {
+                    pos.y=j;
+                    pos.x=k;
+                    return pos;
+                }
+            }
+        }
+    }
+
 }

@@ -271,7 +271,7 @@ void manage_position_events(GhostShared* ghost_shared, CharGhost* ghost)
                 {
                     for(j=-2; j<=2; j++)
                     {
-                        if(ghost->e.p.x == ghost_shared->ghosts[i]->e.p.x && ghost->e.p.y == ghost_shared->ghosts[i]->e.p.y )
+                        if(ghost->e.p.x == ghost_shared->ghosts[i]->e.p.x+j && ghost->e.p.y == ghost_shared->ghosts[i]->e.p.y )
                             colliding = true;
                     }
                     if(colliding)

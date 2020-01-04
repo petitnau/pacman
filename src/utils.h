@@ -62,5 +62,10 @@ unsigned long long start_timer(unsigned long long l);
 _Bool check_timer(unsigned long long l);
 _Bool is_empty_space(char);
 void map_loop(Position*);
+void swap(int*, int*);
+Position get_i_ch_pos(int r, int c, char[r][c], char, int);
+int count_mat_occ(int r, int c, char[r][c], char);
+void get_rand_nums(int, int, int, int[]);
+void diff_matrix(int r, int c, char[r][c], char[r][c], char[r][c]);
 
 #endif

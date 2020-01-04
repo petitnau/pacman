@@ -6,8 +6,8 @@
 #define PINKY_CHASE_OFFSET 4
 #define INKY_CHASE_OFFSET 2
 
-static const Position SCATTER[4] = {{ 52, -3},  //BLINKY
-                                    {2, -3},  //PINKY
+static const Position SCATTER[4] = {{52,-3},  //BLINKY
+                                    { 2,-3},  //PINKY
                                     {54,31},  //INKY
                                     { 0,31}}; //CLYDE
 
