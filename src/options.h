@@ -16,9 +16,17 @@ typedef struct
     int time_spawn;
 }OptionsSpawn;
 
+typedef struct 
+{
+    _Bool fixed;
+    Position pos;
+}OptionsFruit;
+
+
 typedef struct{
     OptionsShoot options_shoot;
     OptionsSpawn options_spawn;
+    OptionsFruit options_fruit;
     char map[MAP_HEIGHT][MAP_WIDTH+1];
     _Bool boing;
     int death_timer;

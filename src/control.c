@@ -314,7 +314,7 @@ void food_handler(ControlData* cd)
                 cd->timers.fright_timer = start_timer(6);
                 break;
             case '^':
-                cd->score += 100; //*lvl?
+                cd->score += 200;
 
                 create_temp_text(&cd->temp_text, pe_pos.x-1, pe_pos.y+GUI_HEIGHT, "200", 2e3, 13);
                 for(j=-1; j<=1; j++)
@@ -342,6 +342,8 @@ void collision_handler(ControlData* cd)
         {
             if(ghost->mode == M_FRIGHT)
             {
+                cd->ghost_streak++;
+                cd->score += pow(2,cd->ghost_streak)*100;
                 kill_ghost(cd, i);
 
                 eat_pause(cd, pow(2,(cd->ghost_streak))*100);
@@ -416,8 +418,6 @@ void reset_game(ControlData* cd)
 
 void kill_ghost(ControlData* cd, int i)
 {
-    cd->ghost_streak++;
-    cd->score += pow(2,cd->ghost_streak)*100;    //200 400 800 1600
     cd->characters.ghosts[i].mode = M_DEAD;
     cd->ghost_info.death = i;
     cd->ghost_info.new = true;
@@ -447,16 +447,29 @@ void eat_pause(ControlData* cd, int points)
 
 void create_fruit(ControlData* cd)
 {
+    char x_matrix[MAP_HEIGHT][MAP_WIDTH+1];
+    int n_pos;
+    Position pos;
+
+    if(cd->options.options_fruit.fixed)
+        pos = cd->options.options_fruit.pos;
+    else
+    {
+        diff_matrix(MAP_HEIGHT, MAP_WIDTH, PELLETS, cd->game_food, x_matrix);
+        n_pos = count_mat_occ(MAP_HEIGHT, MAP_WIDTH, x_matrix, 'X');
+        pos = get_i_ch_pos(MAP_HEIGHT, MAP_WIDTH, x_matrix, 'X', rand_between(0, n_pos));
+    }
+      
     attron(COLOR_REDTEXT);
-    mvaddch(23, FRUIT_POS_X-1, S_FRUIT[0][0]);
-    mvaddch(17+GUI_HEIGHT, FRUIT_POS_X+1, S_FRUIT[0][2]);
+    mvaddch(pos.y+GUI_HEIGHT, pos.x-1, S_FRUIT[0][0]);
+    mvaddch(pos.y+GUI_HEIGHT, pos.x+1, S_FRUIT[0][2]);
     attroff(COLOR_REDTEXT);
     attron(COLOR_GREENTEXT);
-    mvaddch(23, FRUIT_POS_X, S_FRUIT[0][1]);
+    mvaddch(pos.y+GUI_HEIGHT, pos.x, S_FRUIT[0][1]);
     attroff(COLOR_GREENTEXT);
-    cd->game_food[FRUIT_POS_Y][FRUIT_POS_X-1] = S_FRUIT[0][0];
-    cd->game_food[FRUIT_POS_Y][FRUIT_POS_X] = S_FRUIT[0][1];
-    cd->game_food[FRUIT_POS_Y][FRUIT_POS_X+1] = S_FRUIT[0][2];
+    cd->game_food[pos.y][pos.x-1] = S_FRUIT[0][0];
+    cd->game_food[pos.y][pos.x] = S_FRUIT[0][1];
+    cd->game_food[pos.y][pos.x+1] = S_FRUIT[0][2];
 
     cd->timers.fruit_timer = start_timer(10e3);
 }

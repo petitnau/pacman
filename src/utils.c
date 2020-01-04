@@ -227,15 +227,17 @@ void swap(int *a, int *b)
     *b = c;
 }
 
-void diff_matrix(int r, int c, char a_mat[r][c], char b_mat[r][c], char x_mat[r][c])
+void diff_matrix(int r, int c, char a_mat[r][c+1], char b_mat[r][c+1], char x_mat[r][c+1])
 {
     int i, j;
     for(i=0; i<r; i++)
     {
         for(j=0; j<c; j++)
         {
-            x_mat[r][c] = (a_mat[r][c] != b_mat[r][c]) ? 'X' : ' ';
+            x_mat[i][j] = (a_mat[i][j] != b_mat[i][j]) ? 'X' : ' ';
+            fprintf(stderr, "%c", x_mat[i][j]);
         }
+        fprintf(stderr, "\n");
     }
 }
 
@@ -258,7 +260,7 @@ void get_rand_nums(int min, int max, int n, int rands[n])
     }
 }
 
-int count_mat_occ(int r, int c, char mat[r][c], char ch)
+int count_mat_occ(int r, int c, char mat[r][c+1], char ch)
 {
     int count = 0;
     int i, j;
@@ -275,7 +277,7 @@ int count_mat_occ(int r, int c, char mat[r][c], char ch)
 }
 
 //Ottiene posizione i-esimo carattere
-Position get_i_ch_pos(int r, int c, char mat[r][c], char ch, int i)
+Position get_i_ch_pos(int r, int c, char mat[r][c+1], char ch, int i)
 {
     Position pos;
     int j, k;
