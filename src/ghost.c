@@ -14,7 +14,7 @@ void manage_g_timers(GhostShared*, CharGhost*);
 void ghost_choose_dir(CharGhost*, GhostShared*);
 void manage_position_events(GhostShared*, CharGhost*);
 void ghost_wait(CharGhost, GhostShared*);
-void ghost_move(CharGhost*, char[MAP_HEIGHT][MAP_WIDTH]);
+void ghost_move(CharGhost*, char[MAP_HEIGHT][MAP_WIDTH+1]);
 _Bool is_empty_space_ghost(char);
 void* ghost_thread(void*);
 void set_ghost_start(Entity*);
@@ -252,29 +252,21 @@ void ghost_choose_dir(CharGhost* ghost, GhostShared* ghost_shared)
 
 void manage_position_events(GhostShared* ghost_shared, CharGhost* ghost)
 {
-    int i, j;
-    _Bool colliding;
+    int i;
     if(ghost->e.p.x == HOME_TARGET.x && ghost->e.p.y == HOME_TARGET.y && ghost->mode == M_DEAD)
     {
         ghost->e.dir = UP;
         ghost->mode = M_CHASE;
     }
-
     if(ghost_shared->options.boing && !is_in_pen(*ghost))
     {
         for(i = 0; i < ghost_shared->num_ghosts; i++)
         {
             if(i != ghost->ghost_id)
             {            
-                colliding = false;
                 if(ghost->e.dir != ghost_shared->ghosts[i]->e.dir)
                 {
-                    for(j=-2; j<=2; j++)
-                    {
-                        if(ghost->e.p.x == ghost_shared->ghosts[i]->e.p.x+j && ghost->e.p.y == ghost_shared->ghosts[i]->e.p.y )
-                            colliding = true;
-                    }
-                    if(colliding)
+                    if(ghost->e.p.x == ghost_shared->ghosts[i]->e.p.x && ghost->e.p.y == ghost_shared->ghosts[i]->e.p.y )
                     {
                         reverse_direction(&ghost->e.dir);
                         reverse_direction(&ghost_shared->ghosts[i]->e.dir);
@@ -301,7 +293,7 @@ void ghost_wait(CharGhost ghost, GhostShared* ghost_shared)
     usleep(movepause);
 }
 
-void ghost_move(CharGhost* ghost, char map[MAP_HEIGHT][MAP_WIDTH])
+void ghost_move(CharGhost* ghost, char map[MAP_HEIGHT][MAP_WIDTH+1])
 {         
     if(can_move_ghost(*ghost, ghost->e.dir, map))
     {        
@@ -329,7 +321,7 @@ _Bool is_empty_space_ghost(char c)
     return is_empty_space(c) || c=='^' || c=='<' || c=='>';
 }
 
-_Bool can_move_ghost(CharGhost ghost, Direction direction, char map[MAP_HEIGHT][MAP_WIDTH])
+_Bool can_move_ghost(CharGhost ghost, Direction direction, char map[MAP_HEIGHT][MAP_WIDTH+1])
 {
     int i;
 

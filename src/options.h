@@ -19,7 +19,7 @@ typedef struct
 typedef struct{
     OptionsShoot options_shoot;
     OptionsSpawn options_spawn;
-    char map[MAP_HEIGHT][MAP_WIDTH];
+    char map[MAP_HEIGHT][MAP_WIDTH+1];
     _Bool boing;
     int death_timer;
     int num_ghosts;

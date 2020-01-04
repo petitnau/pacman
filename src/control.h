@@ -50,7 +50,7 @@ typedef struct
     Characters characters;
     Options options;
 
-    char game_food[MAP_HEIGHT][MAP_WIDTH];
+    char game_food[MAP_HEIGHT][MAP_WIDTH+1];
     int score;
     int eaten_dots;
     int ghost_streak;

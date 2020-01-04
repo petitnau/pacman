@@ -8,12 +8,12 @@
 #include "interface.h"
 #include "options.h"
 
-void manage_p_info_in(Options, int, int, CharPacman*, char[MAP_HEIGHT][MAP_WIDTH]);
-void switch_direction(CharPacman*, char map[MAP_HEIGHT][MAP_WIDTH]);
+void manage_p_info_in(Options, int, int, CharPacman*, char[MAP_HEIGHT][MAP_WIDTH+1]);
+void switch_direction(CharPacman*, char map[MAP_HEIGHT][MAP_WIDTH+1]);
 void pac_wait(CharPacman);
-_Bool accept_turn(CharPacman, Direction, char[MAP_HEIGHT][MAP_WIDTH]);
-void pacman_move(Entity*, char map[MAP_HEIGHT][MAP_WIDTH]);
-_Bool can_move_pacman(Entity, Direction, char[MAP_HEIGHT][MAP_WIDTH]);
+_Bool accept_turn(CharPacman, Direction, char[MAP_HEIGHT][MAP_WIDTH+1]);
+void pacman_move(Entity*, char map[MAP_HEIGHT][MAP_WIDTH+1]);
+_Bool can_move_pacman(Entity, Direction, char[MAP_HEIGHT][MAP_WIDTH+1]);
 
 CharPacman init_pacman_char(Options options)
 {
@@ -61,7 +61,7 @@ void pacman_main(Options options, int info_in, int pos_out, int bullet_out, int 
     }
 }
 
-void manage_p_info_in(Options options,int info_in, int bullet_out, CharPacman *pacman, char map[MAP_HEIGHT][MAP_WIDTH])
+void manage_p_info_in(Options options,int info_in, int bullet_out, CharPacman *pacman, char map[MAP_HEIGHT][MAP_WIDTH+1])
 { 
     PacManInfo info_pkg;
     BulletInfo bullet_info = {};
@@ -148,7 +148,7 @@ void manage_p_info_in(Options options,int info_in, int bullet_out, CharPacman *p
     }
 }
 
-void switch_direction(CharPacman* pacman, char map[MAP_HEIGHT][MAP_WIDTH])
+void switch_direction(CharPacman* pacman, char map[MAP_HEIGHT][MAP_WIDTH+1])
 {
     if(can_move_pacman(pacman->e, pacman->next_dir, map))   //controlla se può fare movimento nella nuova direzione
         pacman->e.dir = pacman->next_dir;
@@ -164,7 +164,7 @@ void pac_wait(CharPacman pacman)
     usleep(movepause);
 }
 
-_Bool accept_turn(CharPacman pacman, Direction direction, char map[MAP_HEIGHT][MAP_WIDTH])
+_Bool accept_turn(CharPacman pacman, Direction direction, char map[MAP_HEIGHT][MAP_WIDTH+1])
 {
     int i;
 
@@ -223,7 +223,7 @@ _Bool accept_turn(CharPacman pacman, Direction direction, char map[MAP_HEIGHT][M
     return false;
 }
 
-void pacman_move(Entity* pacman, char map[MAP_HEIGHT][MAP_WIDTH])
+void pacman_move(Entity* pacman, char map[MAP_HEIGHT][MAP_WIDTH+1])
 {         
     if(can_move_pacman(*pacman, pacman->dir, map))
     {        
@@ -246,7 +246,7 @@ void pacman_move(Entity* pacman, char map[MAP_HEIGHT][MAP_WIDTH])
     map_loop(&pacman->p);
 }
 
-_Bool can_move_pacman(Entity entity, Direction direction, char map[MAP_HEIGHT][MAP_WIDTH])
+_Bool can_move_pacman(Entity entity, Direction direction, char map[MAP_HEIGHT][MAP_WIDTH+1])
 {
     int i;
 

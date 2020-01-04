@@ -71,6 +71,7 @@ int main()
 
     mode = main_menu();
     options = choose_options(mode);
+
     //print_map();
     //print_food();
     refresh();

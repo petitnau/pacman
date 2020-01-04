@@ -64,7 +64,7 @@ Position offset_position (Position position, Direction direction, int quantity)
     return position;
 }
 
-Direction choose_direction_random (CharGhost ghost, char map[MAP_HEIGHT][MAP_WIDTH])
+Direction choose_direction_random (CharGhost ghost, char map[MAP_HEIGHT][MAP_WIDTH+1])
 {
     int i;
     int rand_dir;
@@ -93,7 +93,7 @@ Direction choose_direction_random (CharGhost ghost, char map[MAP_HEIGHT][MAP_WID
     }
 }
 
-void ghost_possible_dirs(CharGhost ghost, _Bool possible_dirs[4], char map[MAP_HEIGHT][MAP_WIDTH])
+void ghost_possible_dirs(CharGhost ghost, _Bool possible_dirs[4], char map[MAP_HEIGHT][MAP_WIDTH+1])
 {
     int i;
 
@@ -115,7 +115,7 @@ void ghost_possible_dirs(CharGhost ghost, _Bool possible_dirs[4], char map[MAP_H
     }
 }
 
-Direction choose_direction_target (CharGhost ghost, Position target, char map[MAP_HEIGHT][MAP_WIDTH])
+Direction choose_direction_target (CharGhost ghost, Position target, char map[MAP_HEIGHT][MAP_WIDTH+1])
 {
     int i;
     float dir_dist[4];

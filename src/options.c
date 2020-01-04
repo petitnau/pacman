@@ -1,5 +1,6 @@
 #include "options.h"
 #include "interface.h"
+#include <stdio.h>
 
 Options pacman_options();
 Options gunman_options();
@@ -33,7 +34,6 @@ Options pacman_options()
     {
         strcpy(options.map[i], MAP_PACMAN[i]);
     }
-    
     return options;
 }
 
@@ -52,8 +52,7 @@ Options gunman_options()
     for(i = 0; i < MAP_HEIGHT; i++)
     {
         strcpy(options.map[i], MAP_GUNMAN[i]);
-    }
-
+    }   
     return options;
 }
 

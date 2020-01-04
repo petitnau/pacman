@@ -69,7 +69,7 @@ void print_lives(CharPacman pacman)
         mvprintw(37,15+(i*4), "   ");
 }
 
-void print_map_at(int x, int y, char map[MAP_HEIGHT][MAP_WIDTH])
+void print_map_at(int x, int y, char map[MAP_HEIGHT][MAP_WIDTH+1])
 {
     char c = map[y][x];
 
@@ -89,7 +89,7 @@ void print_map_at(int x, int y, char map[MAP_HEIGHT][MAP_WIDTH])
     attroff(COLOR_MAP);
 }
 
-void print_map(char map[MAP_HEIGHT][MAP_WIDTH])
+void print_map(char map[MAP_HEIGHT][MAP_WIDTH+1])
 {
     int i,j;
 
@@ -98,7 +98,7 @@ void print_map(char map[MAP_HEIGHT][MAP_WIDTH])
            print_map_at(i, j, map);
 }
 
-void print_food_at(int x, int y, char game_food[MAP_HEIGHT][MAP_WIDTH])
+void print_food_at(int x, int y, char game_food[MAP_HEIGHT][MAP_WIDTH+1])
 {
     if(game_food[y][x] != ' ')
     {
@@ -120,7 +120,7 @@ void print_food_at(int x, int y, char game_food[MAP_HEIGHT][MAP_WIDTH])
     }
 }
 
-void print_food(char game_food[MAP_HEIGHT][MAP_WIDTH])
+void print_food(char game_food[MAP_HEIGHT][MAP_WIDTH+1])
 {
     int i, j;
     attron(COLOR_PELLETS);
@@ -133,7 +133,7 @@ void print_food(char game_food[MAP_HEIGHT][MAP_WIDTH])
 }
 
 
-char get_map_at(int x, int y, char map[MAP_HEIGHT][MAP_WIDTH])
+char get_map_at(int x, int y, char map[MAP_HEIGHT][MAP_WIDTH+1])
 {
     Position orig_pos = {x,y};
     Position mod_pos = get_pac_eff_pos(orig_pos);
@@ -274,6 +274,7 @@ int count_mat_occ(int r, int c, char mat[r][c], char ch)
     return count;
 }
 
+//Ottiene posizione i-esimo carattere
 Position get_i_ch_pos(int r, int c, char mat[r][c], char ch, int i)
 {
     Position pos;

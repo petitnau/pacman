@@ -56,7 +56,7 @@ typedef struct
 CharGhost init_ghost_char();
 GhostInfo init_ghost_info();
 void ghost_main(Options ,int, int, int, int);
-_Bool can_move_ghost(CharGhost, Direction, char map[MAP_HEIGHT][MAP_WIDTH]);
+_Bool can_move_ghost(CharGhost, Direction, char map[MAP_HEIGHT][MAP_WIDTH+1]);
 _Bool is_in_pen(CharGhost);
 
 #endif

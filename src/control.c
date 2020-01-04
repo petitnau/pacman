@@ -27,7 +27,7 @@ void send_pacman_info(ControlData*);
 
 void collision_handler(ControlData*);
 void food_handler(ControlData*);
-void food_setup(char[MAP_HEIGHT][MAP_WIDTH]);
+void food_setup(char[MAP_HEIGHT][MAP_WIDTH+1]);
 void eat_pause(ControlData*, int);
 void create_fruit(ControlData*);
 
@@ -122,7 +122,7 @@ void control_main(ControlPipes pipes, Options options)
     }
 }
 
-void food_setup(char food[MAP_HEIGHT][MAP_WIDTH])
+void food_setup(char food[MAP_HEIGHT][MAP_WIDTH+1])
 {
     int i;
     for (i = 0; i < MAP_HEIGHT; i++)
