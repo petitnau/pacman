@@ -41,11 +41,12 @@ typedef struct
 
 typedef struct
 {
-    CharGhost** ghosts;
+    CharGhost* ghosts;
     Options options;
     int num_ghosts;
     Entity pacman;
     GhostMode mode;
+    Position* starting_pos;
     _Bool fright;
     _Bool paused;
     int pos_out;
@@ -53,7 +54,7 @@ typedef struct
     int log_out;
 } GhostShared;
 
-CharGhost init_ghost_char();
+CharGhost init_ghost_char(GhostShared*, int);
 GhostInfo init_ghost_info();
 void ghost_main(Options ,int, int, int, int);
 _Bool can_move_ghost(CharGhost, Direction, char map[MAP_HEIGHT][MAP_WIDTH+1]);

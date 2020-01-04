@@ -473,3 +473,4 @@ void create_fruit(ControlData* cd)
 
     cd->timers.fruit_timer = start_timer(10e3);
 }
+

@@ -251,13 +251,15 @@ void get_rand_nums(int min, int max, int n, int rands[n])
     {
         possible[i] = i+min;
     }
-
+    
+    //mischia i numeri possibili e prende i primi n;
     for(i=0; i<size-1 && i<n; i++)
     {
-        swap(possible[i], possible[rand_between(i+1, size-1)]);
-
+        swap(&possible[i], &possible[rand_between(i+1, size-1)]);
         rands[i] = possible[i];
     }
+
+    free(possible);
 }
 
 int count_mat_occ(int r, int c, char mat[r][c+1], char ch)

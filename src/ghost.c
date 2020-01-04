@@ -17,27 +17,41 @@ void ghost_wait(CharGhost, GhostShared*);
 void ghost_move(CharGhost*, char[MAP_HEIGHT][MAP_WIDTH+1]);
 _Bool is_empty_space_ghost(char);
 void* ghost_thread(void*);
-void set_ghost_start(Entity*);
+void set_ghost_start(GhostShared*, CharGhost*);
+void init_ghost_map(GhostShared*);
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-CharGhost init_ghost_char(int id)
+CharGhost init_ghost_char(GhostShared *ghost_shared, int id)
 {
     CharGhost ghost;
     ghost.ghost_id = id;
     ghost.e.id = id;
-    set_ghost_start(&ghost.e);
-    ghost.mode = M_CHASE;
+    set_ghost_start(ghost_shared, &ghost);
+
+    if(!ghost_shared->options.options_spawn.enabled)
+        ghost.mode = M_CHASE;
+    else
+        ghost.mode = M_CHASE;
+
     ghost.timers.fright = 0;
     ghost.timers.shoot = start_timer(1e3);
     //ghost.paused = true;
     return ghost;
 }
 
-void set_ghost_start(Entity* e)
+void set_ghost_start(GhostShared *ghost_shared, CharGhost *ghost)
 {
-    e->p = GHOST_START_POS[e->id];
-    e->dir = UP;
+    if(ghost_shared->options.options_spawn.enabled)
+    {
+        ghost->e.p = ghost_shared->starting_pos[ghost->ghost_id];
+    }
+    else
+    {
+        ghost->e.p = GHOST_START_POS[ghost->ghost_id];
+    }
+    
+    ghost->e.dir = UP;
 }
 
 GhostInfo init_ghost_info()
@@ -71,11 +85,15 @@ void ghost_main(Options options, int info_in, int pos_out, int bullet_out, int l
     ghost_shared.bullet_out = bullet_out;
     ghost_shared.log_out = log_out;
     pthread_t fantasma;
-    sem_init(&mutex, 0, 1);
-    ghost_shared.ghosts = malloc(sizeof(CharGhost*)*options.num_ghosts);
+    ghost_shared.ghosts = malloc(sizeof(CharGhost)*options.num_ghosts); //alloca puntatori
+    ghost_shared.starting_pos = malloc(sizeof(Position)*options.num_ghosts); //alloca puntatori
+    
+    init_ghost_map(&ghost_shared);
 
     for(i = 0; i < options.num_ghosts; i++)
+    {
         pthread_create(&fantasma, NULL, &ghost_thread, &ghost_shared);
+    }
     
     while(1)
     {
@@ -85,28 +103,27 @@ void ghost_main(Options options, int info_in, int pos_out, int bullet_out, int l
 
 void* ghost_thread(void* parameters)
 {
-    CharGhost ghost;
+    CharGhost* ghost;
     GhostShared* ghost_shared = (GhostShared*) parameters;
 
     int i = 0;  
-
     //Assegno ad ogni ghost un ghost_id univoco
-    sem_wait(&mutex);
-    ghost = init_ghost_char(ghost_shared->num_ghosts);
-    ghost_shared->ghosts[ghost.ghost_id] = &ghost;
+    pthread_mutex_lock(&mutex);
+    ghost_shared->ghosts[ghost_shared->num_ghosts] = init_ghost_char(ghost_shared, ghost_shared->num_ghosts);
+    ghost = &ghost_shared->ghosts[ghost_shared->num_ghosts];
     ghost_shared->num_ghosts++;
-    sem_post(&mutex);
+    pthread_mutex_unlock(&mutex);
 
     while(1)
     {       
-        sem_wait(&mutex);
-        manage_g_timers(ghost_shared, &ghost);
-        ghost_choose_dir(&ghost, ghost_shared); 
-        if(!ghost_shared->paused) ghost_move(&ghost, ghost_shared->options.map);
-        manage_position_events(ghost_shared, &ghost);
-        write(ghost_shared->pos_out, &ghost, sizeof(ghost)); //invia la posizione a control
-        sem_post(&mutex);
-        ghost_wait(ghost, ghost_shared);
+        pthread_mutex_lock(&mutex);
+        manage_g_timers(ghost_shared, ghost);
+        ghost_choose_dir(ghost, ghost_shared); 
+        if(!ghost_shared->paused) ghost_move(ghost, ghost_shared->options.map);
+        manage_position_events(ghost_shared, ghost);
+        write(ghost_shared->pos_out, ghost, sizeof(*ghost)); //invia la posizione a control
+        pthread_mutex_unlock(&mutex);
+        ghost_wait(*ghost, ghost_shared);
     }
 }
 
@@ -116,22 +133,23 @@ void manage_g_info_in(int info_in, GhostShared* ghost_shared)
     static int i=0;
     int k;
         
-    sem_wait(&mutex);
+    pthread_mutex_lock(&mutex);
     while(read(info_in, &info, sizeof(info)) != -1)
     {
         if(info.death != -1)
         {
-            ghost_shared->ghosts[info.death]->mode = M_DEAD;
+            ghost_shared->ghosts[info.death].mode = M_DEAD;
         }
         if(info.fright)
         {
             for(i=0; i < ghost_shared->num_ghosts; i++)
             {
-                if(ghost_shared->ghosts[i]->mode != M_DEAD && !is_in_pen(*ghost_shared->ghosts[i]))
+                if(ghost_shared->ghosts[i].mode != M_DEAD && !is_in_pen(ghost_shared->ghosts[i]))
                 {
-                    ghost_shared->ghosts[i]->timers.fright = start_timer(6e3);
-                    ghost_shared->ghosts[i]->mode = M_FRIGHT;
-                    reverse_direction(&(ghost_shared->ghosts[i]->e.dir));
+                    ghost_shared->ghosts[i].timers.fright = start_timer(6e3);
+                    ghost_shared->ghosts[i].mode = M_FRIGHT;
+                    fprintf(stderr, "([%d]%d/%d)", ghost_shared->num_ghosts, ghost_shared->ghosts[i].e.p.x, ghost_shared->ghosts[i].e.p.y);
+                    reverse_direction(&(ghost_shared->ghosts[i].e.dir));
                 }
             } 
         }
@@ -139,7 +157,7 @@ void manage_g_info_in(int info_in, GhostShared* ghost_shared)
         {
             for(i=0; i < ghost_shared->num_ghosts; i++)
             {
-                *ghost_shared->ghosts[i] = init_ghost_char(ghost_shared->ghosts[i]->e.id);
+                ghost_shared->ghosts[i] = init_ghost_char(ghost_shared, ghost_shared->ghosts[i].e.id);
             } 
             ghost_shared->paused = true;
             ghost_shared->fright = false;
@@ -162,7 +180,7 @@ void manage_g_info_in(int info_in, GhostShared* ghost_shared)
         }
         ghost_shared->pacman = info.pacman;
     }
-    sem_post(&mutex);
+    pthread_mutex_unlock(&mutex);
 }
 
 void manage_g_timers(GhostShared* ghost_shared, CharGhost* ghost)
@@ -240,10 +258,10 @@ void ghost_choose_dir(CharGhost* ghost, GhostShared* ghost_shared)
                     ghost->e.dir = choose_direction_target(*ghost, pinky_target(ghost_shared->pacman), ghost_shared->options.map);
                     break;
                 case 2:
-                    ghost->e.dir = choose_direction_target(*ghost, inky_target(ghost_shared->pacman, ghost_shared->ghosts[0]->e), ghost_shared->options.map);
+                    ghost->e.dir = choose_direction_target(*ghost, inky_target(ghost_shared->pacman, ghost_shared->ghosts[0].e), ghost_shared->options.map);
                     break;
                 case 3:
-                    ghost->e.dir = choose_direction_target(*ghost, clyde_target(ghost_shared->pacman, ghost_shared->ghosts[3]->e), ghost_shared->options.map);
+                    ghost->e.dir = choose_direction_target(*ghost, clyde_target(ghost_shared->pacman, ghost_shared->ghosts[3].e), ghost_shared->options.map);
                     break;
             }
             break;
@@ -252,6 +270,10 @@ void ghost_choose_dir(CharGhost* ghost, GhostShared* ghost_shared)
 
 void manage_position_events(GhostShared* ghost_shared, CharGhost* ghost)
 {
+    if(ghost->mode == M_FRIGHT)
+    {
+        fprintf(stderr, "bimbumbam");
+    }
     int i;
     if(ghost->e.p.x == HOME_TARGET.x && ghost->e.p.y == HOME_TARGET.y && ghost->mode == M_DEAD)
     {
@@ -264,12 +286,12 @@ void manage_position_events(GhostShared* ghost_shared, CharGhost* ghost)
         {
             if(i != ghost->ghost_id)
             {            
-                if(ghost->e.dir != ghost_shared->ghosts[i]->e.dir)
+                if(ghost->e.dir != ghost_shared->ghosts[i].e.dir)
                 {
-                    if(ghost->e.p.x == ghost_shared->ghosts[i]->e.p.x && ghost->e.p.y == ghost_shared->ghosts[i]->e.p.y )
+                    if(ghost->e.p.x == ghost_shared->ghosts[i].e.p.x && ghost->e.p.y == ghost_shared->ghosts[i].e.p.y )
                     {
                         reverse_direction(&ghost->e.dir);
-                        reverse_direction(&ghost_shared->ghosts[i]->e.dir);
+                        reverse_direction(&ghost_shared->ghosts[i].e.dir);
                     }
                 }
             } 
@@ -365,4 +387,21 @@ _Bool can_move_ghost(CharGhost ghost, Direction direction, char map[MAP_HEIGHT][
 _Bool is_in_pen(CharGhost ghost)
 {
     return (ghost.e.p.x >= 20 && ghost.e.p.y >= 12 && ghost.e.p.x <= 34 && ghost.e.p.y <= 16);
+}
+
+void init_ghost_map(GhostShared* ghost_shared)
+{
+    int n_pos;
+    //numeri a caso per la posizione dei pellet dove andranno i fantasmi
+    int *rand_nums = malloc(sizeof(int)*(ghost_shared->options.num_ghosts));
+    int i,j;
+    Position pos;
+
+    n_pos = count_mat_occ(MAP_HEIGHT, MAP_WIDTH, PELLETS, '~');
+    get_rand_nums(0, n_pos, ghost_shared->options.num_ghosts, rand_nums);
+    for (i = 0; i < ghost_shared->options.num_ghosts; i++)
+    {
+        pos = get_i_ch_pos(MAP_HEIGHT, MAP_WIDTH, PELLETS, '~', rand_nums[i]);   
+        ghost_shared->starting_pos[i] = pos;
+    }
 }
