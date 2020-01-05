@@ -19,6 +19,51 @@ typedef struct
     int y;
 } Pacrun_Par;
 
+char pac_game[10][28+1] = {
+" ~[\"]~ ~ ~ ~ ~ ~ ~ ~ ~ ~ x x",
+" ~ lqqqqqk ~ lqqqqqqqk ~ x x",
+" ~ mqqqk x ~ mqqqqqqqj ~ mqj",
+" ` ~ ~ x x[\"]               ",
+"qqqk ~ x x   lqk ~ lqqqqqqqq",
+"qqqj ~ mqj   x x ~ mqqqqqk l",
+" ~ ~ >*)     x x ~ ~ ~ ~ x x",
+" ~ lqqqqqqqqqj mqqqqqk ~ x x",
+" ~ mqqqqqqqqqqqqqqqqqj ~ mqj",
+" ~ ~ ~ [\"] ~ ~ ~ ~ ~ ~[\"]~ ~"};
+char pac_col[10][28+1] = {
+" dyyyd d d d d d d d d d m m",
+" d mmmmmmm d mmmmmmmmm d m m",
+" d mmmmm m d mmmmmmmmm d mmm",
+" ` d d m mwww              ",
+"mmmm d m m   mmm d mmmmmmmmm",
+"mmmm d mmm   m m d mmmmmmm m",
+" d d ppp     m m d d d d m m",
+" d mmmmmmmmmmm mmmmmmm d m m",
+" d mmmmmmmmmmmmmmmmmmm d mmm",
+" d d d zzz d d d d d dxxxd d"};
+char gun_game[10][28+1] = {
+"      * *                x x",
+" ~ lqqqqqk   lqqqqqqqk   x x",
+" ~ mqqqk x   mqqqqqqqj   mqj",
+" ` ~ ~ x x (*< + +  + + [\"] ",
+"qqqk ~ x x ~ lqk ~ lqqqqqqqq",
+"qqqj ~ mqj ~ x x ~ mqqqqqk l",
+" ~ ~ ~ ~ ~ ~ x x ~ ~ ~ ~ x x",
+" ~ lqqqqqqqqqj mqqqqqk ~ x x",
+" ~ mqqqqqqqqqqqqqqqqqj ~ mqj",
+" ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~"};
+char gun_col[10][28+1] = {
+"                         m m",
+" d mmmmmmm   mmmmmmmmm   m m",
+" d mmmmm m   mmmmmmmmm   mmm",
+" ` d d m m ppp + +  - - www ",
+"mmmm d m m d mmm d mmmmmmmmm",
+"mmmm d mmm d m m d mmmmmmm m",
+" d d d d d d m m d d d d m m",
+" d mmmmmmmmmmm mmmmmmm d m m",
+" d mmmmmmmmmmmmmmmmmmm d mmm",
+" d d d d d d d d d d d d d d"};
+
 void menu_print_ent(WINDOW*, int, int, int, int, char*, int);
 void* delete_menu(void*);
 void* pacrun_menu(void*);
@@ -91,6 +136,88 @@ void menu_print_ent(WINDOW* win, int oy, int ox, int ny, int nx, char* str, int 
     wattroff(win, COLOR_PAIR(color));
 }
 
+void print_preview(WINDOW* win, int r, int c, char preview[r][c], char colors[r][c])
+{
+    int i,j;
+
+    werase(win);
+
+    wattron(win, COLOR_MAP);
+    box(win,0,0);
+    wattroff(win, COLOR_MAP);
+    for(i=0;i<r;i++)
+        for(j=0;j<c-1;j++)
+        {
+            switch(colors[i][j])
+            {
+                case 'w':
+                    wattron(win, COLOR_BLINKY);
+                    break;
+                case 'x':
+                    wattron(win, COLOR_PINKY);
+                    break;
+                case 'y':
+                    wattron(win, COLOR_INKY);
+                    break;
+                case 'z':
+                    wattron(win, COLOR_CLYDE);
+                    break;
+                case 'm':
+                    wattron(win, COLOR_MAP);
+                    break;
+                case 'd':
+                    wattron(win, COLOR_PELLETS);
+                    break;
+                case 'p':
+                    wattron(win, COLOR_PACMAN);
+                    break;
+                case '+':
+                    wattron(win, COLOR_PAIR(17));
+                    break;
+                case '-':
+                    wattron(win, COLOR_REDTEXT);
+                    break;
+            }
+
+            if(preview[i][j] == '>' || preview[i][j] == '<' || preview[i][j] == '*' || preview[i][j] == ')' || preview[i][j] == '(' || preview[i][j] == '+' || preview[i][j] == '[' || preview[i][j] == '"' || preview[i][j] == ']')
+                mvwaddch(win, i+1, j+1, preview[i][j]);
+            else
+                mvwaddch(win, i+1, j+1, NCURSES_ACS(preview[i][j]));
+
+            switch(colors[i][j])
+            {
+                case 'w':
+                    wattroff(win, COLOR_BLINKY);
+                    break;
+                case 'x':
+                    wattroff(win, COLOR_PINKY);
+                    break;
+                case 'y':
+                    wattroff(win, COLOR_INKY);
+                    break;
+                case 'z':
+                    wattroff(win, COLOR_CLYDE);
+                    break;
+                case 'm':
+                    wattroff(win, COLOR_MAP);
+                    break;
+                case 'd':
+                    wattroff(win, COLOR_PELLETS);
+                    break;
+                case 'p':
+                    wattroff(win, COLOR_PACMAN);
+                    break;
+                case '+':
+                    wattroff(win, COLOR_PAIR(17));
+                    break;
+                case '-':
+                    wattroff(win, COLOR_REDTEXT);
+                    break;
+            }
+        }
+    wrefresh(win); 
+}
+
 int main_menu()
 {
     int i,j,k;
@@ -99,18 +226,7 @@ int main_menu()
     int n_selection = 0;
     int num_choices = 2;
     char c;
-/*
-    char* title[9] = {
-    " _____________________________________________________ ",
-    "/ ___________________________________________________ \\",
-    "|/ ____             ____                          __ \\|",
-    "|||    \\    /\\     /    \\    |\\   /|    /\\    |\\ |  |||",
-    "|||  o  |  /  \\   /    /     | \\_/ |   /  \\   | \\|  |||",
-    "|||  __/  / [] \\  \\    \\     |     |  / [] \\  |     |||",
-    "|||_|    /______\\  \\____/    |_____| /______\\ |_____|||",
-    "|\\___________________________________________________/|",
-    "\\_____________________________________________________/"};
-*/
+
     char title[8][MAP_WIDTH+1] = {
     "                                                       ",
     "                                                       ",
@@ -124,6 +240,7 @@ int main_menu()
 
 
     WINDOW* win = newwin(MAP_HEIGHT, MAP_WIDTH, GUI_HEIGHT, 0);
+    WINDOW* win2 = newwin(12, 30, 22, (MAP_WIDTH-30)/2);
 
     keypad(win, true);
 
@@ -148,8 +265,9 @@ int main_menu()
                 wattroff(win, YELLOW_MENU);
             }
         }
-
     wrefresh(win);
+
+    print_preview(win2, 10, 28+1, pac_game, pac_col);
 
     do
     {
@@ -177,8 +295,18 @@ int main_menu()
         wrefresh(win);
         c_selection = n_selection;
 
+        switch(c_selection)
+        {
+            case 0:
+                print_preview(win2, 10, 28+1, pac_game, pac_col);
+                break;
+            case 1:
+                print_preview(win2, 10, 28+1, gun_game, gun_col);
+                break;
+        }
+
     }
-    while(c!='\r');
+    while(c!='\r' && c!=' ');
 
     pthread_t pacrun_v, delete_v;
     Pacrun_Par pacrun_par = {win, c_selection};
