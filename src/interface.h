@@ -1,6 +1,8 @@
 #ifndef INTERFACE_H
 #define INTERFACE_H
 
+#include <curses.h>
+
 #include "ghost.h"
 #include "pacman.h"
 #include "entity.h"
@@ -116,10 +118,6 @@ static const char PELLETS[MAP_HEIGHT][MAP_WIDTH+1] = {
 "  ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~  ",
 "                                                       "};
 
-void print_pacman(CharPacman);
-void print_ghost(CharGhost);
-void print_ui(ControlData*);
-void print_temp_text(TempText);
-void create_temp_text(TempText*, int, int, char*, int, int);
+void print_ui(WINDOW*, ControlData*);
 
 #endif

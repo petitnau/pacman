@@ -43,17 +43,19 @@
 #define COLOR_REDTEXT COLOR_PAIR(10)
 #define COLOR_GREENTEXT COLOR_PAIR(11)
 #define COLOR_CYANTEXT COLOR_PAIR(12)
-#define COLOR_MAGENTATEXT COLOR_PAIR(13)
+#define COLOR_MAGENTATEXT COLOR_P
 
-void print_gui_string(int, int, char*); 
-void print_map_at(int, int,char[MAP_HEIGHT][MAP_WIDTH+1]);
-void print_lives(CharPacman);
-void print_map(char[MAP_HEIGHT][MAP_WIDTH+1]);
-void print_food(char[MAP_HEIGHT][MAP_WIDTH+1]);
+typedef struct
+{
+    Position p;
+    char text[10];
+    unsigned long long timer;
+    int color;
+} TempText;
+
 char get_map_at(int, int, char[MAP_HEIGHT][MAP_WIDTH+1]);
 Position get_pac_eff_pos(Position);
 int mod(int, int);
-
 int rand_between(int, int);
 float distance(Position, Position);
 int min_index(int, float *);
@@ -67,5 +69,6 @@ Position get_i_ch_pos(int r, int c, char[r][c+1], char, int);
 int count_mat_occ(int r, int c, char[r][c+1], char);
 void get_rand_nums(int, int, int, int[]);
 void diff_matrix(int r, int c, char[r][c+1], char[r][c+1], char[r][c+1]);
+void create_temp_text(TempText*, int, int, char*, int, int);
 
 #endif

@@ -7,134 +7,6 @@
 #include "utils.h"
 #include "interface.h"
 
-void print_gui_string(int y, int x, char* str)
-{
-    int i,j,k;
-    int len = strlen(str);
-    char c;
-
-    attron(COLOR_TEXT);
-
-    for(i=0; i<len; i++)
-    {
-        for(j=0; j<6; j++)
-        {
-            if(str[i] >= '0' && str[i] <= '9')
-                c = F_NUMBERS[str[i]-'0'][j];
-            else if(str[i] >= 'a' && str[i] <= 'z')
-                c = F_LETTERS[str[i]-'a'][j];
-            else if(str[i] >= 'A' && str[i] <= 'Z')
-                c = F_LETTERS[str[i]-'A'][j];
-            else 
-                c = ' ';
-
-            if(c=='m' || c=='q' || c=='x' || c=='j' 
-            || c=='l' || c=='k' || c=='t' || c=='u' 
-            || c=='w' || c=='v')
-                mvaddch(y+(j/2),x+(j%2)-(len-i)*2, NCURSES_ACS(c));
-            else
-                mvaddch(y+(j/2),x+(j%2)-(len-i)*2, c);
-        }
-    }
-
-    attroff(COLOR_TEXT);
-}
-
-void print_lives(CharPacman pacman)
-{
-    int i;
-
-    attron(COLOR_PACMAN);
-
-    for(i = 0; i < pacman.lives; i++)
-        mvprintw(37,4+(i*4), S_PACMAN[LEFT]);
-
-    attroff(COLOR_PACMAN);
-
-    for(i = pacman.lives; i < MAX_HP; i++)
-        mvprintw(37,4+(i*4), "   ");
-    
-    attron(COLOR_PAIR(18));
-
-    for(i = 0; i < pacman.armor; i++)
-    {
-        mvaddch(37,15+(i*4), '[');
-        mvaddch(37,16+(i*4), NCURSES_ACS('~'));
-        mvaddch(37,17+(i*4), ']');
-    }
-    
-    attroff(COLOR_PAIR(18));
-
-    for(i = pacman.armor; i < PACMAN_START_ARMOR; i++)
-        mvprintw(37,15+(i*4), "   ");
-}
-
-void print_map_at(int x, int y, char map[MAP_HEIGHT][MAP_WIDTH+1])
-{
-    char c = map[y][x];
-
-    attron(COLOR_MAP);
-
-    if(c=='m' || c=='q' || c=='x' || c=='j' 
-     || c=='l' || c=='k' || c=='t' || c=='u' 
-     || c=='w' || c=='~' || c=='`')
-        mvaddch(y+GUI_HEIGHT, x, NCURSES_ACS(c));
-    else if(is_empty_space(c) || c == '@' || c == '[' || c== ']')
-        mvaddch(y+GUI_HEIGHT, x, ' ');
-    else if(c == '^' || c =='v')
-        mvaddch(y+GUI_HEIGHT, x, '-');
-    else if(c == '<' || c =='>')
-        mvaddch(y+GUI_HEIGHT, x, '-');
-    else
-        mvaddch(y+GUI_HEIGHT, x, c);
-        
-    attroff(COLOR_MAP);
-}
-
-void print_map(char map[MAP_HEIGHT][MAP_WIDTH+1])
-{
-    int i,j;
-
-    for(i=0; i<MAP_WIDTH; i++)
-        for(j=0; j<MAP_HEIGHT; j++)
-           print_map_at(i, j, map);
-}
-
-void print_food_at(int x, int y, char game_food[MAP_HEIGHT][MAP_WIDTH+1])
-{
-    if(game_food[y][x] != ' ')
-    {
-        if(game_food[y][x] == '~' || game_food[y][x] == '`')
-            mvaddch(y+GUI_HEIGHT, x, NCURSES_ACS(game_food[y][x]));
-        else if(game_food[y][x] == '^')
-        {
-            attron(COLOR_GREENTEXT);
-            mvaddch(y+GUI_HEIGHT, x, game_food[y][x]);
-            attroff(COLOR_GREENTEXT);
-        }
-        else if(game_food[y][x] == '.')
-        {
-
-            attron(COLOR_REDTEXT);
-            mvaddch(y+GUI_HEIGHT, x, game_food[y][x]);
-            attroff(COLOR_REDTEXT);        
-        }
-    }
-}
-
-void print_food(char game_food[MAP_HEIGHT][MAP_WIDTH+1])
-{
-    int i, j;
-    attron(COLOR_PELLETS);
-
-    for(i=0; i<MAP_WIDTH; i++)
-        for(j=0; j<MAP_HEIGHT; j++)
-            print_food_at(i,j, game_food);
-        
-    attroff(COLOR_PELLETS);
-}
-
-
 char get_map_at(int x, int y, char map[MAP_HEIGHT][MAP_WIDTH+1])
 {
     Position orig_pos = {x,y};
@@ -302,4 +174,13 @@ Position get_i_ch_pos(int r, int c, char mat[r][c+1], char ch, int i)
         }
     }
 
+}
+
+void create_temp_text(TempText* temp_text, int x, int y, char* string, int time, int color)
+{
+    temp_text->timer = start_timer(time);
+    strcpy(temp_text->text, string);
+    temp_text->p.x = x;
+    temp_text->p.y = y;
+    temp_text->color = color;
 }

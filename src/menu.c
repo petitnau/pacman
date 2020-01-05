@@ -6,7 +6,13 @@
 #include "control.h"
 #include "interface.h"
 
-#define OFFSET_OPTIONS 10
+#define NUM_OPTIONS 2
+#define OPTIONS_OFFSET 10 
+#define PREVIEW_OFFSET 18
+#define PREVIEW_WIDTH 30
+#define PREVIEW_HEIGHT 12
+#define TITLE_OFFSET 14
+#define TITLE_HEIGHT 4
 #define YELLOW_MENU COLOR_PAIR(14) 
 #define WHITE_MENU COLOR_PAIR(15) 
 #define BLACK_MENU COLOR_PAIR(16) 
@@ -16,10 +22,10 @@ pthread_mutex_t menu_mutex = PTHREAD_MUTEX_INITIALIZER;
 typedef struct
 {
     WINDOW* win;
-    int y;
+    int n_sel;
 } Pacrun_Par;
 
-char pac_game[10][28+1] = {
+char pac_game[(PREVIEW_HEIGHT-2)][(PREVIEW_WIDTH-2)+1] = {
 " ~[\"]~ ~ ~ ~ ~ ~ ~ ~ ~ ~ x x",
 " ~ lqqqqqk ~ lqqqqqqqk ~ x x",
 " ~ mqqqk x ~ mqqqqqqqj ~ mqj",
@@ -30,7 +36,7 @@ char pac_game[10][28+1] = {
 " ~ lqqqqqqqqqj mqqqqqk ~ x x",
 " ~ mqqqqqqqqqqqqqqqqqj ~ mqj",
 " ~ ~ ~ [\"] ~ ~ ~ ~ ~ ~[\"]~ ~"};
-char pac_col[10][28+1] = {
+char pac_col[(PREVIEW_HEIGHT-2)][(PREVIEW_WIDTH-2)+1] = {
 " dyyyd d d d d d d d d d m m",
 " d mmmmmmm d mmmmmmmmm d m m",
 " d mmmmm m d mmmmmmmmm d mmm",
@@ -41,7 +47,7 @@ char pac_col[10][28+1] = {
 " d mmmmmmmmmmm mmmmmmm d m m",
 " d mmmmmmmmmmmmmmmmmmm d mmm",
 " d d d zzz d d d d d dxxxd d"};
-char gun_game[10][28+1] = {
+char gun_game[(PREVIEW_HEIGHT-2)][(PREVIEW_WIDTH-2)+1] = {
 "      * *                x x",
 " ~ lqqqqqk   lqqqqqqqk   x x",
 " ~ mqqqk x   mqqqqqqqj   mqj",
@@ -52,7 +58,7 @@ char gun_game[10][28+1] = {
 " ~ lqqqqqqqqqj mqqqqqk ~ x x",
 " ~ mqqqqqqqqqqqqqqqqqj ~ mqj",
 " ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~"};
-char gun_col[10][28+1] = {
+char gun_col[(PREVIEW_HEIGHT-2)][(PREVIEW_WIDTH-2)+1] = {
 "                         m m",
 " d mmmmmmm   mmmmmmmmm   m m",
 " d mmmmm m   mmmmmmmmm   mmm",
@@ -63,6 +69,9 @@ char gun_col[10][28+1] = {
 " d mmmmmmmmmmm mmmmmmm d m m",
 " d mmmmmmmmmmmmmmmmmmm d mmm",
 " d d d d d d d d d d d d d d"};
+
+char* options[NUM_OPTIONS] = {"Pacman", "Gunman"};
+char* pointer = "(*<";
 
 void menu_print_ent(WINDOW*, int, int, int, int, char*, int);
 void* delete_menu(void*);
@@ -101,18 +110,22 @@ void* pacrun_menu(void* parameters)
     int i,j;
     Pacrun_Par* par = (Pacrun_Par*) parameters;
     WINDOW* win = par->win;
-    int y = par->y;
+    int n_sel = par->n_sel;
+    
+    const int ghost_offset = 20;
+    const int ghost_num = 4;
+    const int cicles = 90;
 
-    for(i=0; i < 90; i++)
+    for(i=0; i < cicles; i++)
     {
         pthread_mutex_lock(&menu_mutex);
 
-        for(j=0; j < 4; j++)
+        for(j=0; j < ghost_num; j++)
         {        
-            menu_print_ent(win, OFFSET_OPTIONS+2*y, -21+i+j*4, OFFSET_OPTIONS+2*y, -20+i+j*4, S_GHOST[0], 8-j);
+            menu_print_ent(win, OPTIONS_OFFSET+2*n_sel, i+j*4 - ghost_offset, OPTIONS_OFFSET+2*n_sel, i+j*4 - (ghost_offset-1), S_GHOST[0], 8-j);
         }
 
-        menu_print_ent(win, OFFSET_OPTIONS+2*y, MAP_WIDTH/2 - 7+i, OFFSET_OPTIONS+2*y, MAP_WIDTH/2 - 6+i, S_PACMAN[3], 4);
+        menu_print_ent(win, OPTIONS_OFFSET+2*n_sel, i-(strlen(S_PACMAN[3])+2) + (MAP_WIDTH-strlen(options[n_sel]))/2, OPTIONS_OFFSET+2*n_sel, i-(strlen(S_PACMAN[3])+1) + (MAP_WIDTH-strlen(options[n_sel]))/2, S_PACMAN[3], 4);
         wattroff(win, COLOR_PACMAN);
         wrefresh(win);
         pthread_mutex_unlock(&menu_mutex);
@@ -227,35 +240,18 @@ int main_menu()
     int num_choices = 2;
     char c;
 
-    char title[8][MAP_WIDTH+1] = {
-    "                                                       ",
-    "                                                       ",
+    char title[TITLE_HEIGHT][MAP_WIDTH+1] = {
     "  XXXXXX    XX     XXXXXX     XX   XX    XX    X  XXXX ",
     "  XX  XXX  XXXX   XXXXXX      XXX XXX   XXXX   XX XXXX ",
     "  XXXXXX  XX  XX  XXXXXX      XXXXXXX  XX  XX  XXXXXXX ",
-    "  XXX    XXXXXXXX  XXXXXX     XXXXXXX XXXXXXXX XXXXXXX ",
-    "                                                       ",
-    "                                                       "};
-
-
-
+    "  XXX    XXXXXXXX  XXXXXX     XXXXXXX XXXXXXXX XXXXXXX ",};
+    
     WINDOW* win = newwin(MAP_HEIGHT, MAP_WIDTH, GUI_HEIGHT, 0);
-    WINDOW* win2 = newwin(12, 30, 22, (MAP_WIDTH-30)/2);
+    WINDOW* win_preview = newwin(PREVIEW_HEIGHT, PREVIEW_WIDTH, PREVIEW_OFFSET+2*NUM_OPTIONS, (MAP_WIDTH-PREVIEW_WIDTH)/2);
 
     keypad(win, true);
 
-    box(win,0,0);
-    wborder(win, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '); // Erase frame around the window
-
-    wattron(win, COLOR_PACMAN);
-    mvwprintw(win, OFFSET_OPTIONS+0, MAP_WIDTH/2 - 6, "(*<");
-    wattroff(win, COLOR_PACMAN);
-    mvwprintw(win, OFFSET_OPTIONS+0, MAP_WIDTH/2 - 2, "PacMan");
-
-    mvwprintw(win, OFFSET_OPTIONS+2, MAP_WIDTH/2 - 2, "GunMan");
-    wrefresh(win);
-
-    for(i=0;i<8;i++)
+    for(i=0;i<TITLE_HEIGHT;i++)
         for(j=0;j<MAP_WIDTH;j++)
         {
             if(title[i][j] != ' ')
@@ -267,7 +263,15 @@ int main_menu()
         }
     wrefresh(win);
 
-    print_preview(win2, 10, 28+1, pac_game, pac_col);
+    wattron(win, COLOR_PACMAN);
+    mvwprintw(win, OPTIONS_OFFSET, (MAP_WIDTH-strlen(options[0]))/2 - (strlen(pointer)+1), pointer);
+    wattroff(win, COLOR_PACMAN);
+    for(i=0; i < NUM_OPTIONS; i++)
+    {
+        mvwprintw(win, OPTIONS_OFFSET+(2*i), (MAP_WIDTH-strlen(options[i]))/2, options[i]);
+    }
+    wrefresh(win);
+    print_preview(win_preview, (PREVIEW_HEIGHT-2), (PREVIEW_WIDTH-2)+1, pac_game, pac_col);
 
     do
     {
@@ -282,16 +286,17 @@ int main_menu()
                 }
                 break;
             case K_DOWN:
-                if(c_selection < num_choices - 1)
+                if(c_selection+1 < num_choices)
                 {
                     n_selection = c_selection+1;
                 }
                 break;
         }
 
-        mvwprintw(win, OFFSET_OPTIONS+2*c_selection, MAP_WIDTH/2 - 6, "   ");
+        for(i=0; i < strlen(pointer); i++)
+            mvwaddch(win, OPTIONS_OFFSET+2*(c_selection), (MAP_WIDTH-strlen(options[c_selection]))/2 - (i+2), ' ');
         wattron(win, COLOR_PACMAN);
-        mvwprintw(win, OFFSET_OPTIONS+2*n_selection, MAP_WIDTH/2 - 6, "(*<");
+        mvwprintw(win, OPTIONS_OFFSET+2*(n_selection), (MAP_WIDTH-strlen(options[n_selection]))/2 - (strlen(pointer)+1), pointer);
         wattroff(win, COLOR_PACMAN);
         wrefresh(win);
         c_selection = n_selection;
@@ -299,10 +304,10 @@ int main_menu()
         switch(c_selection)
         {
             case 0:
-                print_preview(win2, 10, 28+1, pac_game, pac_col);
+                print_preview(win_preview, (PREVIEW_HEIGHT-2), (PREVIEW_WIDTH-2)+1, pac_game, pac_col);
                 break;
             case 1:
-                print_preview(win2, 10, 28+1, gun_game, gun_col);
+                print_preview(win_preview, (PREVIEW_HEIGHT-2), (PREVIEW_WIDTH-2)+1, gun_game, gun_col);
                 break;
         }
 
@@ -317,8 +322,6 @@ int main_menu()
     pthread_join(pacrun_v, NULL);
     pthread_join(delete_v, NULL);
 
-    wborder(win, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '); // Erase frame around the window
-    wrefresh(win);
     delwin(win);
 
     return c_selection;
@@ -351,8 +354,6 @@ int pause_menu(ControlData* cd)
     {
         while(read(cd->pipes->cmd_in, &c, sizeof(c)) != -1)
         {
-            
-
             switch(c)
             {
                 case K_UP: 

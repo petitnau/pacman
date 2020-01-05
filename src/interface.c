@@ -5,13 +5,22 @@
 #include "pacman.h"
 #include "ghost.h"
 
-void print_pacman(CharPacman pacman)
+void print_gui_string(int, int, char*); 
+void print_health(CharPacman);
+void print_map_at(WINDOW*, int, int,char[MAP_HEIGHT][MAP_WIDTH+1]);
+void print_map(WINDOW*, char[MAP_HEIGHT][MAP_WIDTH+1]);
+void print_food(WINDOW*, char[MAP_HEIGHT][MAP_WIDTH+1]);
+void print_pacman(WINDOW*, CharPacman);
+void print_ghost(WINDOW*, CharGhost);
+void print_temp_text(WINDOW*, TempText);
+
+void print_pacman(WINDOW* win, CharPacman pacman)
 {
     Position pos;
     int i;
     char sprite[3];
     
-    attron(COLOR_PACMAN);
+    wattron(win, COLOR_PACMAN);
     strcpy(sprite, S_PACMAN[pacman.e.dir]);
     
     for(i=0; i<3; i++)
@@ -19,13 +28,13 @@ void print_pacman(CharPacman pacman)
         pos.x = pacman.e.p.x+(i-1);
         pos.y = pacman.e.p.y;
         pos = get_pac_eff_pos(pos);
-        mvaddch(pos.y+GUI_HEIGHT,pos.x, sprite[i]);
+        mvwaddch(win, pos.y,pos.x, sprite[i]);
     }
     
-    attroff(COLOR_PACMAN);
+    wattroff(win, COLOR_PACMAN);
 }
 
-void print_bullet(Bullet bullet)
+void print_bullet(WINDOW* win, Bullet bullet)
 {
     Position pos = bullet.p;
     int i;
@@ -34,21 +43,21 @@ void print_bullet(Bullet bullet)
     if(!bullet.dead)
     {
         if(bullet.enemy)
-            attron(COLOR_PAIR(10));
+            wattron(win, COLOR_PAIR(10));
         else
-            attron(COLOR_PAIR(17));
+            wattron(win, COLOR_PAIR(17));
         
         pos = get_pac_eff_pos(pos);
-        mvaddch(pos.y+GUI_HEIGHT,pos.x, '+');
+        mvwaddch(win, pos.y,pos.x, '+');
 
         if(bullet.enemy)
-            attroff(COLOR_PAIR(10));
+            wattroff(win, COLOR_PAIR(10));
         else
-            attroff(COLOR_PAIR(17));
+            wattroff(win, COLOR_PAIR(17));
     }        
 }
 
-void print_ghost(CharGhost ghost)
+void print_ghost(WINDOW *win, CharGhost ghost)
 {
     Position pos;
     int i;
@@ -56,25 +65,25 @@ void print_ghost(CharGhost ghost)
     switch(ghost.mode)
     {
         case M_DEAD:
-            attron(COLOR_TEXT);
+            wattron(win, COLOR_TEXT);
             break;
         case M_FRIGHT:
-            attron(COLOR_FRIGHT);
+            wattron(win, COLOR_FRIGHT);
             break;
         default:
             switch(ghost.e.id)
             {
                 case 0:
-                    attron(COLOR_BLINKY);
+                    wattron(win, COLOR_BLINKY);
                     break;
                 case 1:
-                    attron(COLOR_PINKY);
+                    wattron(win, COLOR_PINKY);
                     break;
                 case 2:
-                    attron(COLOR_INKY);
+                    wattron(win, COLOR_INKY);
                     break;
                 case 3:
-                    attron(COLOR_CLYDE);
+                    wattron(win, COLOR_CLYDE);
                     break;
             }
             break;
@@ -84,38 +93,38 @@ void print_ghost(CharGhost ghost)
         pos.x = ghost.e.p.x+(i-1);
         pos.y = ghost.e.p.y;
         pos = get_pac_eff_pos(pos);
-        mvaddch(pos.y+GUI_HEIGHT,pos.x, S_GHOST[ghost.mode][i]);
+        mvwaddch(win, pos.y,pos.x, S_GHOST[ghost.mode][i]);
     }
 
     switch(ghost.mode)
     {
         case M_DEAD:
-            attroff(COLOR_TEXT);
+            wattroff(win, COLOR_TEXT);
             break;
         case M_FRIGHT:
-            attroff(COLOR_FRIGHT);
+            wattroff(win, COLOR_FRIGHT);
             break;
         default:
             switch(ghost.e.id)
             {
                 case 0:
-                    attroff(COLOR_BLINKY);
+                    wattroff(win, COLOR_BLINKY);
                     break;
                 case 1:
-                    attroff(COLOR_PINKY);
+                    wattroff(win, COLOR_PINKY);
                     break;
                 case 2:
-                    attroff(COLOR_INKY);
+                    wattroff(win, COLOR_INKY);
                     break;
                 case 3:
-                    attroff(COLOR_CLYDE);
+                    wattroff(win, COLOR_CLYDE);
                     break;
             }
             break;
     }
 }
 
-void print_ui(ControlData* cd)
+void print_ui(WINDOW* win_map, ControlData* cd)
 {    
     //wborder(win, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '); // Erase frame around the window
 
@@ -124,8 +133,8 @@ void print_ui(ControlData* cd)
     char scorestr[10];
     char nupstr[10];    
 
-    print_map(cd->options.map);
-    print_food(cd->game_food);
+    print_map(win_map, cd->options.map);
+    print_food(win_map, cd->game_food);
     sprintf(scorestr, "%d", cd->score/10);
     sprintf(nupstr, "1UP");
     print_gui_string(0,11, nupstr);
@@ -134,41 +143,161 @@ void print_ui(ControlData* cd)
     print_gui_string(3,33, "0");
     print_gui_string(3,31, scorestr);
     print_gui_string(0,37, "HIGH SCORE");
-    print_lives(cd->characters.pacman);
+    print_health(cd->characters.pacman);
     
     BulletNode* aux = cd->characters.bullets.head;
     while(aux != NULL)
     {                 
-        print_bullet(aux->bullet);
+        print_bullet(win_map, aux->bullet);
         aux = aux->next;
     }
     
-    print_pacman(cd->characters.pacman);
+    print_pacman(win_map, cd->characters.pacman);
 
     for(i = 0; i < cd->characters.num_ghosts; i++)
     {                 
-        print_ghost(cd->characters.ghosts[i]);
+        print_ghost(win_map, cd->characters.ghosts[i]);
     }
 
-    print_temp_text(cd->temp_text);
+    print_temp_text(win_map, cd->temp_text);
+    wrefresh(win_map);
+    refresh();
 }
 
-void create_temp_text(TempText* temp_text, int x, int y, char* string, int time, int color)
+void print_temp_text(WINDOW *win, TempText temp_text)
 {
-    temp_text->timer = start_timer(time);
-    strcpy(temp_text->text, string);
-    temp_text->p.x = x;
-    temp_text->p.y = y;
-    temp_text->color = color;
-}
-
-void print_temp_text(TempText temp_text)
-{
-    attron(COLOR_PAIR(temp_text.color));
+    wattron(win, COLOR_PAIR(temp_text.color));
     if(temp_text.timer != 0 && check_timer(temp_text.timer))
     {
-        mvprintw(temp_text.p.y, temp_text.p.x, "%s", temp_text.text);
+        mvwprintw(win, temp_text.p.y, temp_text.p.x, "%s", temp_text.text);
         refresh();
     }
-    attroff(COLOR_PAIR(temp_text.color));
+    wattroff(win, COLOR_PAIR(temp_text.color));
+}
+
+void print_gui_string(int y, int x, char* str)
+{
+    int i,j,k;
+    int len = strlen(str);
+    char c;
+
+    attron(COLOR_TEXT);
+
+    for(i=0; i<len; i++)
+    {
+        for(j=0; j<6; j++)
+        {
+            if(str[i] >= '0' && str[i] <= '9')
+                c = F_NUMBERS[str[i]-'0'][j];
+            else if(str[i] >= 'a' && str[i] <= 'z')
+                c = F_LETTERS[str[i]-'a'][j];
+            else if(str[i] >= 'A' && str[i] <= 'Z')
+                c = F_LETTERS[str[i]-'A'][j];
+            else 
+                c = ' ';
+
+            if(c=='m' || c=='q' || c=='x' || c=='j' 
+            || c=='l' || c=='k' || c=='t' || c=='u' 
+            || c=='w' || c=='v')
+                mvaddch(y+(j/2),x+(j%2)-(len-i)*2, NCURSES_ACS(c));
+            else
+                mvaddch(y+(j/2),x+(j%2)-(len-i)*2, c);
+        }
+    }
+
+    attroff(COLOR_TEXT);
+}
+
+void print_health(CharPacman pacman)
+{
+    int i;
+
+    attron(COLOR_PACMAN);
+
+    for(i = 0; i < pacman.lives; i++)
+        mvprintw(37,4+(i*4), S_PACMAN[LEFT]);
+
+    attroff(COLOR_PACMAN);
+
+    for(i = pacman.lives; i < MAX_HP; i++)
+        mvprintw(37,4+(i*4), "   ");
+    
+    attron(COLOR_PAIR(18));
+
+    for(i = 0; i < pacman.armor; i++)
+    {
+        mvaddch(37,48-(i*4), '[');
+        mvaddch(37,49-(i*4), NCURSES_ACS('~'));
+        mvaddch(37,50-(i*4), ']');
+    }
+    
+    attroff(COLOR_PAIR(18));
+
+    for(i = pacman.armor; i < PACMAN_START_ARMOR; i++)
+        mvprintw(37,48-(i*4), "   ");
+}
+
+void print_map_at(WINDOW* win, int x, int y, char map[MAP_HEIGHT][MAP_WIDTH+1])
+{
+    char c = map[y][x];
+
+    wattron(win, COLOR_MAP);
+
+    if(c=='m' || c=='q' || c=='x' || c=='j' 
+     || c=='l' || c=='k' || c=='t' || c=='u' 
+     || c=='w' || c=='~' || c=='`')
+        mvwaddch(win, y, x, NCURSES_ACS(c));
+    else if(is_empty_space(c) || c == '@' || c == '[' || c== ']')
+        mvwaddch(win, y, x, ' ');
+    else if(c == '^' || c =='v')
+        mvwaddch(win, y, x, '-');
+    else if(c == '<' || c =='>')
+        mvwaddch(win, y, x, '-');
+    else
+        mvwaddch(win, y, x, c);
+        
+    wattroff(win, COLOR_MAP);
+}
+
+void print_map(WINDOW* win, char map[MAP_HEIGHT][MAP_WIDTH+1])
+{
+    int i,j;
+
+    for(i=0; i<MAP_WIDTH; i++)
+        for(j=0; j<MAP_HEIGHT; j++)
+           print_map_at(win, i, j, map);
+}
+
+void print_food_at(WINDOW *win, int x, int y, char game_food[MAP_HEIGHT][MAP_WIDTH+1])
+{
+    if(game_food[y][x] != ' ')
+    {
+        if(game_food[y][x] == '~' || game_food[y][x] == '`')
+            mvwaddch(win, y, x, NCURSES_ACS(game_food[y][x]));
+        else if(game_food[y][x] == '^')
+        {
+            wattron(win, COLOR_GREENTEXT);
+            mvwaddch(win, y, x, game_food[y][x]);
+            wattroff(win, COLOR_GREENTEXT);
+        }
+        else if(game_food[y][x] == '.')
+        {
+
+            wattron(win, COLOR_REDTEXT);
+            mvwaddch(win, y, x, game_food[y][x]);
+            wattroff(win, COLOR_REDTEXT);        
+        }
+    }
+}
+
+void print_food(WINDOW *win, char game_food[MAP_HEIGHT][MAP_WIDTH+1])
+{
+    int i, j;
+    wattron(win, COLOR_PELLETS);
+
+    for(i=0; i<MAP_WIDTH; i++)
+        for(j=0; j<MAP_HEIGHT; j++)
+            print_food_at(win, i,j, game_food);
+        
+    wattroff(win, COLOR_PELLETS);
 }

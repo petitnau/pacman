@@ -269,10 +269,6 @@ void ghost_choose_dir(CharGhost* ghost, GhostShared* ghost_shared)
 
 void manage_position_events(GhostShared* ghost_shared, CharGhost* ghost)
 {
-    if(ghost->mode == M_FRIGHT)
-    {
-        fprintf(stderr, "bimbumbam");
-    }
     int i;
     if(ghost->e.p.x == HOME_TARGET.x && ghost->e.p.y == HOME_TARGET.y && ghost->mode == M_DEAD)
     {
@@ -353,6 +349,8 @@ _Bool can_move_ghost(CharGhost ghost, Direction direction, char map[MAP_HEIGHT][
             {
                 if(!is_empty_space_ghost(get_map_at(ghost.e.p.x+i, ghost.e.p.y-1, map)))
                     return false;
+                if(ghost.mode != M_DEAD && get_map_at(ghost.e.p.x+i, ghost.e.p.y-1, map) == 'v')
+                    return false;
             }
             if(get_map_at(ghost.e.p.x, ghost.e.p.y, map) == '#')
                 return false;
@@ -360,7 +358,7 @@ _Bool can_move_ghost(CharGhost ghost, Direction direction, char map[MAP_HEIGHT][
         case LEFT:
             if(!is_empty_space_ghost(get_map_at(ghost.e.p.x-2, ghost.e.p.y, map)))
                 return false;
-            if(ghost.mode != M_DEAD && get_map_at(ghost.e.p.x-2, ghost.e.p.y, map) == '>' || get_map_at(ghost.e.p.x-2, ghost.e.p.y, map) == ']')
+            if(ghost.mode != M_DEAD && (get_map_at(ghost.e.p.x-2, ghost.e.p.y, map) == '>' || get_map_at(ghost.e.p.x-2, ghost.e.p.y, map) == ']'))
                 return false;
             break;
         case DOWN:
@@ -375,7 +373,7 @@ _Bool can_move_ghost(CharGhost ghost, Direction direction, char map[MAP_HEIGHT][
         case RIGHT:
             if(!is_empty_space_ghost(get_map_at(ghost.e.p.x+2, ghost.e.p.y, map)))
                 return false;
-            if(ghost.mode != M_DEAD && get_map_at(ghost.e.p.x+2, ghost.e.p.y, map) == '<' || get_map_at(ghost.e.p.x+2, ghost.e.p.y, map) == '[')
+            if(ghost.mode != M_DEAD && (get_map_at(ghost.e.p.x+2, ghost.e.p.y, map) == '<' || get_map_at(ghost.e.p.x+2, ghost.e.p.y, map) == '['))
                 return false;
             break;
     }

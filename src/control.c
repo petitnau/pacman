@@ -83,10 +83,11 @@ void manage_logs(int log_in, MessageList* log_list)
 void control_main(ControlPipes pipes, Options options)
 {
     ControlData cd; 
+    MessageList log_list;
+    WINDOW *win_map = newwin(MAP_HEIGHT, MAP_WIDTH, GUI_HEIGHT, 0);
 
     init_control_data(&cd, &pipes, options);
     
-    MessageList log_list;
     m_list_init(&log_list);
     b_list_init(&cd.characters.bullets);
 
@@ -101,9 +102,7 @@ void control_main(ControlPipes pipes, Options options)
         collision_handler(&cd);
         send_pacman_info(&cd);
         send_ghost_info(&cd);
-        print_ui(&cd);
-        mvprintw(0,60, "%d          ", cd.characters.pacman.armor);
-        refresh();
+        print_ui(win_map, &cd);
 
         manage_logs(pipes.log_in, &log_list);
         if(cd.eaten_dots == 240)
@@ -316,12 +315,10 @@ void food_handler(ControlData* cd)
             case '^':
                 cd->score += 200;
 
-                create_temp_text(&cd->temp_text, pe_pos.x-1, pe_pos.y+GUI_HEIGHT, "200", 2e3, 13);
+                create_temp_text(&cd->temp_text, pe_pos.x-1, pe_pos.y, "200", 2e3, 13);
                 for(j=-1; j<=1; j++)
                     cd->game_food[pe_pos.y][pe_pos.x+j] = ' '; 
                 
-                mvaddch(pe_pos.y+GUI_HEIGHT, pe_pos.x+i, ' ');
-                refresh();
                 break;
         }
 
@@ -438,7 +435,7 @@ void eat_pause(ControlData* cd, int points)
 {   
     char points_string[6] = {};     
     sprintf(points_string, "%d", points);
-    create_temp_text(&cd->temp_text, cd->characters.pacman.e.p.x-1, cd->characters.pacman.e.p.y+GUI_HEIGHT, points_string, 0.6e3, 12);
+    create_temp_text(&cd->temp_text, cd->characters.pacman.e.p.x-1, cd->characters.pacman.e.p.y, points_string, 0.6e3, 12);
     cd->ghost_info.sleeptime = 0.6e6;    
     cd->ghost_info.new = true;
     cd->pacman_info.sleeptime = 0.6e6;    
@@ -459,14 +456,7 @@ void create_fruit(ControlData* cd)
         n_pos = count_mat_occ(MAP_HEIGHT, MAP_WIDTH, x_matrix, 'X');
         pos = get_i_ch_pos(MAP_HEIGHT, MAP_WIDTH, x_matrix, 'X', rand_between(0, n_pos));
     }
-      
-    attron(COLOR_REDTEXT);
-    mvaddch(pos.y+GUI_HEIGHT, pos.x-1, S_FRUIT[0][0]);
-    mvaddch(pos.y+GUI_HEIGHT, pos.x+1, S_FRUIT[0][2]);
-    attroff(COLOR_REDTEXT);
-    attron(COLOR_GREENTEXT);
-    mvaddch(pos.y+GUI_HEIGHT, pos.x, S_FRUIT[0][1]);
-    attroff(COLOR_GREENTEXT);
+    
     cd->game_food[pos.y][pos.x-1] = S_FRUIT[0][0];
     cd->game_food[pos.y][pos.x] = S_FRUIT[0][1];
     cd->game_food[pos.y][pos.x+1] = S_FRUIT[0][2];

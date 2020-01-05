@@ -11,14 +11,6 @@
 
 typedef struct
 {
-    Position p;
-    char text[10];
-    unsigned long long timer;
-    int color;
-} TempText;
-
-typedef struct
-{
     CharPacman pacman;
     CharGhost* ghosts;
     BulletList bullets;
