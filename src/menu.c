@@ -34,7 +34,7 @@ char pac_col[10][28+1] = {
 " dyyyd d d d d d d d d d m m",
 " d mmmmmmm d mmmmmmmmm d m m",
 " d mmmmm m d mmmmmmmmm d mmm",
-" ` d d m mwww              ",
+" d d d m mwww               ",
 "mmmm d m m   mmm d mmmmmmmmm",
 "mmmm d mmm   m m d mmmmmmm m",
 " d d ppp     m m d d d d m m",
@@ -56,7 +56,7 @@ char gun_col[10][28+1] = {
 "                         m m",
 " d mmmmmmm   mmmmmmmmm   m m",
 " d mmmmm m   mmmmmmmmm   mmm",
-" ` d d m m ppp + +  - - www ",
+" d d d m m ppp + +  - - www ",
 "mmmm d m m d mmm d mmmmmmmmm",
 "mmmm d mmm d m m d mmmmmmm m",
 " d d d d d d m m d d d d m m",
@@ -272,6 +272,7 @@ int main_menu()
     do
     {
         c=getchar();
+        beep();
         switch(c)
         {
             case K_UP: 
