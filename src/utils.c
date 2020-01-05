@@ -79,9 +79,11 @@ void print_map_at(int x, int y, char map[MAP_HEIGHT][MAP_WIDTH+1])
      || c=='l' || c=='k' || c=='t' || c=='u' 
      || c=='w' || c=='~' || c=='`')
         mvaddch(y+GUI_HEIGHT, x, NCURSES_ACS(c));
-    else if(is_empty_space(c) || c == '@' || c == '<' || c == '>')
+    else if(is_empty_space(c) || c == '@' || c == '[' || c== ']')
         mvaddch(y+GUI_HEIGHT, x, ' ');
-    else if(c == '^')
+    else if(c == '^' || c =='v')
+        mvaddch(y+GUI_HEIGHT, x, '-');
+    else if(c == '<' || c =='>')
         mvaddch(y+GUI_HEIGHT, x, '-');
     else
         mvaddch(y+GUI_HEIGHT, x, c);

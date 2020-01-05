@@ -148,7 +148,6 @@ void manage_g_info_in(int info_in, GhostShared* ghost_shared)
                 {
                     ghost_shared->ghosts[i].timers.fright = start_timer(6e3);
                     ghost_shared->ghosts[i].mode = M_FRIGHT;
-                    fprintf(stderr, "([%d]%d/%d)", ghost_shared->num_ghosts, ghost_shared->ghosts[i].e.p.x, ghost_shared->ghosts[i].e.p.y);
                     reverse_direction(&(ghost_shared->ghosts[i].e.dir));
                 }
             } 
@@ -340,7 +339,7 @@ void ghost_move(CharGhost* ghost, char map[MAP_HEIGHT][MAP_WIDTH+1])
 
 _Bool is_empty_space_ghost(char c)
 {
-    return is_empty_space(c) || c=='^' || c=='<' || c=='>';
+    return is_empty_space(c) || c=='^' || c == 'v' || c=='<' || c=='>' || c=='[' || c==']';
 }
 
 _Bool can_move_ghost(CharGhost ghost, Direction direction, char map[MAP_HEIGHT][MAP_WIDTH+1])
@@ -361,7 +360,7 @@ _Bool can_move_ghost(CharGhost ghost, Direction direction, char map[MAP_HEIGHT][
         case LEFT:
             if(!is_empty_space_ghost(get_map_at(ghost.e.p.x-2, ghost.e.p.y, map)))
                 return false;
-            if(ghost.mode != M_DEAD && get_map_at(ghost.e.p.x-2, ghost.e.p.y, map) == '>')
+            if(ghost.mode != M_DEAD && get_map_at(ghost.e.p.x-2, ghost.e.p.y, map) == '>' || get_map_at(ghost.e.p.x-2, ghost.e.p.y, map) == ']')
                 return false;
             break;
         case DOWN:
@@ -376,7 +375,7 @@ _Bool can_move_ghost(CharGhost ghost, Direction direction, char map[MAP_HEIGHT][
         case RIGHT:
             if(!is_empty_space_ghost(get_map_at(ghost.e.p.x+2, ghost.e.p.y, map)))
                 return false;
-            if(ghost.mode != M_DEAD && get_map_at(ghost.e.p.x+2, ghost.e.p.y, map) == '<')
+            if(ghost.mode != M_DEAD && get_map_at(ghost.e.p.x+2, ghost.e.p.y, map) == '<' || get_map_at(ghost.e.p.x+2, ghost.e.p.y, map) == '[')
                 return false;
             break;
     }
