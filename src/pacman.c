@@ -22,7 +22,7 @@ CharPacman init_pacman_char(Options options)
     pacman.e.dir = PACMAN_START_DIR;
     pacman.e.p.x = PACMAN_START_X;
     pacman.e.p.y = PACMAN_START_Y;
-    pacman.lives = PACMAN_START_LIVES;
+    pacman.lives = options.lives;
     pacman.armor = options.options_shoot.armor;
     pacman.next_dir = PACMAN_START_DIR;
     pacman.paused = true;

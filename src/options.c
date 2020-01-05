@@ -26,6 +26,7 @@ Options pacman_options()
     options.options_shoot.armor = 0;
     options.options_spawn.enabled = false;
     options.options_spawn.time_spawn = 0;
+    options.lives = 2;
     options.num_ghosts = 4;
     options.boing = false;
     options.options_fruit.fixed = true;
@@ -49,6 +50,7 @@ Options gunman_options()
     options.options_spawn.enabled = true;
     options.options_spawn.time_spawn = 3;
     options.options_fruit.fixed = false;
+    options.lives = 2;
     options.num_ghosts = 4;
     options.boing = true;
     options.death_timer = 3;

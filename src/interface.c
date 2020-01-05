@@ -212,29 +212,46 @@ void print_health(CharPacman pacman)
 {
     int i;
 
-    attron(COLOR_PACMAN);
+    mvprintw(37,0, "%*s", MAP_WIDTH, " ");
 
-    for(i = 0; i < pacman.lives; i++)
-        mvprintw(37,4+(i*4), S_PACMAN[LEFT]);
-
-    attroff(COLOR_PACMAN);
-
-    for(i = pacman.lives; i < MAX_HP; i++)
-        mvprintw(37,4+(i*4), "   ");
-    
-    attron(COLOR_PAIR(18));
-
-    for(i = 0; i < pacman.armor; i++)
+    if(pacman.lives <= 5)
     {
-        mvaddch(37,48-(i*4), '[');
-        mvaddch(37,49-(i*4), NCURSES_ACS('~'));
-        mvaddch(37,50-(i*4), ']');
+        attron(COLOR_PACMAN);
+        for(i = 0; i < pacman.lives; i++)
+            mvprintw(37,4+(i*4), S_PACMAN[LEFT]);
+        attroff(COLOR_PACMAN);
+    }
+    else
+    {
+        attron(COLOR_PACMAN);
+        mvprintw(37,4, S_PACMAN[LEFT]);
+        attroff(COLOR_PACMAN);
+
+        mvprintw(37,8, "x%d", pacman.lives);
     }
     
-    attroff(COLOR_PAIR(18));
+    if(pacman.armor <= 5)
+    {
+        attron(COLOR_PAIR(18));
+        for(i = 0; i < pacman.armor; i++)
+        {
+            mvaddch(37,MAP_WIDTH-7-(i*4), '[');
+            mvaddch(37,MAP_WIDTH-6-(i*4), NCURSES_ACS('~'));
+            mvaddch(37,MAP_WIDTH-5-(i*4), ']');
+        }
+        attroff(COLOR_PAIR(18));
+    }
+    else
+    {
+        attron(COLOR_PAIR(18));
+        mvaddch(37,MAP_WIDTH-7, '[');
+        mvaddch(37,MAP_WIDTH-6, NCURSES_ACS('~'));
+        mvaddch(37,MAP_WIDTH-5, ']');
+        attroff(COLOR_PAIR(18));
 
-    for(i = pacman.armor; i < PACMAN_START_ARMOR; i++)
-        mvprintw(37,48-(i*4), "   ");
+        mvprintw(37,MAP_WIDTH-12, "%3dx", pacman.armor);
+    }
+    
 }
 
 void print_map_at(WINDOW* win, int x, int y, char map[MAP_HEIGHT][MAP_WIDTH+1])
