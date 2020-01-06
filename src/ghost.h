@@ -11,7 +11,7 @@ static const Position GHOST_START_POS[4] = {{27,11},{27,14},{24,14},{30,14}};
 
 #define GHOST_SPEED 75000
 
-typedef enum {M_SCATTER, M_CHASE, M_FRIGHT, M_DEAD} GhostMode;
+typedef enum {M_SCATTER, M_CHASE, M_FRIGHT, M_DEAD, M_INACTIVE} GhostMode;
 
 typedef struct
 {
@@ -21,6 +21,7 @@ typedef struct
     _Bool restart;
     _Bool pause;
     _Bool resume;
+    int spawn;
     int death;
     int sleeptime;
 } GhostInfo;
@@ -53,6 +54,12 @@ typedef struct
     int bullet_out;
     int log_out;
 } GhostShared;
+
+typedef struct
+{
+    GhostShared* ghost_shared;
+    int id;
+} GhostParameters;
 
 CharGhost init_ghost_char(GhostShared*, int);
 GhostInfo init_ghost_info();

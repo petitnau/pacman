@@ -29,8 +29,8 @@ CharGhost init_ghost_char(GhostShared *ghost_shared, int id)
     ghost.e.id = id;
     set_ghost_start(ghost_shared, &ghost);
 
-    if(!ghost_shared->options.options_spawn.enabled)
-        ghost.mode = M_CHASE;
+    if(ghost_shared->options.options_spawn.enabled)
+        ghost.mode = M_INACTIVE;
     else
         ghost.mode = M_CHASE;
 
@@ -67,6 +67,7 @@ GhostInfo init_ghost_info()
     info.pause = false;
     info.resume = false;
     info.death = -1;
+    info.spawn = -1;
     info.sleeptime = 0;
     return info;
 }
@@ -74,26 +75,31 @@ GhostInfo init_ghost_info()
 void ghost_main(Options options, int info_in, int pos_out, int bullet_out, int log_out) //int num_fantasmi
 {
     int i;
+    pthread_t fantasma;
     GhostInfo info_pkg = init_ghost_info();
     GhostShared ghost_shared = {};
+    GhostParameters *ghost_parameters = malloc(sizeof(GhostParameters)*options.num_ghosts);
+
     ghost_shared.options = options;
-    ghost_shared.num_ghosts = 0;
+    ghost_shared.num_ghosts = options.num_ghosts;
     ghost_shared.pacman = init_pacman_char(options).e;
     ghost_shared.paused = true;
     ghost_shared.mode = M_CHASE;
     ghost_shared.pos_out = pos_out;
     ghost_shared.bullet_out = bullet_out;
     ghost_shared.log_out = log_out;
-    pthread_t fantasma;
     ghost_shared.ghosts = malloc(sizeof(CharGhost)*options.num_ghosts); //alloca puntatori
     ghost_shared.starting_pos = malloc(sizeof(Position)*options.num_ghosts); //alloca puntatori
-    
+
     init_ghost_map(&ghost_shared);
 
-    for(i = 0; i < options.num_ghosts; i++)
-    {
-        pthread_create(&fantasma, NULL, &ghost_thread, &ghost_shared);
-    }
+    if(!options.options_spawn.enabled)
+        for(i = 0; i < options.num_ghosts; i++)
+        {
+            ghost_parameters[i].ghost_shared = &ghost_shared;
+            ghost_parameters[i].id = i;
+            pthread_create(&fantasma, NULL, &ghost_thread, &ghost_parameters[i]);
+        }
     
     while(1)
     {
@@ -104,14 +110,14 @@ void ghost_main(Options options, int info_in, int pos_out, int bullet_out, int l
 void* ghost_thread(void* parameters)
 {
     CharGhost* ghost;
-    GhostShared* ghost_shared = (GhostShared*) parameters;
+    GhostShared* ghost_shared = ((GhostParameters*)parameters)->ghost_shared;
+    int id = ((GhostParameters*)parameters)->id;
 
     int i = 0;  
     //Assegno ad ogni ghost un ghost_id univoco
     pthread_mutex_lock(&mutex);
-    ghost_shared->ghosts[ghost_shared->num_ghosts] = init_ghost_char(ghost_shared, ghost_shared->num_ghosts);
-    ghost = &ghost_shared->ghosts[ghost_shared->num_ghosts];
-    ghost_shared->num_ghosts++;
+    ghost_shared->ghosts[id] = init_ghost_char(ghost_shared, id);
+    ghost = &ghost_shared->ghosts[id];
     pthread_mutex_unlock(&mutex);
 
     while(1)
@@ -169,6 +175,10 @@ void manage_g_info_in(int info_in, GhostShared* ghost_shared)
         if(info.resume)
         {
             ghost_shared->paused = false;
+        }
+        if(info.spawn != -1)
+        {
+            ghost_shared->ghosts[info.spawn].mode = M_CHASE;
         }
         if(info.sleeptime > 0)
         {
@@ -293,7 +303,12 @@ void manage_position_events(GhostShared* ghost_shared, CharGhost* ghost)
         
         }
     }
-  
+
+    if(ghost->mode == M_INACTIVE && ghost->e.p.x == ghost_shared->pacman.p.x && ghost->e.p.y == ghost_shared->pacman.p.y)
+    {
+        ghost->mode = M_CHASE;
+        //usleep(rand_between(1,3)*1e6);
+    }
 }
 
 void ghost_wait(CharGhost ghost, GhostShared* ghost_shared)

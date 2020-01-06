@@ -61,7 +61,9 @@ void print_ghost(WINDOW *win, CharGhost ghost)
 {
     Position pos;
     int i;
-    
+    if(ghost.mode == M_INACTIVE)
+            return;
+            
     switch(ghost.mode)
     {
         case M_DEAD:
