@@ -61,8 +61,8 @@ void print_ghost(WINDOW *win, CharGhost ghost)
 {
     Position pos;
     int i;
-    if(ghost.mode == M_INACTIVE)
-            return;
+  /*  if(ghost.mode == M_INACTIVE)
+            return; */
             
     switch(ghost.mode)
     {
@@ -156,9 +156,10 @@ void print_ui(WINDOW* win_map, ControlData* cd)
     
     print_pacman(win_map, cd->characters.pacman);
 
-    for(i = 0; i < cd->characters.num_ghosts; i++)
+    for(i = 0; i < cd->options.num_ghosts; i++)
     {                 
-        print_ghost(win_map, cd->characters.ghosts[i]);
+        if(cd->characters.ghosts[i].mode != M_INACTIVE)
+            print_ghost(win_map, cd->characters.ghosts[i]);
     }
 
     print_temp_text(win_map, cd->temp_text);

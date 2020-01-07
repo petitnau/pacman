@@ -109,9 +109,7 @@ void diff_matrix(int r, int c, char a_mat[r][c+1], char b_mat[r][c+1], char x_ma
         for(j=0; j<c; j++)
         {
             x_mat[i][j] = (a_mat[i][j] != b_mat[i][j]) ? 'X' : ' ';
-            fprintf(stderr, "%c", x_mat[i][j]);
         }
-        fprintf(stderr, "\n");
     }
 }
 

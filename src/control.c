@@ -33,6 +33,8 @@ void create_fruit(ControlData*);
 
 void init_control_data(ControlData* cd, ControlPipes* pipes, Options options)
 {
+    int i;
+
     cd->characters.pacman = init_pacman_char(options);
     cd->pacman_info = init_pacman_info();
     cd->ghost_info = init_ghost_info();
@@ -42,6 +44,11 @@ void init_control_data(ControlData* cd, ControlPipes* pipes, Options options)
     cd->characters.bullets.count = 0;
     cd->characters.ghosts = malloc(sizeof(CharGhost)*options.num_ghosts);
     
+    for(i=0; i < options.num_ghosts; i++)
+    {
+        cd->characters.ghosts[i].mode = M_INACTIVE;
+    }
+
     cd->temp_text.timer = 0;
     cd->timers.fright_timer = 0;
     cd->timers.fruit_timer = 0;
@@ -90,7 +97,6 @@ void control_main(ControlPipes pipes, Options options)
     
     m_list_init(&log_list);
     b_list_init(&cd.characters.bullets);
-
 
     while(1)
     {  
@@ -216,9 +222,6 @@ void manage_ghost_in(ControlData* cd)
     while(read(cd->pipes->ghost_in, &ghost_pkg, sizeof(ghost_pkg)) != -1)
     {
         cd->characters.ghosts[ghost_pkg.ghost_id] = ghost_pkg;
-
-        if(ghost_pkg.ghost_id+1 > cd->characters.num_ghosts)
-            cd->characters.num_ghosts = ghost_pkg.ghost_id+1;
     }
 }
 
@@ -331,25 +334,28 @@ void collision_handler(ControlData* cd)
     int i, j;
     CharGhost *ghost;
 
-    for(i = 0; i < cd->characters.num_ghosts; i++)
-    {
+    for(i = 0; i < cd->options.num_ghosts; i++)
+    {       
         ghost = &cd->characters.ghosts[i];
 
-        if(cd->characters.pacman.e.p.x == ghost->e.p.x && cd->characters.pacman.e.p.y == ghost->e.p.y)
+        if(ghost->mode != M_INACTIVE)
         {
-            if(ghost->mode == M_FRIGHT)
+            if(cd->characters.pacman.e.p.x == ghost->e.p.x && cd->characters.pacman.e.p.y == ghost->e.p.y)
             {
-                cd->ghost_streak++;
-                cd->score += pow(2,cd->ghost_streak)*100;
-                kill_ghost(cd, i);
+                if(ghost->mode == M_FRIGHT)
+                {
+                    cd->ghost_streak++;
+                    cd->score += pow(2,cd->ghost_streak)*100;
+                    kill_ghost(cd, i);
 
-                eat_pause(cd, pow(2,(cd->ghost_streak))*100);
-            }
-            else if(ghost->mode != M_DEAD && !cd->characters.pacman.dead)
-            {
-                //cd->pacman_info.new = true;
-                //cd->pacman_info.collide = true;
-                //cd->characters.pacman.dead = true;
+                    eat_pause(cd, pow(2,(cd->ghost_streak))*100);
+                }
+                else if(ghost->mode != M_DEAD && !cd->characters.pacman.dead)
+                {
+                    //cd->pacman_info.new = true;
+                    //cd->pacman_info.collide = true;
+                    //cd->characters.pacman.dead = true;
+                }
             }
         }
     }
@@ -361,9 +367,9 @@ void collision_handler(ControlData* cd)
         {
             if(!aux->bullet.enemy)
             {
-                for(j = 0; j < cd->characters.num_ghosts; j++)
+                for(j = 0; j < cd->options.num_ghosts; j++)
                 {
-                    if(cd->characters.ghosts[j].mode != M_DEAD && aux->bullet.p.x == cd->characters.ghosts[j].e.p.x && aux->bullet.p.y == cd->characters.ghosts[j].e.p.y)
+                    if(cd->characters.ghosts[j].mode != M_DEAD && cd->characters.ghosts[i].mode != M_INACTIVE && aux->bullet.p.x == cd->characters.ghosts[j].e.p.x && aux->bullet.p.y == cd->characters.ghosts[j].e.p.y)
                     {
                         kill_bullet(cd, aux);
                         kill_ghost(cd, j);

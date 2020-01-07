@@ -46,7 +46,7 @@ Options gunman_options()
     int i;
     Options options;
     options.options_shoot.enabled = true;
-    options.options_shoot.armor = 5;
+    options.options_shoot.armor = 6;
     options.options_spawn.enabled = true;
     options.options_spawn.time_spawn = 3;
     options.options_fruit.fixed = false;

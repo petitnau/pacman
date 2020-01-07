@@ -14,7 +14,6 @@ typedef struct
     CharPacman pacman;
     CharGhost* ghosts;
     BulletList bullets;
-    int num_ghosts;
 } Characters;
 
 typedef struct
