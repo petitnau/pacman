@@ -29,9 +29,12 @@ CharGhost init_ghost_char(GhostShared *ghost_shared, int id)
     ghost.e.id = id;
     set_ghost_start(ghost_shared, &ghost);
 
-    //if(ghost_shared->options.options_spawn.enabled)
-    //    ghost.mode = M_INACTIVE;
-    //else
+    if(ghost_shared->options.options_spawn.enabled)
+    {
+        ghost.mode = M_IDLE;      
+        ghost.timers.load = start_timer(rand_between(1,3)*1e3);
+    }
+    else
         ghost.mode = M_CHASE;
 
     ghost.timers.fright = 0;
@@ -128,7 +131,7 @@ void* ghost_thread(void* parameters)
         pthread_mutex_lock(&mutex);
         manage_g_timers(ghost_shared, ghost);
         ghost_choose_dir(ghost, ghost_shared); 
-        if(!ghost_shared->paused) ghost_move(ghost, ghost_shared->options.map);
+        if(!ghost_shared->paused && ghost->mode != M_IDLE) ghost_move(ghost, ghost_shared->options.map);
         manage_position_events(ghost_shared, ghost);
         write(ghost_shared->pos_out, ghost, sizeof(*ghost)); //invia la posizione a control
         pthread_mutex_unlock(&mutex);
@@ -153,7 +156,7 @@ void manage_g_info_in(int info_in, GhostShared* ghost_shared)
         {
             for(i=0; i < ghost_shared->num_ghosts; i++)
             {
-                if(ghost_shared->ghosts[i].mode != M_DEAD && ghost_shared->ghosts[i].mode != M_INACTIVE && !is_in_pen(ghost_shared->ghosts[i]))
+                if((ghost_shared->ghosts[i].mode == M_SCATTER || ghost_shared->ghosts[i].mode == M_CHASE) && !is_in_pen(ghost_shared->ghosts[i]))
                 {
                     ghost_shared->ghosts[i].timers.fright = start_timer(6e3);
                     ghost_shared->ghosts[i].mode = M_FRIGHT;
@@ -206,6 +209,14 @@ void manage_g_timers(GhostShared* ghost_shared, CharGhost* ghost)
             if(ghost->mode != M_DEAD)
                 ghost->mode = ghost_shared->mode;
             ghost->timers.fright = 0; 
+        }
+    }
+    if(ghost->timers.load != 0)
+    {
+        if(!check_timer(ghost->timers.load))
+        {
+            ghost->mode = M_CHASE;
+            ghost->timers.load = 0;
         }
     }
     if(ghost->timers.shoot != 0 && ghost_shared->options.options_shoot.enabled)
@@ -424,7 +435,7 @@ void check_ghost_spawn(GhostParameters* ghost_parameters)
         if(ghost_shared->pacman.p.x == ghost_shared->starting_pos[i].x && ghost_shared->pacman.p.y == ghost_shared->starting_pos[i].y && ghost_shared->ghosts[i].mode == M_INACTIVE)
         {        
             pthread_create(&ghost, NULL, &ghost_thread, &ghost_parameters[i]);
-            ghost_shared->ghosts[i].mode = M_CHASE;
+            ghost_shared->ghosts[i].mode = M_IDLE;
         }   
     }
 }

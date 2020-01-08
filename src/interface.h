@@ -9,7 +9,7 @@
 #include "control.h"
 
 static const char S_PACMAN[4][4] = {"(*v", ">*)", "^*)", "(*<"};
-static const char S_GHOST[4][4] = {"[\"]", "[\"]", "[w]", "* *"};
+static const char S_GHOST[6][4] = {"[\"]", "[\"]", "[w]", "* *", "   ", "[\"]"};
 
 static const char S_FRUIT[1][4] = {".^."};
 

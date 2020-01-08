@@ -222,7 +222,6 @@ void manage_ghost_in(ControlData* cd)
     while(read(cd->pipes->ghost_in, &ghost_pkg, sizeof(ghost_pkg)) != -1)
     {
         cd->characters.ghosts[ghost_pkg.ghost_id] = ghost_pkg;
-        fprintf(stderr, "%d", ghost_pkg.ghost_id);
     }
 }
 
@@ -264,6 +263,7 @@ void manage_timers(ControlData* cd)
             cd->ghost_streak = 0;
             cd->timers.fright_timer = 0;;
         }
+    
 }
 
 void send_ghost_info(ControlData* cd)

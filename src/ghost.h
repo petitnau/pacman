@@ -11,7 +11,7 @@ static const Position GHOST_START_POS[4] = {{27,11},{27,14},{24,14},{30,14}};
 
 #define GHOST_SPEED 75000
 
-typedef enum {M_SCATTER, M_CHASE, M_FRIGHT, M_DEAD, M_INACTIVE} GhostMode;
+typedef enum {M_SCATTER, M_CHASE, M_FRIGHT, M_DEAD, M_INACTIVE, M_IDLE} GhostMode;
 
 typedef struct
 {
@@ -28,7 +28,8 @@ typedef struct
 typedef struct
 {
     unsigned long long fright;
-    unsigned long long int shoot;
+    unsigned long long shoot;
+    unsigned long long load;
 } GhostTimers;
 
 typedef struct

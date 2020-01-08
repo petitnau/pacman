@@ -56,6 +56,8 @@ void init()
     init_pair(16, COLOR_BLACK, COLOR_BLACK);
     init_pair(17, COLOR_YELLOW, COLOR_BLACK);
     init_pair(18, COLOR_BLACK, COLOR_GRAY);
+    init_pair(19, COLOR_PINK, COLOR_BLACK);
+    init_pair(20, COLOR_ORANGE, COLOR_BLACK);
 
     refresh();
 }

@@ -72,6 +72,23 @@ void print_ghost(WINDOW *win, CharGhost ghost)
         case M_FRIGHT:
             wattron(win, COLOR_FRIGHT);
             break;
+        case M_IDLE:
+            switch(ghost.e.id)
+            {
+                case 0:
+                    wattron(win, COLOR_REDTEXT);
+                    break;
+                case 1:
+                    wattron(win, COLOR_PINKTEXT);
+                    break;
+                case 2:
+                    wattron(win, COLOR_CYANTEXT);
+                    break;
+                case 3:
+                    wattron(win, COLOR_ORANGETEXT);
+                    break;
+            }
+            break;
         default:
             switch(ghost.e.id)
             {
@@ -105,6 +122,24 @@ void print_ghost(WINDOW *win, CharGhost ghost)
             break;
         case M_FRIGHT:
             wattroff(win, COLOR_FRIGHT);
+            break;
+        case M_IDLE:
+
+            switch(ghost.e.id)
+            {
+                case 0:
+                    wattroff(win, COLOR_REDTEXT);
+                    break;
+                case 1:
+                    wattroff(win, COLOR_PINKTEXT);
+                    break;
+                case 2:
+                    wattroff(win, COLOR_CYANTEXT);
+                    break;
+                case 3:
+                    wattroff(win, COLOR_ORANGETEXT);
+                    break;
+            }
             break;
         default:
             switch(ghost.e.id)
