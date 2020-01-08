@@ -67,7 +67,6 @@ GhostInfo init_ghost_info()
     info.pause = false;
     info.resume = false;
     info.death = -1;
-    info.spawn = -1;
     info.sleeptime = 0;
     return info;
 }
@@ -90,11 +89,9 @@ void ghost_main(Options options, int info_in, int pos_out, int bullet_out, int l
     ghost_shared.log_out = log_out;
     ghost_shared.ghosts = malloc(sizeof(CharGhost)*options.num_ghosts); //alloca puntatori
     ghost_shared.starting_pos = malloc(sizeof(Position)*options.num_ghosts); //alloca puntatori
-
-    init_ghost_map(&ghost_shared);
-
     
-
+    init_ghost_map(&ghost_shared);
+    
     for(i = 0; i < options.num_ghosts; i++)
     {
         ghost_shared.ghosts[i].mode = M_INACTIVE;
@@ -105,6 +102,7 @@ void ghost_main(Options options, int info_in, int pos_out, int bullet_out, int l
     if(!options.options_spawn.enabled)
         for(i = 0; i < options.num_ghosts; i++)
             pthread_create(&ghost, NULL, &ghost_thread, &ghost_parameters[i]);    
+
     while(1)
     {
         manage_g_info_in(info_in, &ghost_shared);
@@ -180,10 +178,6 @@ void manage_g_info_in(int info_in, GhostShared* ghost_shared)
         if(info.resume)
         {
             ghost_shared->paused = false;
-        }
-        if(info.spawn != -1)
-        {
-            ghost_shared->ghosts[info.spawn].mode = M_CHASE;
         }
         if(info.sleeptime > 0)
         {
@@ -426,11 +420,11 @@ void check_ghost_spawn(GhostParameters* ghost_parameters)
 
     for(i = 0; i < num_ghosts; i++)
     {
+
         if(ghost_shared->pacman.p.x == ghost_shared->starting_pos[i].x && ghost_shared->pacman.p.y == ghost_shared->starting_pos[i].y && ghost_shared->ghosts[i].mode == M_INACTIVE)
-        {
+        {        
             pthread_create(&ghost, NULL, &ghost_thread, &ghost_parameters[i]);
             ghost_shared->ghosts[i].mode = M_CHASE;
-            fprintf(stderr, "SPAWN!\n");
-        }
+        }   
     }
 }

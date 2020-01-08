@@ -222,6 +222,7 @@ void manage_ghost_in(ControlData* cd)
     while(read(cd->pipes->ghost_in, &ghost_pkg, sizeof(ghost_pkg)) != -1)
     {
         cd->characters.ghosts[ghost_pkg.ghost_id] = ghost_pkg;
+        fprintf(stderr, "%d", ghost_pkg.ghost_id);
     }
 }
 

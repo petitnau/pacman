@@ -21,7 +21,6 @@ typedef struct
     _Bool restart;
     _Bool pause;
     _Bool resume;
-    int spawn;
     int death;
     int sleeptime;
 } GhostInfo;
