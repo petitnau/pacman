@@ -55,7 +55,7 @@ void pacman_main(Options options, int info_in, int pos_out, int bullet_out, int 
         //Legge solo l'ultimo inserito nella pipe e controlla se è una mossa valida
         manage_p_info_in(options, info_in, bullet_out, &pacman, options.map);
         switch_direction(&pacman, options.map);
-        if (!pacman.paused) pacman_move(&pacman.e, options.map);
+        if (!pacman.paused && !pacman.dead) pacman_move(&pacman.e, options.map);
         write(pos_out, &pacman, sizeof(pacman)); //invia la posizione a control
         pac_wait(pacman);
     }

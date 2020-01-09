@@ -115,16 +115,17 @@ void control_main(ControlPipes pipes, Options options)
         {
             mvprintw(23, 18, "GAME OVER! VITTORIA");
             refresh();
-            return;
+            break;
         }
         if(cd.characters.pacman.lives < 0){
             attron(COLOR_REDTEXT);
             mvprintw(23, 18, "G A M E   O V E R !");
             attroff(COLOR_REDTEXT);
             refresh();
-            return;
+            break;
         }
     }
+    delwin(win_map);
 }
 
 void food_setup(char food[MAP_HEIGHT][MAP_WIDTH+1])
@@ -139,25 +140,25 @@ void food_setup(char food[MAP_HEIGHT][MAP_WIDTH+1])
 void manage_cmd_in(ControlData* cd)
 {
     _Bool new_pkg = false;
-    char c_in;
+    int c_in;
 
     while(read(cd->pipes->cmd_in, &c_in, sizeof(c_in)) != -1)
     {
         switch(c_in)
         {
-            case K_UP:
+            case KEY_UP:
                 new_pkg = true;
                 cd->pacman_info.direction = UP;
                 break;
-            case K_LEFT:
+            case KEY_LEFT:
                 new_pkg = true;
                 cd->pacman_info.direction = LEFT;
                 break;
-            case K_DOWN:
+            case KEY_DOWN:
                 new_pkg = true;
                 cd->pacman_info.direction = DOWN;
                 break;
-            case K_RIGHT:
+            case KEY_RIGHT:
                 new_pkg = true;
                 cd->pacman_info.direction = RIGHT;
                 break;
@@ -353,9 +354,9 @@ void collision_handler(ControlData* cd)
                 }
                 else if((ghost->mode == M_CHASE || ghost->mode == M_FRIGHT) && !cd->characters.pacman.dead)
                 {
-                    //cd->pacman_info.new = true;
-                    //cd->pacman_info.collide = true;
-                    //cd->characters.pacman.dead = true;
+                    cd->pacman_info.new = true;
+                    cd->pacman_info.collide = true;
+                    cd->characters.pacman.dead = true;
                 }
             }
         }

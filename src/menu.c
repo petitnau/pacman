@@ -6,24 +6,21 @@
 #include "control.h"
 #include "interface.h"
 
-#define NUM_OPTIONS 2
-#define OPTIONS_OFFSET 10 
-#define PREVIEW_OFFSET 18
+#define NUM_OPTIONS 5
+#define OPTIONS_OFFSET 3 
+#define PREVIEW_OFFSET 2
 #define PREVIEW_WIDTH 30
 #define PREVIEW_HEIGHT 12
-#define TITLE_OFFSET 14
+#define TITLE_OFFSET 2
 #define TITLE_HEIGHT 4
 #define YELLOW_MENU COLOR_PAIR(14) 
 #define WHITE_MENU COLOR_PAIR(15) 
 #define BLACK_MENU COLOR_PAIR(16) 
 
-pthread_mutex_t menu_mutex = PTHREAD_MUTEX_INITIALIZER;
+#define OPTIONS_POSY OPTIONS_OFFSET+TITLE_HEIGHT+TITLE_OFFSET
+#define PREVIEW_POSY OPTIONS_POSY+OPTIONS_OFFSET+2*NUM_OPTIONS
 
-typedef struct
-{
-    WINDOW* win;
-    int n_sel;
-} Pacrun_Par;
+pthread_mutex_t menu_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 char pac_game[(PREVIEW_HEIGHT-2)][(PREVIEW_WIDTH-2)+1] = {
 " ~[\"]~ ~ ~ ~ ~ ~ ~ ~ ~ ~ x x",
@@ -51,7 +48,7 @@ char gun_game[(PREVIEW_HEIGHT-2)][(PREVIEW_WIDTH-2)+1] = {
 "      * *                x x",
 " ~ lqqqqqk   lqqqqqqqk   x x",
 " ~ mqqqk x   mqqqqqqqj   mqj",
-" ` ~ ~ x x (*< + +  + + [\"] ",
+" ` ~ ~ x x  (*< + ++ + [\"]  ",
 "qqqk ~ x x ~ lqk ~ lqqqqqqqq",
 "qqqj ~ mqj ~ x x ~ mqqqqqk l",
 " ~ ~ ~ ~ ~ ~ x x ~ ~ ~ ~ x x",
@@ -62,7 +59,7 @@ char gun_col[(PREVIEW_HEIGHT-2)][(PREVIEW_WIDTH-2)+1] = {
 "                         m m",
 " d mmmmmmm   mmmmmmmmm   m m",
 " d mmmmm m   mmmmmmmmm   mmm",
-" d d d m m ppp + +  - - www ",
+" d d d m m  ppp + +- - www  ",
 "mmmm d m m d mmm d mmmmmmmmm",
 "mmmm d mmm d m m d mmmmmmm m",
 " d d d d d d m m d d d d m m",
@@ -70,36 +67,36 @@ char gun_col[(PREVIEW_HEIGHT-2)][(PREVIEW_WIDTH-2)+1] = {
 " d mmmmmmmmmmmmmmmmmmm d mmm",
 " d d d d d d d d d d d d d d"};
 
-char* options[NUM_OPTIONS] = {"Pacman", "Gunman"};
+char* options[NUM_OPTIONS] = {"Play Pacman", "Play Gunman", "", "Options", "Exit"};
 char* pointer = "(*<";
 
-void menu_print_ent(WINDOW*, int, int, int, int, char*, int);
+void menu_print_ent(int, int, int, int, char*, int);
 void* delete_menu(void*);
 void* pacrun_menu(void*);
 
 void* delete_menu(void* parameters)
 {
+    int start_y = MAP_HEIGHT*2;
     int i,j;
-    WINDOW* win = (WINDOW*) parameters;
 
-    for(i=-100; i < 100; i++)
+    for(i=-30; i < 120; i++)
     {        
         pthread_mutex_lock(&menu_mutex);
-        wattron(win, BLACK_MENU);
+        attron(BLACK_MENU);
         for(j=0;j<i-2;j++)
         {
-            mvwaddch(win, MAP_HEIGHT-((i-2)-j), j, ' ');
+            mvaddch(start_y-((i-2)-j), j, ' ');
         }
-        wattroff(win, BLACK_MENU);
-        wattron(win, WHITE_MENU);
+        attroff(BLACK_MENU);
+        attron(WHITE_MENU);
         for(j=0;j<i;j++)
         {
-            if(mvwinch(win, MAP_HEIGHT-(i-j), j) != ' ')
-                mvwaddch(win, MAP_HEIGHT-(i-j), j, ' ');
+            if(mvinch(start_y-(i-j), j) != ' ')
+                mvaddch(start_y-(i-j), j, ' ');
         }
         
-        wattroff(win, WHITE_MENU);
-        wrefresh(win);
+        attroff(WHITE_MENU);
+        refresh();
         pthread_mutex_unlock(&menu_mutex);
         usleep(9000);
     }
@@ -108,9 +105,7 @@ void* delete_menu(void* parameters)
 void* pacrun_menu(void* parameters)
 {
     int i,j;
-    Pacrun_Par* par = (Pacrun_Par*) parameters;
-    WINDOW* win = par->win;
-    int n_sel = par->n_sel;
+    int n_sel = *((int*) parameters);
     
     const int ghost_offset = 20;
     const int ghost_num = 4;
@@ -122,12 +117,12 @@ void* pacrun_menu(void* parameters)
 
         for(j=0; j < ghost_num; j++)
         {        
-            menu_print_ent(win, OPTIONS_OFFSET+2*n_sel, i+j*4 - ghost_offset, OPTIONS_OFFSET+2*n_sel, i+j*4 - (ghost_offset-1), S_GHOST[0], 8-j);
+            menu_print_ent(OPTIONS_POSY+2*n_sel, i+j*4 - ghost_offset, OPTIONS_POSY+2*n_sel, i+j*4 - (ghost_offset-1), S_GHOST[0], 8-j);
         }
 
-        menu_print_ent(win, OPTIONS_OFFSET+2*n_sel, i-(strlen(S_PACMAN[3])+2) + (MAP_WIDTH-strlen(options[n_sel]))/2, OPTIONS_OFFSET+2*n_sel, i-(strlen(S_PACMAN[3])+1) + (MAP_WIDTH-strlen(options[n_sel]))/2, S_PACMAN[3], 4);
-        wattroff(win, COLOR_PACMAN);
-        wrefresh(win);
+        menu_print_ent(OPTIONS_POSY+2*n_sel, i-(strlen(S_PACMAN[3])+2) + (MAP_WIDTH-strlen(options[n_sel]))/2, OPTIONS_POSY+2*n_sel, i-(strlen(S_PACMAN[3])+1) + (MAP_WIDTH-strlen(options[n_sel]))/2, S_PACMAN[3], 4);
+        attroff(COLOR_PACMAN);
+        refresh();
         pthread_mutex_unlock(&menu_mutex);
 
         usleep(35000);
@@ -135,18 +130,18 @@ void* pacrun_menu(void* parameters)
 
 }
 
-void menu_print_ent(WINDOW* win, int oy, int ox, int ny, int nx, char* str, int color)
+void menu_print_ent(int oy, int ox, int ny, int nx, char* str, int color)
 {
     int i;
 
     for(i=0; i < strlen(str); i++)
         if(ox+i>0 && ox+i<MAP_WIDTH)
-            mvwaddch(win, oy, ox+i, ' ');
-    wattron(win, COLOR_PAIR(color));
+            mvaddch(oy, ox+i, ' ');
+    attron(COLOR_PAIR(color));
     for(i=0; i < strlen(str); i++)
         if(nx+i>0 && nx+1+i<MAP_WIDTH)
-            mvwaddch(win, ny, nx+i, str[i]);
-    wattroff(win, COLOR_PAIR(color));
+            mvaddch(ny, nx+i, str[i]);
+    attroff(COLOR_PAIR(color));
 }
 
 void print_preview(WINDOW* win, int r, int c, char preview[r][c], char colors[r][c])
@@ -237,68 +232,74 @@ int main_menu()
 
     int c_selection = 0;
     int n_selection = 0;
-    int num_choices = 2;
+
     char c;
 
     char title[TITLE_HEIGHT][MAP_WIDTH+1] = {
     "  XXXXXX    XX     XXXXXX     XX   XX    XX    X  XXXX ",
     "  XX  XXX  XXXX   XXXXXX      XXX XXX   XXXX   XX XXXX ",
     "  XXXXXX  XX  XX  XXXXXX      XXXXXXX  XX  XX  XXXXXXX ",
-    "  XXX    XXXXXXXX  XXXXXX     XXXXXXX XXXXXXXX XXXXXXX ",};
-    
-    WINDOW* win = newwin(MAP_HEIGHT, MAP_WIDTH, GUI_HEIGHT, 0);
-    WINDOW* win_preview = newwin(PREVIEW_HEIGHT, PREVIEW_WIDTH, PREVIEW_OFFSET+2*NUM_OPTIONS, (MAP_WIDTH-PREVIEW_WIDTH)/2);
+    "  XXX    XXXXXXXX  XXXXXX     XXXXXXX XXXXXXXX XXXXXXX "};
 
-    keypad(win, true);
+    WINDOW* win_preview = newwin(PREVIEW_HEIGHT, PREVIEW_WIDTH, PREVIEW_POSY, (MAP_WIDTH-PREVIEW_WIDTH)/2);
 
     for(i=0;i<TITLE_HEIGHT;i++)
         for(j=0;j<MAP_WIDTH;j++)
         {
             if(title[i][j] != ' ')
             {
-                wattron(win, YELLOW_MENU);
-                mvwaddch(win, i, j, title[i][j]);
-                wattroff(win, YELLOW_MENU);
+                attron(YELLOW_MENU);
+                mvaddch(i+TITLE_OFFSET, j, title[i][j]);
+                attroff(YELLOW_MENU);
             }
         }
-    wrefresh(win);
+    refresh();
 
-    wattron(win, COLOR_PACMAN);
-    mvwprintw(win, OPTIONS_OFFSET, (MAP_WIDTH-strlen(options[0]))/2 - (strlen(pointer)+1), pointer);
-    wattroff(win, COLOR_PACMAN);
+    attron(COLOR_PACMAN);
+    mvprintw(OPTIONS_POSY, (MAP_WIDTH-strlen(options[0]))/2 - (strlen(pointer)+1), pointer);
+    attroff(COLOR_PACMAN);
     for(i=0; i < NUM_OPTIONS; i++)
     {
-        mvwprintw(win, OPTIONS_OFFSET+(2*i), (MAP_WIDTH-strlen(options[i]))/2, options[i]);
+        mvprintw(OPTIONS_POSY+2*i, (MAP_WIDTH-strlen(options[i]))/2, options[i]);
     }
-    wrefresh(win);
+    refresh();
     print_preview(win_preview, (PREVIEW_HEIGHT-2), (PREVIEW_WIDTH-2)+1, pac_game, pac_col);
 
     do
     {
         c=getchar();
         beep();
+        n_selection = c_selection;
         switch(c)
         {
             case K_UP: 
                 if(c_selection > 0)
                 {
-                    n_selection = c_selection-1;
+                    do
+                    {
+                        n_selection--;
+                    }
+                    while(n_selection>0 && !strcmp("", options[n_selection]));
                 }
                 break;
             case K_DOWN:
-                if(c_selection+1 < num_choices)
+                if(c_selection+1 < NUM_OPTIONS)
                 {
-                    n_selection = c_selection+1;
+                    do
+                    {
+                        n_selection++;
+                    }
+                    while(n_selection>0 && !strcmp("", options[n_selection]));
                 }
                 break;
         }
 
         for(i=0; i < strlen(pointer); i++)
-            mvwaddch(win, OPTIONS_OFFSET+2*(c_selection), (MAP_WIDTH-strlen(options[c_selection]))/2 - (i+2), ' ');
-        wattron(win, COLOR_PACMAN);
-        mvwprintw(win, OPTIONS_OFFSET+2*(n_selection), (MAP_WIDTH-strlen(options[n_selection]))/2 - (strlen(pointer)+1), pointer);
-        wattroff(win, COLOR_PACMAN);
-        wrefresh(win);
+            mvaddch(OPTIONS_POSY+2*c_selection, (MAP_WIDTH-strlen(options[c_selection]))/2 - (i+2), ' ');
+        attron(COLOR_PACMAN);
+        mvprintw(OPTIONS_POSY+2*n_selection, (MAP_WIDTH-strlen(options[n_selection]))/2 - (strlen(pointer)+1), pointer);
+        attroff(COLOR_PACMAN);
+        refresh();
         c_selection = n_selection;
 
         switch(c_selection)
@@ -309,23 +310,34 @@ int main_menu()
             case 1:
                 print_preview(win_preview, (PREVIEW_HEIGHT-2), (PREVIEW_WIDTH-2)+1, gun_game, gun_col);
                 break;
+            default:
+                werase(win_preview);
+                wrefresh(win_preview);
         }
 
     }
     while(c!='\r' && c!=' ');
 
-    pthread_t pacrun_v, delete_v;
-    Pacrun_Par pacrun_par = {win, c_selection};
-    pthread_create(&pacrun_v, NULL, &pacrun_menu, &pacrun_par);
-    pthread_create(&delete_v, NULL, &delete_menu, win);
+    if(c_selection == 0 || c_selection == 1)
+    {
+        pthread_t pacrun_v, delete_v;
+        pthread_create(&pacrun_v, NULL, &pacrun_menu, &c_selection);
+        pthread_create(&delete_v, NULL, &delete_menu, NULL);
 
-    pthread_join(pacrun_v, NULL);
-    pthread_join(delete_v, NULL);
+        pthread_join(pacrun_v, NULL);
+        pthread_join(delete_v, NULL);
+    }
+    else
+    {
 
-    delwin(win);
+    }
+    
+    erase();
+    delwin(win_preview);
 
     return c_selection;
 }
+
 
 int pause_menu(ControlData* cd)
 {
@@ -341,7 +353,7 @@ int pause_menu(ControlData* cd)
         
     box(win, 0, 0);
 
-    for( i = 0; i < 2; i++)
+    for(i = 0; i < 2; i++)
             {
                 if(i == c_selection)
                     wattron(win, COLOR_BLINKY);
@@ -369,7 +381,7 @@ int pause_menu(ControlData* cd)
                     }
                     break;
             }
-            for( i = 0; i < 2; i++)
+            for(i = 0; i < 2; i++)
             {
                 if(i == c_selection)
                     wattron(win, COLOR_BLINKY);

@@ -6,9 +6,9 @@
 
 void player_main(int cmd_out, int log_out)
 {
-    char c;
+    int c;
     //Direction direction;
-
+    
     while(1)
     {
         /*
