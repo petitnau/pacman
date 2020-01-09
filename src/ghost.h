@@ -12,6 +12,7 @@ static const Position GHOST_START_POS[4] = {{27,11},{27,14},{24,14},{30,14}};
 #define GHOST_SPEED 75000
 
 typedef enum {M_SCATTER, M_CHASE, M_FRIGHT, M_DEAD, M_INACTIVE, M_IDLE} GhostMode;
+typedef enum {BLINKY, PINKY, INKY, CLYDE} GhostType;
 
 typedef struct
 {
@@ -35,7 +36,7 @@ typedef struct
 typedef struct
 {
     Entity e;
-    int ghost_id;
+    GhostType type;
     GhostMode mode;
     GhostTimers timers;
 } CharGhost;

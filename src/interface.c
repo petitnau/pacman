@@ -73,35 +73,35 @@ void print_ghost(WINDOW *win, CharGhost ghost)
             wattron(win, COLOR_FRIGHT);
             break;
         case M_IDLE:
-            switch(ghost.e.id)
+            switch(ghost.type)
             {
-                case 0:
+                case BLINKY:
                     wattron(win, COLOR_REDTEXT);
                     break;
-                case 1:
+                case PINKY:
                     wattron(win, COLOR_PINKTEXT);
                     break;
-                case 2:
+                case INKY:
                     wattron(win, COLOR_CYANTEXT);
                     break;
-                case 3:
+                case CLYDE:
                     wattron(win, COLOR_ORANGETEXT);
                     break;
             }
             break;
         default:
-            switch(ghost.e.id)
+            switch(ghost.type)
             {
-                case 0:
+                case BLINKY:
                     wattron(win, COLOR_BLINKY);
                     break;
-                case 1:
+                case PINKY:
                     wattron(win, COLOR_PINKY);
                     break;
-                case 2:
+                case INKY:
                     wattron(win, COLOR_INKY);
                     break;
-                case 3:
+                case CLYDE:
                     wattron(win, COLOR_CLYDE);
                     break;
             }
@@ -125,35 +125,35 @@ void print_ghost(WINDOW *win, CharGhost ghost)
             break;
         case M_IDLE:
 
-            switch(ghost.e.id)
+            switch(ghost.type)
             {
-                case 0:
+                case BLINKY:
                     wattroff(win, COLOR_REDTEXT);
                     break;
-                case 1:
+                case PINKY:
                     wattroff(win, COLOR_PINKTEXT);
                     break;
-                case 2:
+                case INKY:
                     wattroff(win, COLOR_CYANTEXT);
                     break;
-                case 3:
+                case CLYDE:
                     wattroff(win, COLOR_ORANGETEXT);
                     break;
             }
             break;
         default:
-            switch(ghost.e.id)
+            switch(ghost.type)
             {
-                case 0:
+                case BLINKY:
                     wattroff(win, COLOR_BLINKY);
                     break;
-                case 1:
+                case PINKY:
                     wattroff(win, COLOR_PINKY);
                     break;
-                case 2:
+                case INKY:
                     wattroff(win, COLOR_INKY);
                     break;
-                case 3:
+                case CLYDE:
                     wattroff(win, COLOR_CLYDE);
                     break;
             }

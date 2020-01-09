@@ -51,7 +51,7 @@ Options gunman_options()
     options.options_spawn.time_spawn = 3;
     options.options_fruit.fixed = false;
     options.lives = 2;
-    options.num_ghosts = 4;
+    options.num_ghosts = 7;
     options.boing = true;
     options.death_timer = 3;
 

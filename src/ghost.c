@@ -25,8 +25,9 @@ pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 CharGhost init_ghost_char(GhostShared *ghost_shared, int id)
 {
     CharGhost ghost;
-    ghost.ghost_id = id;
     ghost.e.id = id;
+    ghost.type = id%4;
+
     set_ghost_start(ghost_shared, &ghost);
 
     if(ghost_shared->options.options_spawn.enabled)
@@ -47,11 +48,11 @@ void set_ghost_start(GhostShared *ghost_shared, CharGhost *ghost)
 {
     if(ghost_shared->options.options_spawn.enabled)
     {
-        ghost->e.p = ghost_shared->starting_pos[ghost->ghost_id];
+        ghost->e.p = ghost_shared->starting_pos[ghost->e.id];
     }
     else
     {
-        ghost->e.p = GHOST_START_POS[ghost->ghost_id];
+        ghost->e.p = GHOST_START_POS[ghost->type];
     }
     
     ghost->e.dir = UP;
@@ -168,7 +169,11 @@ void manage_g_info_in(int info_in, GhostShared* ghost_shared)
         {
             for(i=0; i < ghost_shared->num_ghosts; i++)
             {
-                ghost_shared->ghosts[i] = init_ghost_char(ghost_shared, ghost_shared->ghosts[i].e.id);
+                if(ghost_shared->ghosts[i].mode != M_INACTIVE)
+                {
+                    ghost_shared->ghosts[i] = init_ghost_char(ghost_shared, i);
+                    //ghost_shared->ghosts[i].e.p = GHOST_START_POS[ghost_shared->ghosts[i].type];
+                }
             } 
             ghost_shared->paused = true;
             ghost_shared->fright = false;
@@ -265,21 +270,21 @@ void ghost_choose_dir(CharGhost* ghost, GhostShared* ghost_shared)
             ghost->e.dir = choose_direction_target(*ghost, HOME_TARGET, ghost_shared->options.map);
             break;
         case M_SCATTER:
-            ghost->e.dir = choose_direction_target(*ghost, SCATTER[ghost->e.id], ghost_shared->options.map);
+            ghost->e.dir = choose_direction_target(*ghost, SCATTER[ghost->type], ghost_shared->options.map);
             break;
         case M_CHASE:
-            switch(ghost->e.id)
+            switch(ghost->type)
             {
-                case 0: 
+                case BLINKY: 
                     ghost->e.dir = choose_direction_target(*ghost, blinky_target(ghost_shared->pacman), ghost_shared->options.map);
                     break;
-                case 1:
+                case PINKY:
                     ghost->e.dir = choose_direction_target(*ghost, pinky_target(ghost_shared->pacman), ghost_shared->options.map);
                     break;
-                case 2:
+                case INKY:
                     ghost->e.dir = choose_direction_target(*ghost, inky_target(ghost_shared->pacman, ghost_shared->ghosts[0].e), ghost_shared->options.map);
                     break;
-                case 3:
+                case CLYDE:
                     ghost->e.dir = choose_direction_target(*ghost, clyde_target(ghost_shared->pacman, ghost_shared->ghosts[3].e), ghost_shared->options.map);
                     break;
             }
@@ -299,11 +304,11 @@ void manage_position_events(GhostShared* ghost_shared, CharGhost* ghost)
     {
         for(i = 0; i < ghost_shared->num_ghosts; i++)
         {
-            if(i != ghost->ghost_id)
+            if(i != ghost->e.id)
             {            
                 if(ghost->e.dir != ghost_shared->ghosts[i].e.dir)
                 {
-                    if(ghost->e.p.x == ghost_shared->ghosts[i].e.p.x && ghost->e.p.y == ghost_shared->ghosts[i].e.p.y )
+                    if(ghost->e.p.x == ghost_shared->ghosts[i].e.p.x && ghost->e.p.y == ghost_shared->ghosts[i].e.p.y)
                     {
                         reverse_direction(&ghost->e.dir);
                         reverse_direction(&ghost_shared->ghosts[i].e.dir);
