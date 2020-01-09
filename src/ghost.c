@@ -172,7 +172,8 @@ void manage_g_info_in(int info_in, GhostShared* ghost_shared)
                 if(ghost_shared->ghosts[i].mode != M_INACTIVE)
                 {
                     ghost_shared->ghosts[i] = init_ghost_char(ghost_shared, i);
-                    //ghost_shared->ghosts[i].e.p = GHOST_START_POS[ghost_shared->ghosts[i].type];
+                    ghost_shared->ghosts[i].e.p = HOME_TARGET;
+                    ghost_shared->ghosts[i].timers.load = start_timer(i*1e3);
                 }
             } 
             ghost_shared->paused = true;

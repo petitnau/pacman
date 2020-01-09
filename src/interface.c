@@ -163,8 +163,6 @@ void print_ghost(WINDOW *win, CharGhost ghost)
 
 void print_ui(WINDOW* win_map, ControlData* cd)
 {    
-    //wborder(win, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '); // Erase frame around the window
-
     int i;
 
     char scorestr[10];
@@ -301,17 +299,35 @@ void print_map_at(WINDOW* win, int x, int y, char map[MAP_HEIGHT][MAP_WIDTH+1])
     if(c=='m' || c=='q' || c=='x' || c=='j' 
      || c=='l' || c=='k' || c=='t' || c=='u' 
      || c=='w' || c=='~' || c=='`')
+    {
+        wattron(win, COLOR_MAP);
         mvwaddch(win, y, x, NCURSES_ACS(c));
+        wattroff(win, COLOR_MAP);
+
+    }
     else if(is_empty_space(c) || c == '@' || c == '[' || c== ']')
+    {
+        wattron(win, COLOR_MAP);
         mvwaddch(win, y, x, ' ');
+        wattroff(win, COLOR_MAP);
+    }
     else if(c == '^' || c =='v')
-        mvwaddch(win, y, x, '-');
+    {
+        wattron(win, COLOR_MAGENTATEXT);
+        mvwaddch(win, y, x, ACS_HLINE);
+        wattroff(win, COLOR_MAGENTATEXT);
+    }
     else if(c == '<' || c =='>')
-        mvwaddch(win, y, x, '-');
+    {
+        wattron(win, COLOR_MAGENTATEXT);
+        mvwaddch(win, y, x, ACS_VLINE);
+        wattroff(win, COLOR_MAGENTATEXT);
+    }
     else
+    {
         mvwaddch(win, y, x, c);
+    }
         
-    wattroff(win, COLOR_MAP);
 }
 
 void print_map(WINDOW* win, char map[MAP_HEIGHT][MAP_WIDTH+1])
@@ -327,8 +343,21 @@ void print_food_at(WINDOW *win, int x, int y, char game_food[MAP_HEIGHT][MAP_WID
 {
     if(game_food[y][x] != ' ')
     {
-        if(game_food[y][x] == '~' || game_food[y][x] == '`')
+        if(game_food[y][x] == '~')
+        {
+            wattron(win, COLOR_PELLETS);
             mvwaddch(win, y, x, NCURSES_ACS(game_food[y][x]));
+            wattroff(win, COLOR_PELLETS);
+        }
+        else if(game_food[y][x] == '`')
+        {
+            if(blink(2e2))
+            {
+                wattron(win, COLOR_PELLETS);
+                mvwaddch(win, y, x, NCURSES_ACS(game_food[y][x]));
+                wattroff(win, COLOR_PELLETS);
+            }
+        }
         else if(game_food[y][x] == '^')
         {
             wattron(win, COLOR_GREENTEXT);
@@ -348,11 +377,8 @@ void print_food_at(WINDOW *win, int x, int y, char game_food[MAP_HEIGHT][MAP_WID
 void print_food(WINDOW *win, char game_food[MAP_HEIGHT][MAP_WIDTH+1])
 {
     int i, j;
-    wattron(win, COLOR_PELLETS);
 
     for(i=0; i<MAP_WIDTH; i++)
         for(j=0; j<MAP_HEIGHT; j++)
             print_food_at(win, i,j, game_food);
-        
-    wattroff(win, COLOR_PELLETS);
 }

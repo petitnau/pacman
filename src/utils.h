@@ -72,5 +72,6 @@ int count_mat_occ(int r, int c, char[r][c+1], char);
 void get_rand_nums(int, int, int, int[]);
 void diff_matrix(int r, int c, char[r][c+1], char[r][c+1], char[r][c+1]);
 void create_temp_text(TempText*, int, int, char*, int, int);
+_Bool blink(unsigned long long);
 
 #endif

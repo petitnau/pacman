@@ -332,7 +332,7 @@ void food_handler(ControlData* cd)
 void collision_handler(ControlData* cd)
 {
     _Bool flag = false;
-    int i, j;
+    int i;
     CharGhost *ghost;
 
     for(i = 0; i < cd->options.num_ghosts; i++)
@@ -351,7 +351,7 @@ void collision_handler(ControlData* cd)
 
                     eat_pause(cd, pow(2,(cd->ghost_streak))*100);
                 }
-                else if(ghost->mode != M_DEAD && !cd->characters.pacman.dead)
+                else if((ghost->mode == M_CHASE || ghost->mode == M_FRIGHT) && !cd->characters.pacman.dead)
                 {
                     //cd->pacman_info.new = true;
                     //cd->pacman_info.collide = true;
@@ -368,12 +368,13 @@ void collision_handler(ControlData* cd)
         {
             if(!aux->bullet.enemy)
             {
-                for(j = 0; j < cd->options.num_ghosts; j++)
+                for(i = 0; i < cd->options.num_ghosts; i++)
                 {
-                    if(cd->characters.ghosts[j].mode != M_DEAD && cd->characters.ghosts[i].mode != M_INACTIVE && aux->bullet.p.x == cd->characters.ghosts[j].e.p.x && aux->bullet.p.y == cd->characters.ghosts[j].e.p.y)
+                    if(cd->characters.ghosts[i].mode != M_DEAD && cd->characters.ghosts[i].mode != M_INACTIVE && cd->characters.ghosts[i].mode != M_IDLE 
+                    && aux->bullet.p.x == cd->characters.ghosts[i].e.p.x && aux->bullet.p.y == cd->characters.ghosts[i].e.p.y)
                     {
                         kill_bullet(cd, aux);
-                        kill_ghost(cd, j);
+                        kill_ghost(cd, i);
                         break;
                     }
                 }

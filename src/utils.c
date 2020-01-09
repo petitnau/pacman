@@ -182,3 +182,12 @@ void create_temp_text(TempText* temp_text, int x, int y, char* string, int time,
     temp_text->p.y = y;
     temp_text->color = color;
 }
+
+_Bool blink(unsigned long long freq)
+{
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    unsigned long long millis = now.tv_sec * 1000 + now.tv_usec / 1000;
+
+    return (millis/freq)%2 == 0;
+}

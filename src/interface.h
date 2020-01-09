@@ -67,7 +67,7 @@ static const char MAP_GUNMAN[MAP_HEIGHT][MAP_WIDTH+1] = {
 "@@@@@@@@@@x   x@x      #########      x@x   x@@@@@@@@@@",
 "@@@@@@@@@@x   x@x   lqqqqq^^^qqqqqk   x@x   x@@@@@@@@@@",
 "qqqqqqqqqqj   mqj   x@@@@@   @@@@@x   mqj   mqqqqqqqqqq",
-"                    <    ]   [    >                    ",
+"                    <             >                    ",
 "qqqqqqqqqqk   lqk   x@@@@@   @@@@@x   lqk   lqqqqqqqqqq",
 "@@@@@@@@@@x   x@x   mqqqqqvvvqqqqqj   x@x   x@@@@@@@@@@",
 "@@@@@@@@@@x   x@x                     x@x   x@@@@@@@@@@",
