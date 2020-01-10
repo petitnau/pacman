@@ -22,31 +22,47 @@ void init_ghost_map(GhostShared*);
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-CharGhost init_ghost_char(GhostShared *ghost_shared, int id)
+void init_timers(GhostShared* ghost_shared, int id)
 {
-    CharGhost ghost;
-    ghost.e.id = id;
-    ghost.type = id%4;
+    CharGhost* ghost = &ghost_shared->ghosts[id];
 
-    set_ghost_start(ghost_shared, &ghost);
+    ghost->timers.fright = 0;
+    ghost->timers.respawn = 0;
+    ghost->timers.shoot = 0;
+    ghost->timers.load = 0;
+}
 
-    if(ghost_shared->options.options_spawn.enabled)
+void init_ghost_char(GhostShared *ghost_shared, int id)
+{
+    CharGhost* ghost = &ghost_shared->ghosts[id];
+    ghost->e.id = id;
+    ghost->type = id%4;
+
+    set_ghost_start(ghost_shared, ghost);
+
+    init_timers(ghost_shared, id);
+
+    if(ghost_shared->options.options_shoot.enabled)
+        ghost->timers.shoot = start_timer(1e3);
+
+    if(ghost_shared->options.options_spawn.enabled && ghost->mode != M_RESPAWN)
     {
-        ghost.mode = M_IDLE;      
-        ghost.timers.load = start_timer(rand_between(1,3)*1e3);
+        ghost->mode = M_IDLE;      
+        ghost->timers.load = start_timer(rand_between(1,3)*1e3);
     }
     else
-        ghost.mode = M_CHASE;
-
-    ghost.timers.fright = 0;
-    ghost.timers.shoot = start_timer(1e3);
-    //ghost.paused = true;
-    return ghost;
+    {
+        ghost->mode = M_CHASE;
+    }
 }
 
 void set_ghost_start(GhostShared *ghost_shared, CharGhost *ghost)
 {
-    if(ghost_shared->options.options_spawn.enabled)
+    if(ghost->mode == M_RESPAWN)
+    {
+        ghost->e.p = HOME_POSITION;
+    }
+    else if(ghost_shared->options.options_spawn.enabled)
     {
         ghost->e.p = ghost_shared->starting_pos[ghost->e.id];
     }
@@ -98,6 +114,7 @@ void ghost_main(Options options, int info_in, int pos_out, int bullet_out, int l
     
     for(i = 0; i < options.num_ghosts; i++)
     {
+        init_timers(&ghost_shared, i);
         ghost_shared.ghosts[i].mode = M_INACTIVE;
 
         ghost_parameters[i].ghost_shared = &ghost_shared;
@@ -111,6 +128,26 @@ void ghost_main(Options options, int info_in, int pos_out, int bullet_out, int l
     {
         manage_g_info_in(info_in, &ghost_shared);
         if(options.options_spawn.enabled) check_ghost_spawn(ghost_parameters);
+        manage_respawn(ghost_parameters);
+    }
+}
+
+void manage_respawn(GhostParameters* ghost_parameters)
+{
+    GhostShared* ghost_shared = ghost_parameters[0].ghost_shared;
+    int i;
+    pthread_t ghost;
+    
+    for(i=0; i<ghost_shared->num_ghosts; i++)
+    {
+        if(ghost_shared->ghosts[i].timers.respawn != 0)
+        {                
+            if(!check_timer(ghost_shared->ghosts[i].timers.respawn))
+            {
+                ghost_shared->ghosts[i].timers.respawn = 0;
+                pthread_create(&ghost, NULL, &ghost_thread, &ghost_parameters[i]);    
+            }
+        }        
     }
 }
 
@@ -122,12 +159,14 @@ void* ghost_thread(void* parameters)
 
     int i = 0;  
     //Assegno ad ogni ghost un ghost_id univoco
+
     pthread_mutex_lock(&mutex);
-    ghost_shared->ghosts[id] = init_ghost_char(ghost_shared, id);
+    init_ghost_char(ghost_shared, id);
     ghost = &ghost_shared->ghosts[id];
     pthread_mutex_unlock(&mutex);
 
-    while(1)
+
+    do
     {       
         pthread_mutex_lock(&mutex);
         manage_g_timers(ghost_shared, ghost);
@@ -138,6 +177,7 @@ void* ghost_thread(void* parameters)
         pthread_mutex_unlock(&mutex);
         ghost_wait(*ghost, ghost_shared);
     }
+    while(ghost->mode != M_RESPAWN);
 }
 
 void manage_g_info_in(int info_in, GhostShared* ghost_shared)
@@ -171,8 +211,11 @@ void manage_g_info_in(int info_in, GhostShared* ghost_shared)
             {
                 if(ghost_shared->ghosts[i].mode != M_INACTIVE)
                 {
-                    ghost_shared->ghosts[i] = init_ghost_char(ghost_shared, i);
-                    ghost_shared->ghosts[i].e.p = HOME_TARGET;
+                    init_ghost_char(ghost_shared, i);
+                    
+                    if(ghost_shared->options.options_spawn.enabled)
+                        ghost_shared->ghosts[i].e.p = HOME_POSITION;
+                    
                     ghost_shared->ghosts[i].timers.load = start_timer(i*1e3);
                 }
             } 
@@ -268,7 +311,7 @@ void ghost_choose_dir(CharGhost* ghost, GhostShared* ghost_shared)
             ghost->e.dir = choose_direction_random(*ghost, ghost_shared->options.map);
             break;
         case M_DEAD:
-            ghost->e.dir = choose_direction_target(*ghost, HOME_TARGET, ghost_shared->options.map);
+            ghost->e.dir = choose_direction_target(*ghost, HOME_POSITION, ghost_shared->options.map);
             break;
         case M_SCATTER:
             ghost->e.dir = choose_direction_target(*ghost, SCATTER[ghost->type], ghost_shared->options.map);
@@ -296,10 +339,11 @@ void ghost_choose_dir(CharGhost* ghost, GhostShared* ghost_shared)
 void manage_position_events(GhostShared* ghost_shared, CharGhost* ghost)
 {
     int i;
-    if(ghost->e.p.x == HOME_TARGET.x && ghost->e.p.y == HOME_TARGET.y && ghost->mode == M_DEAD)
+    if(ghost->e.p.x == HOME_POSITION.x && ghost->e.p.y == HOME_POSITION.y && ghost->mode == M_DEAD)
     {
-        ghost->e.dir = UP;
-        ghost->mode = M_CHASE;
+        ghost->mode = M_RESPAWN;
+        ghost->timers.respawn = start_timer(ghost_shared->options.options_spawn.time_spawn);
+
     }
     if(ghost_shared->options.boing && !is_in_pen(*ghost))
     {
@@ -437,7 +481,6 @@ void check_ghost_spawn(GhostParameters* ghost_parameters)
 
     for(i = 0; i < num_ghosts; i++)
     {
-
         if(ghost_shared->pacman.p.x == ghost_shared->starting_pos[i].x && ghost_shared->pacman.p.y == ghost_shared->starting_pos[i].y && ghost_shared->ghosts[i].mode == M_INACTIVE)
         {        
             pthread_create(&ghost, NULL, &ghost_thread, &ghost_parameters[i]);

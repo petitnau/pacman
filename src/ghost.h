@@ -8,10 +8,10 @@
 #include "options.h"
 
 static const Position GHOST_START_POS[4] = {{27,11},{27,14},{24,14},{30,14}};
-
+    
 #define GHOST_SPEED 75000
 
-typedef enum {M_SCATTER, M_CHASE, M_FRIGHT, M_DEAD, M_INACTIVE, M_IDLE} GhostMode;
+typedef enum {M_SCATTER, M_CHASE, M_FRIGHT, M_DEAD, M_INACTIVE, M_IDLE, M_RESPAWN} GhostMode;
 typedef enum {BLINKY, PINKY, INKY, CLYDE} GhostType;
 
 typedef struct
@@ -31,6 +31,7 @@ typedef struct
     unsigned long long fright;
     unsigned long long shoot;
     unsigned long long load;
+    unsigned long long respawn;
 } GhostTimers;
 
 typedef struct
@@ -60,9 +61,10 @@ typedef struct
 {
     GhostShared* ghost_shared;
     int id;
+    _Bool respawn;
 } GhostParameters;
 
-CharGhost init_ghost_char(GhostShared*, int);
+void init_ghost_char(GhostShared*, int);
 GhostInfo init_ghost_info();
 void ghost_main(Options ,int, int, int, int);
 _Bool can_move_ghost(CharGhost, Direction, char map[MAP_HEIGHT][MAP_WIDTH+1]);

@@ -40,7 +40,7 @@ Position scatter_target (int id)
 
 Position eaten_target ()
 {
-    return HOME_TARGET;
+    return HOME_POSITION;
 }
 
 Position offset_position (Position position, Direction direction, int quantity)
