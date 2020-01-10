@@ -67,12 +67,26 @@ char gun_col[(PREVIEW_HEIGHT-2)][(PREVIEW_WIDTH-2)+1] = {
 " d mmmmmmmmmmmmmmmmmmm d mmm",
 " d d d d d d d d d d d d d d"};
 
+char title[TITLE_HEIGHT][MAP_WIDTH+1] = {
+    "  XXXXXX    XX     XXXXXX     XX   XX    XX    X  XXXX ",
+    "  XX  XXX  XXXX   XXXXXX      XXX XXX   XXXX   XX XXXX ",
+    "  XXXXXX  XX  XX  XXXXXX      XXXXXXX  XX  XX  XXXXXXX ",
+    "  XXX    XXXXXXXX  XXXXXX     XXXXXXX XXXXXXXX XXXXXXX "};
+
 char* options[NUM_OPTIONS] = {"Play Pacman", "Play Gunman", "", "Options", "Exit"};
 char* pointer = "(*<";
 
 void menu_print_ent(int, int, int, int, char*, int);
 void* delete_menu(void*);
 void* pacrun_menu(void*);
+
+void options_menu(Options*);
+
+void print_title();
+void print_options(int, char **);
+void print_pointer(int, int, char*, int, char **);
+void move_pointer(char , int*, int*);
+
 
 void* delete_menu(void* parameters)
 {
@@ -235,71 +249,25 @@ int main_menu()
 
     char c;
 
-    char title[TITLE_HEIGHT][MAP_WIDTH+1] = {
-    "  XXXXXX    XX     XXXXXX     XX   XX    XX    X  XXXX ",
-    "  XX  XXX  XXXX   XXXXXX      XXX XXX   XXXX   XX XXXX ",
-    "  XXXXXX  XX  XX  XXXXXX      XXXXXXX  XX  XX  XXXXXXX ",
-    "  XXX    XXXXXXXX  XXXXXX     XXXXXXX XXXXXXXX XXXXXXX "};
 
     WINDOW* win_preview = newwin(PREVIEW_HEIGHT, PREVIEW_WIDTH, PREVIEW_POSY, (MAP_WIDTH-PREVIEW_WIDTH)/2);
 
-    for(i=0;i<TITLE_HEIGHT;i++)
-        for(j=0;j<MAP_WIDTH;j++)
-        {
-            if(title[i][j] != ' ')
-            {
-                attron(YELLOW_MENU);
-                mvaddch(i+TITLE_OFFSET, j, title[i][j]);
-                attroff(YELLOW_MENU);
-            }
-        }
-    refresh();
-
-    attron(COLOR_PACMAN);
-    mvprintw(OPTIONS_POSY, (MAP_WIDTH-strlen(options[0]))/2 - (strlen(pointer)+1), pointer);
-    attroff(COLOR_PACMAN);
-    for(i=0; i < NUM_OPTIONS; i++)
-    {
-        mvprintw(OPTIONS_POSY+2*i, (MAP_WIDTH-strlen(options[i]))/2, options[i]);
-    }
-    refresh();
+    print_title();
+    print_options(NUM_OPTIONS, options);
+    print_pointer(0,0, pointer, NUM_OPTIONS, options);
+    
     print_preview(win_preview, (PREVIEW_HEIGHT-2), (PREVIEW_WIDTH-2)+1, pac_game, pac_col);
 
     do
     {
-        c=getchar();
+        c = getchar();
         beep();
         n_selection = c_selection;
-        switch(c)
-        {
-            case K_UP: 
-                if(c_selection > 0)
-                {
-                    do
-                    {
-                        n_selection--;
-                    }
-                    while(n_selection>0 && !strcmp("", options[n_selection]));
-                }
-                break;
-            case K_DOWN:
-                if(c_selection+1 < NUM_OPTIONS)
-                {
-                    do
-                    {
-                        n_selection++;
-                    }
-                    while(n_selection>0 && !strcmp("", options[n_selection]));
-                }
-                break;
-        }
 
-        for(i=0; i < strlen(pointer); i++)
-            mvaddch(OPTIONS_POSY+2*c_selection, (MAP_WIDTH-strlen(options[c_selection]))/2 - (i+2), ' ');
-        attron(COLOR_PACMAN);
-        mvprintw(OPTIONS_POSY+2*n_selection, (MAP_WIDTH-strlen(options[n_selection]))/2 - (strlen(pointer)+1), pointer);
-        attroff(COLOR_PACMAN);
-        refresh();
+        move_pointer(c, &c_selection, &n_selection);
+        print_pointer(c_selection, n_selection, pointer, NUM_OPTIONS, options);
+        //refresh();
+
         c_selection = n_selection;
 
         switch(c_selection)
@@ -318,7 +286,7 @@ int main_menu()
     }
     while(c!='\r' && c!=' ');
 
-    if(c_selection == 0 || c_selection == 1)
+    if(c_selection == 0 || c_selection == 1) //Game 
     {
         pthread_t pacrun_v, delete_v;
         pthread_create(&pacrun_v, NULL, &pacrun_menu, &c_selection);
@@ -327,9 +295,9 @@ int main_menu()
         pthread_join(pacrun_v, NULL);
         pthread_join(delete_v, NULL);
     }
-    else
+    else if(c_selection == 3) //Otions
     {
-
+        options_menu(options);
     }
     
     erase();
@@ -394,4 +362,89 @@ int pause_menu(ControlData* cd)
     while(c != '\n');
     
     return c_selection;
+}
+
+void options_menu(Options *options)
+{
+    char c;
+    erase();
+    print_title();
+    char* options_menu[2] = {"Pacman", "Gunman"};
+    
+    do
+    {
+        print_options(2, options_menu);
+        print_pointer(0, 0, pointer, 2, options);
+        //refresh();
+        c = getchar();
+
+
+    } while (c != '\r');
+    
+}
+
+void print_title()
+{
+    int i,j;
+    for(i=0;i<TITLE_HEIGHT;i++)
+        for(j=0;j<MAP_WIDTH;j++)
+        {
+            if(title[i][j] != ' ')
+            {
+                attron(YELLOW_MENU);
+                mvaddch(i+TITLE_OFFSET, j, title[i][j]);
+                attroff(YELLOW_MENU);
+            }
+        }
+    refresh();
+}
+
+void print_options(int num_options, char *options[num_options])
+{
+    int i;
+    
+    for(i=0; i < num_options; i++)
+    {
+        mvprintw(OPTIONS_POSY+2*i, (MAP_WIDTH-strlen(options[i]))/2, options[i]);
+    }
+    refresh();
+}
+
+void print_pointer(int opos, int npos, char* pointer, int num_options, char *options[num_options])
+{
+    int i;
+
+    for(i=0; i < strlen(pointer); i++)
+        mvaddch(OPTIONS_POSY+2*opos, (MAP_WIDTH-strlen(options[opos]))/2 - (i+2), ' ');
+    attron(COLOR_PACMAN);
+    mvprintw(OPTIONS_POSY+2*npos, (MAP_WIDTH-strlen(options[npos]))/2 - (strlen(pointer)+1), pointer);
+    attroff(COLOR_PACMAN);
+    refresh();
+}
+
+void move_pointer(char c, int *c_selection, int *n_selection)
+{
+    switch(c)
+    {
+        case K_UP: 
+            if(*c_selection > 0)
+            {
+                do
+                {
+                    (*n_selection)--;
+                }
+                while(*n_selection > 0 && !strcmp("", options[*n_selection]));
+            }
+            break;
+        case K_DOWN:
+            if(*c_selection + 1 < NUM_OPTIONS)
+            {
+                do
+                {
+                    (*n_selection)++;
+                }
+                while(*n_selection > 0 && !strcmp("", options[*n_selection]));
+            }
+            break;
+    }
 }
