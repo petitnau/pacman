@@ -377,8 +377,6 @@ void options_menu(Options *options)
         print_pointer(0, 0, pointer, 2, options);
         //refresh();
         c = getchar();
-
-
     } while (c != '\r');
     
 }

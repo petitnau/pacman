@@ -8,6 +8,8 @@ typedef struct
 {
     _Bool enabled;
     int armor;
+    int max_bullets;
+    int shoot_cd;
 }OptionsShoot;
 
 typedef struct 

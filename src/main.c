@@ -33,7 +33,7 @@ void init()
     init_color(COLOR_ORANGE, 1000, 700, 300);
     init_color(COLOR_PINK, 1000, 800, 800);
     init_color(COLOR_WHITE, 1000, 1000, 1000);
-    init_color(COLOR_GRAY, 350, 250, 250);
+    init_color(COLOR_BROWN, 350, 250, 250);
 
     init_pair(1, COLOR_BLUE, COLOR_BLACK);
     init_pair(2, COLOR_WHITE, COLOR_BLACK);
@@ -55,7 +55,7 @@ void init()
     init_pair(15, COLOR_WHITE, COLOR_WHITE);
     init_pair(16, COLOR_BLACK, COLOR_BLACK);
     init_pair(17, COLOR_YELLOW, COLOR_BLACK);
-    init_pair(18, COLOR_BLACK, COLOR_GRAY);
+    init_pair(18, COLOR_BLACK, COLOR_BROWN);
     init_pair(19, COLOR_PINK, COLOR_BLACK);
     init_pair(20, COLOR_ORANGE, COLOR_BLACK);
 

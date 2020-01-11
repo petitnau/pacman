@@ -20,6 +20,8 @@ typedef struct
     Direction next_dir;
     int lives;
     int armor;
+    int bullets;
+    unsigned long long cooldown;
     _Bool paused;
     _Bool dead;
 } CharPacman;

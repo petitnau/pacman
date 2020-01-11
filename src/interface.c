@@ -249,6 +249,21 @@ void print_health(CharPacman pacman)
     int i;
 
     mvprintw(37,0, "%*s", MAP_WIDTH, " ");
+    for(i=0; i<40; i++)
+    {
+        mvaddch(i,57, ' ');
+        mvaddch(i,58, ' ');
+    }
+
+    for(i=0; i<pacman.bullets; i++)
+    {
+        attron(COLOR_SHIELD);
+        mvprintw(35-i*3, 57, "^^");
+        attroff(COLOR_SHIELD);
+        attron(COLOR_PACMAN);
+        mvprintw(36-i*3, 57, "  ");
+        attroff(COLOR_PACMAN);
+    }
 
     if(pacman.lives <= 5)
     {

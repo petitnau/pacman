@@ -14,6 +14,7 @@ void pac_wait(CharPacman);
 _Bool accept_turn(CharPacman, Direction, char[MAP_HEIGHT][MAP_WIDTH+1]);
 void pacman_move(Entity*, char map[MAP_HEIGHT][MAP_WIDTH+1]);
 _Bool can_move_pacman(Entity, Direction, char[MAP_HEIGHT][MAP_WIDTH+1]);
+void manage_p_timers(CharPacman*, Options);
 
 CharPacman init_pacman_char(Options options)
 {
@@ -24,6 +25,7 @@ CharPacman init_pacman_char(Options options)
     pacman.e.p.y = PACMAN_START_Y;
     pacman.lives = options.lives;
     pacman.armor = options.options_shoot.armor;
+    pacman.bullets = options.options_shoot.max_bullets;
     pacman.next_dir = PACMAN_START_DIR;
     pacman.paused = true;
     pacman.dead = false;
@@ -58,6 +60,22 @@ void pacman_main(Options options, int info_in, int pos_out, int bullet_out, int 
         if (!pacman.paused && !pacman.dead) pacman_move(&pacman.e, options.map);
         write(pos_out, &pacman, sizeof(pacman)); //invia la posizione a control
         pac_wait(pacman);
+        manage_p_timers(&pacman, options);
+    }
+}
+
+void manage_p_timers(CharPacman* pacman, Options options)
+{
+    if(pacman->cooldown != 0)
+    {
+        if(!check_timer(pacman->cooldown))
+        {
+            pacman->bullets++;
+            if(pacman->bullets < options.options_shoot.max_bullets)
+                pacman->cooldown = start_timer(options.options_shoot.shoot_cd);
+            else
+                pacman->cooldown = 0;
+        }
     }
 }
 
@@ -102,8 +120,11 @@ void manage_p_info_in(Options options,int info_in, int bullet_out, CharPacman *p
             usleep(info_pkg.sleeptime);
         }
         //Pacman sparocharacters.pacman
-        if(info_pkg.shoot)
+        if(info_pkg.shoot && pacman->bullets > 0)
         {
+            pacman->bullets--;
+            if(pacman->cooldown == 0)
+                pacman->cooldown = start_timer(options.options_shoot.shoot_cd);
             bullet_info.create_bullet = true;
             bullet_info.p = pacman->e.p;
             bullet_info.dir = pacman->e.dir;   

@@ -47,6 +47,8 @@ Options gunman_options()
     Options options;
     options.options_shoot.enabled = true;
     options.options_shoot.armor = 6;
+    options.options_shoot.max_bullets = 5;
+    options.options_shoot.shoot_cd = 1e3;
     options.options_spawn.enabled = true;
     options.options_spawn.time_spawn = 3e3;
     options.options_fruit.fixed = false;
