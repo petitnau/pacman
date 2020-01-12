@@ -42,6 +42,7 @@ typedef struct
     Options options;
 
     char game_food[MAP_HEIGHT][MAP_WIDTH+1];
+    Position fruit;
     int score;
     int eaten_dots;
     int ghost_streak;

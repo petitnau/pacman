@@ -4,7 +4,7 @@
 #include "control.h"
 #include "options.h"
 
-Options main_menu();
+void main_menu(Options*);
 int pause_menu(ControlData*);
 
 #endif

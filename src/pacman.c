@@ -29,6 +29,7 @@ CharPacman init_pacman_char(Options options)
     pacman.next_dir = PACMAN_START_DIR;
     pacman.paused = true;
     pacman.dead = false;
+    pacman.cooldown = 0;    
     return pacman;
 }
 
@@ -70,6 +71,7 @@ void manage_p_timers(CharPacman* pacman, Options options)
     {
         if(!check_timer(pacman->cooldown))
         {
+
             pacman->bullets++;
             if(pacman->bullets < options.options_shoot.max_bullets)
                 pacman->cooldown = start_timer(options.options_shoot.shoot_cd);

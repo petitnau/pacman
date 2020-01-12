@@ -28,8 +28,8 @@ Options pacman_options()
     options.num_ghosts = 4;
     options.boing = false;
     options.options_fruit.fixed = true;
-    options.options_fruit.pos.x = 27;
-    options.options_fruit.pos.y = 17;
+    options.options_fruit.pos.x = FRUIT_POS_X;
+    options.options_fruit.pos.y = FRUIT_POS_Y;
     options.time_spawn = 0;
     
     for(i = 0; i < MAP_HEIGHT; i++)

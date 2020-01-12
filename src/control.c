@@ -253,9 +253,9 @@ void manage_timers(ControlData* cd)
     if(cd->timers.fruit_timer != 0)
         if(!check_timer(cd->timers.fruit_timer))
         {
-            cd->game_food[FRUIT_POS_Y][FRUIT_POS_X-1] = ' ';
-            cd->game_food[FRUIT_POS_Y][FRUIT_POS_X] = ' ';
-            cd->game_food[FRUIT_POS_Y][FRUIT_POS_X+1] = ' ';
+            cd->game_food[cd->fruit.y][cd->fruit.x-1] = ' ';
+            cd->game_food[cd->fruit.y][cd->fruit.x] = ' ';
+            cd->game_food[cd->fruit.y][cd->fruit.x+1] = ' ';
             cd->timers.fruit_timer = 0;
         }
     if(cd->timers.fright_timer != 0)
@@ -455,20 +455,19 @@ void create_fruit(ControlData* cd)
 {
     char x_matrix[MAP_HEIGHT][MAP_WIDTH+1];
     int n_pos;
-    Position pos;
 
     if(cd->options.options_fruit.fixed)
-        pos = cd->options.options_fruit.pos;
+        cd->fruit = cd->options.options_fruit.pos;
     else
     {
         diff_matrix(MAP_HEIGHT, MAP_WIDTH, PELLETS, cd->game_food, x_matrix);
         n_pos = count_mat_occ(MAP_HEIGHT, MAP_WIDTH, x_matrix, 'X');
-        pos = get_i_ch_pos(MAP_HEIGHT, MAP_WIDTH, x_matrix, 'X', rand_between(0, n_pos));
+        cd->fruit = get_i_ch_pos(MAP_HEIGHT, MAP_WIDTH, x_matrix, 'X', rand_between(0, n_pos));
     }
     
-    cd->game_food[pos.y][pos.x-1] = S_FRUIT[0][0];
-    cd->game_food[pos.y][pos.x] = S_FRUIT[0][1];
-    cd->game_food[pos.y][pos.x+1] = S_FRUIT[0][2];
+    cd->game_food[cd->fruit.y][cd->fruit.x-1] = S_FRUIT[0][0];
+    cd->game_food[cd->fruit.y][cd->fruit.x] = S_FRUIT[0][1];
+    cd->game_food[cd->fruit.y][cd->fruit.x+1] = S_FRUIT[0][2];
 
     cd->timers.fruit_timer = start_timer(10e3);
 }

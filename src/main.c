@@ -77,7 +77,7 @@ int main()
     do
     {
         erase();
-        options = main_menu();
+        main_menu(&options);
 
         if(menu_choice==MENU_EXIT)
             break;

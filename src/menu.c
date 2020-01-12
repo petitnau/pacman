@@ -77,21 +77,22 @@ char title[TITLE_HEIGHT][MAP_WIDTH+1] = {
     "  XXX    XXXXXXXX  XXXXXX     XXXXXXX XXXXXXXX XXXXXXX "};
 
 char* options[NUM_OPTIONS] = {"Play Pacman", "Play Gunman", "Custom settings", "", "Exit"};
-char settings[NUM_SETTINGS][MAX_STR_SIZE] = {"Lives", "Random Spawn", "Num Ghosts", "Fruit Position", "Bounce", "Respawn Time", "Shooting", "Armor", "Bullets", "Reload Time"};
+char* settings[NUM_SETTINGS] = {"Lives", "Random Spawn", "Num Ghosts", "Fruit Position", "Bounce", "Respawn Time", "Shooting", "Armor", "Bullets", "Reload Time"};
 char* pointer = "(*<";
+char* PRESS_ENTER = "Press ENTER to start...";
 
 void menu_print_ent(int, int, int, int, char*, int);
 void* delete_menu(void*);
 void* pacrun_menu(void*);
 
-Options custom_menu();
+void custom_menu(Options*);
 
 void print_title();
 void print_options(int, char **);
-void print_settings(int, char[][MAX_STR_SIZE], Options, int, int);
+void print_settings(int, char**, Options, int, int);
 void print_pointer(int, int, char*, int, char **);
 void move_pointer(char , int*, int*, int, char**);
-
+void edit_settings(char, int, Options*);
 
 void* delete_menu(void* parameters)
 {
@@ -245,7 +246,7 @@ void print_preview(WINDOW* win, int r, int c, char preview[r][c], char colors[r]
     wrefresh(win); 
 }
 
-Options main_menu()
+void main_menu(Options* game_options)
 {
     int i,j,k;
 
@@ -253,9 +254,6 @@ Options main_menu()
     int n_selection = 0;
 
     char c;
-
-    Options game_options;
-
 
     WINDOW* win_preview = newwin(PREVIEW_HEIGHT, PREVIEW_WIDTH, PREVIEW_POSY, (MAP_WIDTH-PREVIEW_WIDTH)/2);
 
@@ -293,8 +291,20 @@ Options main_menu()
     }
     while(c!='\r' && c!=' ');
 
-    if(c_selection == 0 || c_selection == 1) //Game 
+    switch(c_selection)
     {
+        case 0:
+        case 1:
+            *game_options = choose_options(c_selection);
+            break;
+        case 2:
+            custom_menu(game_options);
+            break;
+    }
+    
+    if(c_selection == 0 || c_selection == 1 || c_selection == 2) //Game 
+    {
+        c_selection = 11;
         pthread_t pacrun_v, delete_v;
         pthread_create(&pacrun_v, NULL, &pacrun_menu, &c_selection);
         pthread_create(&delete_v, NULL, &delete_menu, NULL);
@@ -302,18 +312,6 @@ Options main_menu()
         pthread_join(pacrun_v, NULL);
         pthread_join(delete_v, NULL);
     }
-
-    switch(c_selection)
-    {
-        case 0:
-        case 1:
-            game_options = choose_options(c_selection);
-            break;
-        case 2:
-            game_options = custom_menu();
-            break;
-    }
-    
     erase();
     delwin(win_preview);
 
@@ -378,31 +376,112 @@ int pause_menu(ControlData* cd)
     return c_selection;
 }
 
-Options custom_menu()
+void custom_menu(Options* options)
 {
     char c;
     int n_selection=0, c_selection=0;
-    Options options = gunman_options();
+    *options = gunman_options();
 
     erase();
     print_title();
-    print_settings(NUM_SETTINGS, settings, options, c_selection, n_selection);
+    print_settings(NUM_SETTINGS, settings, *options, c_selection, n_selection);
     
     do
     {
         c = getchar();
-
         n_selection = c_selection;
-        fprintf(stderr, "bb");
+        edit_settings(c, c_selection, options);
         move_pointer(c, &c_selection, &n_selection, NUM_SETTINGS, settings);
-        print_settings(NUM_SETTINGS, settings, options, c_selection, n_selection);
+        print_settings(NUM_SETTINGS, settings, *options, c_selection, n_selection);
         c_selection = n_selection;
-        fprintf(stderr, "aa");
-    } while (c != '\r');
-    
+    }
+    while(c!='\r' && c!=' ');
 }
 
-void print_settings(int num_settings, char settings_str[num_settings][MAX_STR_SIZE], Options settings, int c_selection, int n_selection)
+void edit_settings(char c, int c_selection, Options* options)
+{
+    switch(c)
+    {
+        case K_LEFT:    
+            switch(c_selection)
+            {
+                case 0:
+                    if(options->lives > 0)
+                        options->lives--;
+                    break;
+                case 1:
+                    options->options_spawn.random = !options->options_spawn.random;
+                    break;
+                case 2:
+                    if(options->num_ghosts > 3)
+                        options->num_ghosts--;
+                    break;
+                case 3:
+                    options->options_fruit.fixed = !options->options_fruit.fixed;
+                    break;
+                case 4:
+                    options->boing = !options->boing;
+                    break;
+                case 5:
+                    if(options->time_spawn > 0)
+                        options->time_spawn = ((options->time_spawn/100.0)-1)*100;
+                    break;
+                case 6:
+                    options->options_shoot.enabled = !options->options_shoot.enabled;
+                    break;
+                case 7:
+                    if(options->options_shoot.armor > 0)
+                    options->options_shoot.armor--;
+                    break;
+                case 8:
+                    if(options->options_shoot.max_bullets > 0)
+                        options->options_shoot.max_bullets--;
+                    break;
+                case 9:
+                    if(options->options_shoot.shoot_cd > 0)
+                        options->options_shoot.shoot_cd = ((options->options_shoot.shoot_cd/100.0)-1)*100;
+                    break;
+            }    
+            break;
+        case K_RIGHT:
+            switch(c_selection)
+            {
+                case 0:
+                    options->lives++;
+                    break;
+                case 1:
+                    options->options_spawn.random = !options->options_spawn.random;
+                    break;
+                case 2:
+                    options->num_ghosts++;
+                    break;
+                case 3:
+                    options->options_fruit.fixed = !options->options_fruit.fixed;
+                    break;
+                case 4:
+                    options->boing = !options->boing;
+                    break;
+                case 5:
+                    options->time_spawn = ((options->time_spawn/100.0)+1)*100;
+                    break;
+                case 6:
+                    options->options_shoot.enabled = !options->options_shoot.enabled;
+                    break;
+                case 7:
+                    options->options_shoot.armor++;
+                    break;
+                case 8:
+                    options->options_shoot.max_bullets++;
+                    break;
+                case 9:
+                    options->options_shoot.shoot_cd = ((options->options_shoot.shoot_cd/100.0)+1)*100;
+                    break;
+            }            
+            break;
+    }
+}
+
+void print_settings(int num_settings, char* settings_str[num_settings], Options settings, int c_selection, int n_selection)
 {
     int i, j;
     char settings_value[NUM_SETTINGS][MAX_STR_SIZE];
@@ -444,27 +523,34 @@ void print_settings(int num_settings, char settings_str[num_settings][MAX_STR_SI
                 break;
         }
 
-        attron(COLOR_PACMAN);
         for(j=0; j < strlen(pointer); j++)
-            mvaddch(OPTIONS_POSY+2*c_selection, 9 - (j+2), ' ');
+            mvaddch(OPTIONS_POSY+2*c_selection, 7 - (j+2), ' ');
 
-        mvprintw(OPTIONS_POSY+2*n_selection, 9 - (strlen(pointer)+1), pointer);
+        attron(COLOR_PACMAN);
+        mvprintw(OPTIONS_POSY+2*n_selection, 7 - (strlen(pointer)+1), pointer);
         attroff(COLOR_PACMAN);
 
-        mvprintw(OPTIONS_POSY+2*i, 10, settings_str[i]);
-        mvaddch(OPTIONS_POSY+2*i, 36, '<');
-        if(c_selection == i)
+        if(n_selection == i)
         {
             attron(COLOR_PACMAN);
             mvprintw(OPTIONS_POSY+2*i, 38, "         ");
+            mvprintw(OPTIONS_POSY+2*i, 42-(strlen(settings_value[i]))/2, settings_value[i]);
+            attroff(COLOR_PACMAN);
         }
-
-        mvprintw(OPTIONS_POSY+2*i, 42-(strlen(settings_value[i]))/2, settings_value[i]);
-        attroff(COLOR_PACMAN);
+        else
+        {
+            mvprintw(OPTIONS_POSY+2*i, 38, "         ");
+            mvprintw(OPTIONS_POSY+2*i, 42-(strlen(settings_value[i]))/2, settings_value[i]);
+        }
+        
+        mvprintw(OPTIONS_POSY+2*i, 8, settings_str[i]);
+        mvaddch(OPTIONS_POSY+2*i, 36, '<');
         mvaddch(OPTIONS_POSY+2*i, 48, '>'); 
         move_pointer(c, &c_selection, &n_selection, num_settings, settings_str);
 
     }
+
+    mvprintw(OPTIONS_POSY+2*(num_settings+1), 6+strlen(PRESS_ENTER)/2, PRESS_ENTER);
 
     refresh();
 }
@@ -533,5 +619,4 @@ void move_pointer(char c, int *c_selection, int *n_selection, int num_options, c
             }
             break;
     }
-    fprintf(stderr, "A");
 }

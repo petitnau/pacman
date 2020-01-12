@@ -140,12 +140,12 @@ void manage_respawn(GhostParameters* ghost_parameters)
     
     for(i=0; i<ghost_shared->num_ghosts; i++)
     {
-        if(ghost_shared->ghosts[i].timers.respawn != 0)
+        if(ghost_shared->ghosts[i].timers.respawn != 0 && ghost_shared->ghosts[i].mode == M_RESPAWN)
         {                
             if(!check_timer(ghost_shared->ghosts[i].timers.respawn))
             {
                 ghost_shared->ghosts[i].timers.respawn = 0;
-                pthread_create(&ghost, NULL, &ghost_thread, &ghost_parameters[i]);    
+                pthread_create(&ghost, NULL, &ghost_thread, &ghost_parameters[i]); 
             }
         }        
     }
@@ -153,6 +153,7 @@ void manage_respawn(GhostParameters* ghost_parameters)
 
 void* ghost_thread(void* parameters)
 {
+    _Bool end_flag = false;
     CharGhost* ghost;
     GhostShared* ghost_shared = ((GhostParameters*)parameters)->ghost_shared;
     int id = ((GhostParameters*)parameters)->id;
@@ -173,11 +174,12 @@ void* ghost_thread(void* parameters)
         ghost_choose_dir(ghost, ghost_shared); 
         if(!ghost_shared->paused && ghost->mode != M_IDLE) ghost_move(ghost, ghost_shared->options.map);
         manage_position_events(ghost_shared, ghost);
+        end_flag = (ghost->mode == M_RESPAWN);
         write(ghost_shared->pos_out, ghost, sizeof(*ghost)); //invia la posizione a control
         pthread_mutex_unlock(&mutex);
         ghost_wait(*ghost, ghost_shared);
     }
-    while(ghost->mode != M_RESPAWN);
+    while(!end_flag);
 }
 
 void manage_g_info_in(int info_in, GhostShared* ghost_shared)
