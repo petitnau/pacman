@@ -304,7 +304,8 @@ void main_menu(Options* game_options)
     
     if(c_selection == 0 || c_selection == 1 || c_selection == 2) //Game 
     {
-        c_selection = 11;
+        if(c_selection == 2)
+            c_selection = 11;
         pthread_t pacrun_v, delete_v;
         pthread_create(&pacrun_v, NULL, &pacrun_menu, &c_selection);
         pthread_create(&delete_v, NULL, &delete_menu, NULL);
@@ -312,6 +313,7 @@ void main_menu(Options* game_options)
         pthread_join(pacrun_v, NULL);
         pthread_join(delete_v, NULL);
     }
+    
     erase();
     delwin(win_preview);
 
