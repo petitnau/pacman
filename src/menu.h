@@ -2,8 +2,9 @@
 #define MENU_H
 
 #include "control.h"
+#include "options.h"
 
-int main_menu();
+Options main_menu();
 int pause_menu(ControlData*);
 
 #endif

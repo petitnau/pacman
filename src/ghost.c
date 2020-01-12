@@ -45,7 +45,7 @@ void init_ghost_char(GhostShared *ghost_shared, int id)
     if(ghost_shared->options.options_shoot.enabled)
         ghost->timers.shoot = start_timer(1e3);
 
-    if(ghost_shared->options.options_spawn.enabled && ghost->mode != M_RESPAWN)
+    if(ghost_shared->options.options_spawn.random && ghost->mode != M_RESPAWN)
     {
         ghost->mode = M_IDLE;      
         ghost->timers.load = start_timer(rand_between(1,3)*1e3);
@@ -62,7 +62,7 @@ void set_ghost_start(GhostShared *ghost_shared, CharGhost *ghost)
     {
         ghost->e.p = HOME_POSITION;
     }
-    else if(ghost_shared->options.options_spawn.enabled)
+    else if(ghost_shared->options.options_spawn.random)
     {
         ghost->e.p = ghost_shared->starting_pos[ghost->e.id];
     }
@@ -120,14 +120,14 @@ void ghost_main(Options options, int info_in, int pos_out, int bullet_out, int l
         ghost_parameters[i].ghost_shared = &ghost_shared;
         ghost_parameters[i].id = i;
     }     
-    if(!options.options_spawn.enabled)
+    if(!options.options_spawn.random)
         for(i = 0; i < options.num_ghosts; i++)
             pthread_create(&ghost, NULL, &ghost_thread, &ghost_parameters[i]);    
 
     while(1)
     {
         manage_g_info_in(info_in, &ghost_shared);
-        if(options.options_spawn.enabled) check_ghost_spawn(ghost_parameters);
+        if(options.options_spawn.random) check_ghost_spawn(ghost_parameters);
         manage_respawn(ghost_parameters);
     }
 }
@@ -213,7 +213,7 @@ void manage_g_info_in(int info_in, GhostShared* ghost_shared)
                 {
                     init_ghost_char(ghost_shared, i);
                     
-                    if(ghost_shared->options.options_spawn.enabled)
+                    if(ghost_shared->options.options_spawn.random)
                         ghost_shared->ghosts[i].e.p = HOME_POSITION;
                     
                     ghost_shared->ghosts[i].timers.load = start_timer(i*1e3);
@@ -342,7 +342,7 @@ void manage_position_events(GhostShared* ghost_shared, CharGhost* ghost)
     if(ghost->e.p.x == HOME_POSITION.x && ghost->e.p.y == HOME_POSITION.y && ghost->mode == M_DEAD)
     {
         ghost->mode = M_RESPAWN;
-        ghost->timers.respawn = start_timer(ghost_shared->options.options_spawn.time_spawn);
+        ghost->timers.respawn = start_timer(ghost_shared->options.time_spawn);
 
     }
     if(ghost_shared->options.boing && !is_in_pen(*ghost))

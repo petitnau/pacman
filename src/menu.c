@@ -7,6 +7,7 @@
 #include "interface.h"
 
 #define NUM_OPTIONS 5
+#define NUM_SETTINGS 10
 #define OPTIONS_OFFSET 3 
 #define PREVIEW_OFFSET 2
 #define PREVIEW_WIDTH 30
@@ -16,6 +17,8 @@
 #define YELLOW_MENU COLOR_PAIR(14) 
 #define WHITE_MENU COLOR_PAIR(15) 
 #define BLACK_MENU COLOR_PAIR(16) 
+
+#define MAX_STR_SIZE 20
 
 #define OPTIONS_POSY OPTIONS_OFFSET+TITLE_HEIGHT+TITLE_OFFSET
 #define PREVIEW_POSY OPTIONS_POSY+OPTIONS_OFFSET+2*NUM_OPTIONS
@@ -73,19 +76,21 @@ char title[TITLE_HEIGHT][MAP_WIDTH+1] = {
     "  XXXXXX  XX  XX  XXXXXX      XXXXXXX  XX  XX  XXXXXXX ",
     "  XXX    XXXXXXXX  XXXXXX     XXXXXXX XXXXXXXX XXXXXXX "};
 
-char* options[NUM_OPTIONS] = {"Play Pacman", "Play Gunman", "", "Options", "Exit"};
+char* options[NUM_OPTIONS] = {"Play Pacman", "Play Gunman", "Custom settings", "", "Exit"};
+char settings[NUM_SETTINGS][MAX_STR_SIZE] = {"Lives", "Random Spawn", "Num Ghosts", "Fruit Position", "Bounce", "Respawn Time", "Shooting", "Armor", "Bullets", "Reload Time"};
 char* pointer = "(*<";
 
 void menu_print_ent(int, int, int, int, char*, int);
 void* delete_menu(void*);
 void* pacrun_menu(void*);
 
-void options_menu(Options*);
+Options custom_menu();
 
 void print_title();
 void print_options(int, char **);
+void print_settings(int, char[][MAX_STR_SIZE], Options, int, int);
 void print_pointer(int, int, char*, int, char **);
-void move_pointer(char , int*, int*);
+void move_pointer(char , int*, int*, int, char**);
 
 
 void* delete_menu(void* parameters)
@@ -240,7 +245,7 @@ void print_preview(WINDOW* win, int r, int c, char preview[r][c], char colors[r]
     wrefresh(win); 
 }
 
-int main_menu()
+Options main_menu()
 {
     int i,j,k;
 
@@ -248,6 +253,8 @@ int main_menu()
     int n_selection = 0;
 
     char c;
+
+    Options game_options;
 
 
     WINDOW* win_preview = newwin(PREVIEW_HEIGHT, PREVIEW_WIDTH, PREVIEW_POSY, (MAP_WIDTH-PREVIEW_WIDTH)/2);
@@ -264,7 +271,7 @@ int main_menu()
         beep();
         n_selection = c_selection;
 
-        move_pointer(c, &c_selection, &n_selection);
+        move_pointer(c, &c_selection, &n_selection, NUM_OPTIONS, options);
         print_pointer(c_selection, n_selection, pointer, NUM_OPTIONS, options);
         //refresh();
 
@@ -295,15 +302,22 @@ int main_menu()
         pthread_join(pacrun_v, NULL);
         pthread_join(delete_v, NULL);
     }
-    else if(c_selection == 3) //Otions
+
+    switch(c_selection)
     {
-        options_menu(options);
+        case 0:
+        case 1:
+            game_options = choose_options(c_selection);
+            break;
+        case 2:
+            game_options = custom_menu();
+            break;
     }
     
     erase();
     delwin(win_preview);
 
-    return c_selection;
+    return game_options;
 }
 
 
@@ -364,21 +378,95 @@ int pause_menu(ControlData* cd)
     return c_selection;
 }
 
-void options_menu(Options *options)
+Options custom_menu()
 {
     char c;
+    int n_selection=0, c_selection=0;
+    Options options = gunman_options();
+
     erase();
     print_title();
-    char* options_menu[2] = {"Pacman", "Gunman"};
+    print_settings(NUM_SETTINGS, settings, options, c_selection, n_selection);
     
     do
     {
-        print_options(2, options_menu);
-        print_pointer(0, 0, pointer, 2, options);
-        //refresh();
         c = getchar();
+
+        n_selection = c_selection;
+        fprintf(stderr, "bb");
+        move_pointer(c, &c_selection, &n_selection, NUM_SETTINGS, settings);
+        print_settings(NUM_SETTINGS, settings, options, c_selection, n_selection);
+        c_selection = n_selection;
+        fprintf(stderr, "aa");
     } while (c != '\r');
     
+}
+
+void print_settings(int num_settings, char settings_str[num_settings][MAX_STR_SIZE], Options settings, int c_selection, int n_selection)
+{
+    int i, j;
+    char settings_value[NUM_SETTINGS][MAX_STR_SIZE];
+    char c;
+    
+    for(i=0; i < num_settings; i++)
+    {
+        switch(i)
+        {
+            case 0:
+                sprintf(settings_value[i], "%d", settings.lives);
+                break;
+            case 1:
+                sprintf(settings_value[i], (settings.options_spawn.random)?"RANDOM":"FIXED");
+                break;
+            case 2:
+                sprintf(settings_value[i], "%d", settings.num_ghosts);
+                break;
+            case 3:
+                sprintf(settings_value[i], (settings.options_fruit.fixed)?"RANDOM":"FIXED");
+                break;
+            case 4:
+                sprintf(settings_value[i], (settings.boing)?"ENABLED":"DISABLED");
+                break;
+            case 5:
+                sprintf(settings_value[i], "%.1f", settings.time_spawn/1000.0);
+                break;
+            case 6:
+                sprintf(settings_value[i], (settings.options_shoot.enabled)?"ENABLED":"DISABLED");
+                break;
+            case 7:
+                sprintf(settings_value[i], "%d", settings.options_shoot.armor);
+                break;
+            case 8:
+                sprintf(settings_value[i], "%d", settings.options_shoot.max_bullets);
+                break;
+            case 9:
+                sprintf(settings_value[i], "%.1f", settings.options_shoot.shoot_cd/1000.0);
+                break;
+        }
+
+        attron(COLOR_PACMAN);
+        for(j=0; j < strlen(pointer); j++)
+            mvaddch(OPTIONS_POSY+2*c_selection, 9 - (j+2), ' ');
+
+        mvprintw(OPTIONS_POSY+2*n_selection, 9 - (strlen(pointer)+1), pointer);
+        attroff(COLOR_PACMAN);
+
+        mvprintw(OPTIONS_POSY+2*i, 10, settings_str[i]);
+        mvaddch(OPTIONS_POSY+2*i, 36, '<');
+        if(c_selection == i)
+        {
+            attron(COLOR_PACMAN);
+            mvprintw(OPTIONS_POSY+2*i, 38, "         ");
+        }
+
+        mvprintw(OPTIONS_POSY+2*i, 42-(strlen(settings_value[i]))/2, settings_value[i]);
+        attroff(COLOR_PACMAN);
+        mvaddch(OPTIONS_POSY+2*i, 48, '>'); 
+        move_pointer(c, &c_selection, &n_selection, num_settings, settings_str);
+
+    }
+
+    refresh();
 }
 
 void print_title()
@@ -420,7 +508,7 @@ void print_pointer(int opos, int npos, char* pointer, int num_options, char *opt
     refresh();
 }
 
-void move_pointer(char c, int *c_selection, int *n_selection)
+void move_pointer(char c, int *c_selection, int *n_selection, int num_options, char* options_str[num_options])
 {
     switch(c)
     {
@@ -431,18 +519,19 @@ void move_pointer(char c, int *c_selection, int *n_selection)
                 {
                     (*n_selection)--;
                 }
-                while(*n_selection > 0 && !strcmp("", options[*n_selection]));
+                while(*n_selection > 0 && !strcmp("", options_str[*n_selection]));
             }
             break;
         case K_DOWN:
-            if(*c_selection + 1 < NUM_OPTIONS)
+            if(*c_selection + 1 < num_options)
             {
                 do
                 {
                     (*n_selection)++;
                 }
-                while(*n_selection > 0 && !strcmp("", options[*n_selection]));
+                while(*n_selection > 0 && !strcmp("", options_str[*n_selection]));
             }
             break;
     }
+    fprintf(stderr, "A");
 }

@@ -14,8 +14,7 @@ typedef struct
 
 typedef struct 
 {
-    _Bool enabled;
-    int time_spawn;
+    _Bool random;
 }OptionsSpawn;
 
 typedef struct 
@@ -29,14 +28,16 @@ typedef struct{
     OptionsShoot options_shoot;
     OptionsSpawn options_spawn;
     OptionsFruit options_fruit;
+    int time_spawn;
     int lives;
     char map[MAP_HEIGHT][MAP_WIDTH+1];
     _Bool boing;
-    int death_timer;
     int num_ghosts;
 }Options;
 
 Options choose_options(int mode);
+Options gunman_options();
+
 
 /*
 Options mode_options[] = {{{false, 0}, {false, 0, 0}, MAP_PACMAN, false, 0}, //pacman

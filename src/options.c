@@ -3,7 +3,6 @@
 #include <stdio.h>
 
 Options pacman_options();
-Options gunman_options();
 
 Options choose_options(int mode)
 {
@@ -24,15 +23,14 @@ Options pacman_options()
     Options options;
     options.options_shoot.enabled = false;
     options.options_shoot.armor = 0;
-    options.options_spawn.enabled = false;
-    options.options_spawn.time_spawn = 0;
+    options.options_spawn.random = false;
     options.lives = 2;
     options.num_ghosts = 4;
     options.boing = false;
     options.options_fruit.fixed = true;
     options.options_fruit.pos.x = 27;
     options.options_fruit.pos.y = 17;
-    options.death_timer = 0;
+    options.time_spawn = 0;
     
     for(i = 0; i < MAP_HEIGHT; i++)
     {
@@ -49,13 +47,12 @@ Options gunman_options()
     options.options_shoot.armor = 6;
     options.options_shoot.max_bullets = 5;
     options.options_shoot.shoot_cd = 1e3;
-    options.options_spawn.enabled = true;
-    options.options_spawn.time_spawn = 3e3;
+    options.options_spawn.random = true;
     options.options_fruit.fixed = false;
+    options.time_spawn = 3e3;
     options.lives = 2;
     options.num_ghosts = 7;
     options.boing = true;
-    options.death_timer = 3;
 
     for(i = 0; i < MAP_HEIGHT; i++)
     {
