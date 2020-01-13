@@ -34,9 +34,7 @@ void init()
     init_color(COLOR_PINK, 1000, 800, 800);
     init_color(COLOR_WHITE, 1000, 1000, 1000);
     init_color(COLOR_BROWN, 350, 250, 250);
-    init_color(COLOR_BLUE_1, 0, 0, 700);
-    init_color(COLOR_BLUE_2, 0, 0, 400);
-    init_color(COLOR_BLUE_3, 0, 0, 200);
+    init_color(COLOR_BLUE_1, 0, 0, 300);
 
     init_pair(1, COLOR_BLUE, COLOR_BLACK);
     init_pair(2, COLOR_WHITE, COLOR_BLACK);
@@ -62,8 +60,6 @@ void init()
     init_pair(19, COLOR_PINK, COLOR_BLACK);
     init_pair(20, COLOR_ORANGE, COLOR_BLACK);
     init_pair(21, COLOR_BLUE_1, COLOR_BLACK);
-    init_pair(22, COLOR_BLUE_2, COLOR_BLACK);
-    init_pair(23, COLOR_BLUE_3, COLOR_BLACK);
 
     refresh();
 }
@@ -79,11 +75,10 @@ int main()
 
     keypad(stdscr, true);
 
-    #define MENU_EXIT 4
     do
     {
         erase();
-        main_menu(&options);
+        menu_choice = main_menu(&options);
 
         if(menu_choice == MENU_EXIT)
             break;

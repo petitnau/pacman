@@ -6,7 +6,7 @@
 #include "control.h"
 #include "interface.h"
 
-#define NUM_OPTIONS 5
+#define NUM_OPTIONS 6
 #define NUM_SETTINGS 13
 #define OPTIONS_OFFSET 3 
 #define PREVIEW_OFFSET 2
@@ -69,6 +69,28 @@ char gun_col[(PREVIEW_HEIGHT-2)][(PREVIEW_WIDTH-2)+1] = {
 " d mmmmmmmmmmm mmmmmmm d m m",
 " d mmmmmmmmmmmmmmmmmmm d mmm",
 " d d d d d d d d d d d d d d"};
+char spook_game[(PREVIEW_HEIGHT-2)][(PREVIEW_WIDTH-2)+1] = {
+"                         x x",
+"   lqqqqqk ~ lqqqqqqqk   x x",
+"   mqqqk x ~ mqqqqqqqj   mqj",
+"     ~ x x       [\"]        ",
+"qqqk ~ x x^*)lqk ~ lqqqqqqqq",
+"qqqj ~ mqj ~ x x ~ mqqqqqk l",
+"     ~ ~ ~ ~ x x ~       x x",
+"   lqqqqqqqqqj mqqqqqk   x x",
+"   mqqqqqqqqqqqqqqqqqj   mqj",
+"                            "};
+char spook_col[(PREVIEW_HEIGHT-2)][(PREVIEW_WIDTH-2)+1] = {
+"       d d d d d         n n",
+"   nnnmmmm d mmmmnnnnn   n n",
+"   nnmmm m d mmmmmnnnn   nnn",
+"     d m m       www        ",
+"nnnn d m mpppmmm d nnnnnnnnn",
+"nnnn d mmm d m m d nnnnnnn n",
+"     d d d d m m d d     n n",
+"   nnnmmmmmmmm mmnnnnn   n n",
+"   nnnnnnnnnnnnnnnnnnn   nnn",
+"                            "};
 
 char title[TITLE_HEIGHT][MAP_WIDTH+1] = {
     "  XXXXXX    XX     XXXXXX     XX   XX    XX    X  XXXX ",
@@ -194,6 +216,9 @@ void print_preview(WINDOW* win, int r, int c, char preview[r][c], char colors[r]
                 case 'm':
                     wattron(win, COLOR_MAP);
                     break;
+                case 'n':
+                    wattron(win, COLOR_MAP_1);
+                    break;
                 case 'd':
                     wattron(win, COLOR_PELLETS);
                     break;
@@ -230,6 +255,9 @@ void print_preview(WINDOW* win, int r, int c, char preview[r][c], char colors[r]
                 case 'm':
                     wattroff(win, COLOR_MAP);
                     break;
+                case 'n':
+                    wattroff(win, COLOR_MAP_1);
+                    break;
                 case 'd':
                     wattroff(win, COLOR_PELLETS);
                     break;
@@ -247,7 +275,7 @@ void print_preview(WINDOW* win, int r, int c, char preview[r][c], char colors[r]
     wrefresh(win); 
 }
 
-void main_menu(Options* game_options)
+int main_menu(Options* game_options)
 {
     int i,j,k;
 
@@ -284,6 +312,9 @@ void main_menu(Options* game_options)
             case 1:
                 print_preview(win_preview, (PREVIEW_HEIGHT-2), (PREVIEW_WIDTH-2)+1, gun_game, gun_col);
                 break;
+            case 2:
+                print_preview(win_preview, (PREVIEW_HEIGHT-2), (PREVIEW_WIDTH-2)+1, spook_game, spook_col);
+                break;
             default:
                 werase(win_preview);
                 wrefresh(win_preview);
@@ -319,7 +350,7 @@ void main_menu(Options* game_options)
     erase();
     delwin(win_preview);
 
-    return game_options;
+    return c_selection;
 }
 
 

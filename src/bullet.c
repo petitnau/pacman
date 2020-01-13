@@ -16,7 +16,6 @@ typedef struct
 
 pthread_mutex_t bullet_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-//int bullet_main(BulletPipes pipes)
 int bullet_main(int bullet_info, int bullet_pos)
 {
     BulletList list;
@@ -37,6 +36,7 @@ void* bullet_thread(void* parameters)
 
     BulletThreadPar* b_par = (BulletThreadPar*) parameters;
 
+    beep();
     while(!stop)
     {
         pthread_mutex_lock(&bullet_mutex);

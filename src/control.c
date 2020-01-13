@@ -263,11 +263,13 @@ void manage_bullet_in(ControlData* cd)
 
 void manage_timers(ControlData* cd)
 {
+    //Timer per il testo temporaneo allo scadere viene rimosso
     if(cd->temp_text.timer != 0)
         if(!check_timer(cd->temp_text.timer))
         {
             cd->temp_text.timer = 0;
         }
+    //Tiimer per lo spawn della frutta allo scadere viene rimossa
     if(cd->timers.fruit_timer != 0)
         if(!check_timer(cd->timers.fruit_timer))
         {
@@ -276,6 +278,7 @@ void manage_timers(ControlData* cd)
             cd->game_food[cd->fruit.y][cd->fruit.x+1] = ' ';
             cd->timers.fruit_timer = 0;
         }
+    //Tiimer per fantasmi spaventati allo scadere tornano normali
     if(cd->timers.fright_timer != 0)
         if(!check_timer(cd->timers.fright_timer))
         {
@@ -288,7 +291,7 @@ void manage_timers(ControlData* cd)
 void send_ghost_info(ControlData* cd)
 {    
     int i = 0;
-    if(cd->ghost_info.new)
+    if(cd->ghost_info.new)  //Se vi è un nuovo pacchetto per un ghost viene inviato
     {
         write(cd->pipes->ghost_out, &cd->ghost_info, sizeof(cd->ghost_info));
         cd->ghost_info = init_ghost_info();
@@ -296,8 +299,8 @@ void send_ghost_info(ControlData* cd)
 }
 
 void send_pacman_info(ControlData* cd)
-{    
-    if(cd->pacman_info.new)
+{       
+    if(cd->pacman_info.new) //Se vi è un nuovo pacchetto per pacman viene inviato
     {
         write(cd->pipes->pacman_out, &cd->pacman_info, sizeof(cd->pacman_info));
         cd->pacman_info = init_pacman_info();
@@ -316,7 +319,7 @@ void food_handler(ControlData* cd)
     int i,j ;
     Position pe_pos;
 
-    for(i=-1; i<=1; i++)
+    for(i=-1; i<=1; i++) //Per tutta la hitbox di pacaman 
     {
         pe_pos.x = cd->characters.pacman.e.p.x+i;
         pe_pos.y = cd->characters.pacman.e.p.y;
@@ -329,10 +332,9 @@ void food_handler(ControlData* cd)
                 cd->eaten_dots +=1;
                 cd->game_food[pe_pos.y][pe_pos.x] = ' ';
                 if(cd->eaten_dots == 70 || cd->eaten_dots == 170){
-                    //spawna un frutto va tutto in funzione col controllo
+                    //Spawna un frutto va tutto in funzione col controllo
                     create_fruit(cd);
                 }
-                beep();
                 break;
             case '`': 
                 cd->score += 50;
@@ -355,6 +357,11 @@ void food_handler(ControlData* cd)
     }
 }
 
+/**
+ * Gestore delle collisioni fra entità
+ * 
+ * @param cd dati di controllo della partita
+ */
 void collision_handler(ControlData* cd)
 {
     _Bool flag = false;
@@ -388,7 +395,7 @@ void collision_handler(ControlData* cd)
     }
     
     BulletNode *aux = cd->characters.bullets.head, *aux2 = cd->characters.bullets.head;
-    while(aux != NULL)
+    while(aux != NULL) //Ciclo la lista degli spari 
     {
         if(!aux->bullet.dead)
         {

@@ -318,12 +318,6 @@ void set_map_brightness(WINDOW* win, int brightness)
         case 1:
             wattron(win, COLOR_MAP_1);
             break;
-        case 2:
-            wattron(win, COLOR_MAP_2);
-            break;
-        case 3:
-            wattron(win, COLOR_MAP_3);
-            break;
     }
 }
 
@@ -336,12 +330,6 @@ void unset_map_brightness(WINDOW* win, int brightness)
             break;
         case 1:
             wattroff(win, COLOR_MAP_1);
-            break;
-        case 2:
-            wattroff(win, COLOR_MAP_2);
-            break;
-        case 3:
-            wattroff(win, COLOR_MAP_3);
             break;
     }
 }
@@ -394,10 +382,10 @@ void print_map(WINDOW* win, ControlData* cd)
         {
             p.y = j;
             p.x = i;
-            if(!cd->options.spooky || distance(cd->characters.pacman.e.p, p) < 5)
+            if(!cd->options.spooky || distance(cd->characters.pacman.e.p, p) < 4)
                 print_map_at(win, i, j, cd->options.map, 0);        
             else
-                print_map_at(win, i, j, cd->options.map, 3);           
+                print_map_at(win, i, j, cd->options.map, 1);           
         }
 }
 
@@ -446,7 +434,7 @@ void print_food(WINDOW *win, ControlData* cd)
         {
             p.y = j;
             p.x = i;
-            if(!cd->options.spooky || distance(cd->characters.pacman.e.p, p) < 5)
+            if(!cd->options.spooky || distance(cd->characters.pacman.e.p, p) < 4)
                 print_food_at(win, i,j, cd->game_food);   
         }
 }
