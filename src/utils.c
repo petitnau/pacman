@@ -44,6 +44,7 @@ int min_index (int size, float *array)
     return x;
 }
 
+//Distanza tra due punti
 float distance (Position a, Position b)
 {
     return sqrt(pow(b.x/2.0-a.x/2.0,2) + pow(b.y-a.y,2));
@@ -79,6 +80,7 @@ _Bool is_empty_space(char c)
     return c == ' ' || c == '#';
 }
 
+//Effetto pacman nella mappa carattere per carattere
 void map_loop(Position* position)
 {
     if(position->x == -1)

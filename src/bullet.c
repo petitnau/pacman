@@ -16,6 +16,12 @@ typedef struct
 
 pthread_mutex_t bullet_mutex = PTHREAD_MUTEX_INITIALIZER;
 
+/**
+ * Funzione principale processo proiettile
+ * 
+ * @param bullet_info pipe che gestisce le info in arrivo da control
+ * @param bullet_pos pipe in uscita che invia posizioni a control
+ */
 int bullet_main(int bullet_info, int bullet_pos)
 {
     BulletList list;
@@ -29,6 +35,11 @@ int bullet_main(int bullet_info, int bullet_pos)
     }
 }
 
+/**
+ * Thread di un singolo sparo dove gestisco il movimento e se collide con un muro
+ * 
+ * @param parameters parametri passati al thread
+ */
 void* bullet_thread(void* parameters)
 {
     int movepause;
@@ -56,7 +67,7 @@ void* bullet_thread(void* parameters)
                 break;
         }
         map_loop(&b_par->bullet->p);
-
+        //Controllo se vi è un muro o meno
         if(!is_empty_space(MAP_PACMAN[b_par->bullet->p.y][b_par->bullet->p.x]))
             b_par->bullet->dead = true;
             
@@ -72,7 +83,7 @@ void* bullet_thread(void* parameters)
 
         usleep(movepause);  
     }
-
+    //Comunica la morte del proiettile a control e lo rimuove dalla lista
     pthread_mutex_lock(&bullet_mutex);
     write(b_par->bullet_pos, b_par->bullet, sizeof(*(b_par->bullet)));
     b_list_remove(b_par->list, b_list_search(*(b_par->list), *(b_par->bullet)));
@@ -87,7 +98,7 @@ void manage_b_info_in(int bullet_info, int bullet_pos, BulletList* list)
 
     while(read(bullet_info, &info, sizeof(info)) != -1)
     {
-        if(info.create_bullet)
+        if(info.create_bullet) //Crea un nuovo proiettile aggiungendo alla lista e creando un thread
         {
             BulletThreadPar* bullet_par = malloc(sizeof(BulletThreadPar));
             bullet.p = info.p;
@@ -103,7 +114,7 @@ void manage_b_info_in(int bullet_info, int bullet_pos, BulletList* list)
 
             pthread_create(&bullet_par->bullet->id, NULL, &bullet_thread, bullet_par);
         }
-        if(info.destroy_bullet)
+        if(info.destroy_bullet) //Se bisogna distruggere il proiettile viene rimosso dalla lista
         {
             pthread_mutex_lock(&bullet_mutex);
             bullet.id = info.destroy_id;

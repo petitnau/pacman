@@ -92,6 +92,29 @@ char spook_col[(PREVIEW_HEIGHT-2)][(PREVIEW_WIDTH-2)+1] = {
 "   nnnnnnnnnnnnnnnnnnn   nnn",
 "                            "};
 
+char custom_game[(PREVIEW_HEIGHT-2)][(PREVIEW_WIDTH-2)+1] = {
+" ~[\"]~ ~ ~ ~ ~ ~ ~ ~ ~ ~ x x",
+" ~ lqqqqqk ~ lqqqqqqqk ~ x x",
+" ~ mqqqk x ~ mqqqqqqqj ~ mqj",
+" ` ~ ~ x x[\"]               ",
+"qqqk ~ x x   lqk ~ lqqqqqqqq",
+"qqqj ~ mqj   x x ~ mqqqqqk l",
+" ~ ~ >*)     x x ~ ~ ~ ~ x x",
+" ~ lqqqqqqqqqj mqqqqqk ~ x x",
+" ~ mqqqqqqqqqqqqqqqqqj ~ mqj",
+" ~ ~ ~ [\"] ~ ~ ~ ~ ~ ~[\"]~ ~"};
+char custom_col[(PREVIEW_HEIGHT-2)][(PREVIEW_WIDTH-2)+1] = {
+" +ppp+ + + + + + + + + + - -",
+" + ------- + --------- + - -",
+" + ----- - + --------- + ---",
+" + + + - -ppp               ",
+"---- + - -   --- + ---------",
+"---- + ---   - - + ------- -",
+" + + www     - - + + + + - -",
+" + ----------- ------- + - -",
+" + ------------------- + ---",
+" + + + ppp + + + + + +ppp+ +"};
+
 char title[TITLE_HEIGHT][MAP_WIDTH+1] = {
     "  XXXXXX    XX     XXXXXX     XX   XX    XX    X  XXXX ",
     "  XX  XXX  XXXX   XXXXXX      XXX XXX   XXXX   XX XXXX ",
@@ -314,6 +337,9 @@ int main_menu(Options* game_options)
                 break;
             case 2:
                 print_preview(win_preview, (PREVIEW_HEIGHT-2), (PREVIEW_WIDTH-2)+1, spook_game, spook_col);
+                break;
+            case 3:
+                print_preview(win_preview, (PREVIEW_HEIGHT-2), (PREVIEW_WIDTH-2)+1, custom_game, custom_col);
                 break;
             default:
                 werase(win_preview);

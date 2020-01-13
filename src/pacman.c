@@ -47,6 +47,16 @@ PacManInfo init_pacman_info()
     info.sleeptime = 0;
     return info;
 }
+
+/**
+ * Funzione principale del processo pacman a cui arrivano i comandi e aggiorno la posizione
+ * 
+ * @param options opzioni della partita
+ * @param info_in info/eventi in arrivo da control
+ * @param pos_out pipe inivio posizione pacmana  control
+ * @param bullet_out pipe per invio al processo proiettile la posizione di un nuovo proiettile
+ * @param log_out pipe per l'invio dei log
+ */
 void pacman_main(Options options, int info_in, int pos_out, int bullet_out, int log_out)
 {
     CharPacman pacman = init_pacman_char(options);
@@ -55,7 +65,6 @@ void pacman_main(Options options, int info_in, int pos_out, int bullet_out, int 
 
     while(1)
     {
-        //Legge solo l'ultimo inserito nella pipe e controlla se è una mossa valida
         manage_p_info_in(options, info_in, bullet_out, &pacman, options.map);
         switch_direction(&pacman, options.map);
         if (!pacman.paused && !pacman.dead) pacman_move(&pacman.e, options.map);
@@ -65,14 +74,21 @@ void pacman_main(Options options, int info_in, int pos_out, int bullet_out, int 
     }
 }
 
+/**
+ * Gestisce i timer di pacman in particolare il cooldown dello sparo
+ * 
+ * @param pacman pacman
+ * @param options opzioni della partita
+ */
 void manage_p_timers(CharPacman* pacman, Options options)
 {
     if(pacman->cooldown != 0)
     {
+        /*Se il timer è stato avviato ed è passato un secondo viene aggiunto 
+        una munizione a pacman fino ad un massimo impostato nelle opzioni*/
         if(!check_timer(pacman->cooldown))
         {
-
-            pacman->bullets++;
+            pacman->bullets++; 
             if(pacman->bullets < options.options_shoot.max_bullets)
                 pacman->cooldown = start_timer(options.options_shoot.shoot_cd);
             else
@@ -81,6 +97,15 @@ void manage_p_timers(CharPacman* pacman, Options options)
     }
 }
 
+/**
+ * Gestisco l'arrivo delle informazioni a pacman da control
+ * 
+ * @param options opzioni della partita
+ * @param info_in info/eventi in arrivo da control
+ * @param bullet_out pipe per invio al processo proiettile la posizione di un nuovo proiettile
+ * @param lpacman pacman
+ * @param map mappa di gioco
+ */
 void manage_p_info_in(Options options,int info_in, int bullet_out, CharPacman *pacman, char map[MAP_HEIGHT][MAP_WIDTH+1])
 { 
     PacManInfo info_pkg;
@@ -88,9 +113,10 @@ void manage_p_info_in(Options options,int info_in, int bullet_out, CharPacman *p
 
     while(read(info_in, &info_pkg, sizeof(info_pkg)) != -1)
     {                
-        //Pacman viene mangiato
+        //Pacman viene colpito da un proiettile
         if(info_pkg.hit)
         {
+            //Se finisce l'armatura muore
             if(pacman->armor <= 0)
             {
                 pacman->lives--;
@@ -101,6 +127,7 @@ void manage_p_info_in(Options options,int info_in, int bullet_out, CharPacman *p
                 pacman->armor--;
             }
         }
+        //Vi è stata una collisione tra fantasma e pacman
         if(info_pkg.collide)
         {
             pacman->lives--;
@@ -116,12 +143,12 @@ void manage_p_info_in(Options options,int info_in, int bullet_out, CharPacman *p
         {
             pacman->paused = false;
         }
-        //Pacman fermo
+        //Pacman fermo per un tempo prestabilito
         if(info_pkg.sleeptime > 0)
         {
             usleep(info_pkg.sleeptime);
         }
-        //Pacman sparocharacters.pacman
+        //Sparo di pacman, viene creato un nuovo proiettile e avviato il timer di cooldown
         if(info_pkg.shoot && pacman->bullets > 0)
         {
             pacman->bullets--;
@@ -147,9 +174,10 @@ void manage_p_info_in(Options options,int info_in, int bullet_out, CharPacman *p
                     bullet_info.p.x+=2;
                     break;
             }       
-
+            //Invio al processo proiettile le info dello sparo nuovo
             write(bullet_out, &bullet_info, sizeof(bullet_info));
         }
+        //Pacman viene resettato 
         if(info_pkg.reset)
         {
             pacman->armor = options.options_shoot.armor;
@@ -173,7 +201,8 @@ void manage_p_info_in(Options options,int info_in, int bullet_out, CharPacman *p
 
 void switch_direction(CharPacman* pacman, char map[MAP_HEIGHT][MAP_WIDTH+1])
 {
-    if(can_move_pacman(pacman->e, pacman->next_dir, map))   //controlla se può fare movimento nella nuova direzione
+    //Controlla se può fare movimento nella nuova direzione
+    if(can_move_pacman(pacman->e, pacman->next_dir, map))   
         pacman->e.dir = pacman->next_dir;
 }
 
@@ -187,6 +216,14 @@ void pac_wait(CharPacman pacman, Options options)
     usleep(movepause);
 }
 
+/**
+ * Controlla se il tasto premuto è possibile tenendo conto di una curva più avanti
+ * non si può girare se si finisce con faccia al muro
+ * 
+ * @param pacman pacman
+ * @param direction nuova direzione (tasto premuto)
+ * @param map mappa di gioco
+ */
 _Bool accept_turn(CharPacman pacman, Direction direction, char map[MAP_HEIGHT][MAP_WIDTH+1])
 {
     int i;
@@ -248,6 +285,7 @@ _Bool accept_turn(CharPacman pacman, Direction direction, char map[MAP_HEIGHT][M
 
 void pacman_move(Entity* pacman, char map[MAP_HEIGHT][MAP_WIDTH+1])
 {         
+    //Se pacman può muoversi si posta
     if(can_move_pacman(*pacman, pacman->dir, map))
     {        
         switch(pacman->dir)
@@ -269,6 +307,13 @@ void pacman_move(Entity* pacman, char map[MAP_HEIGHT][MAP_WIDTH+1])
     map_loop(&pacman->p);
 }
 
+/**
+ * Controlla se il tasto premuto è possibile non si può girare se si finisce con faccia al muro
+ * 
+ * @param entity entità a cui si controlla il movimento
+ * @param direction nuova direzione (tasto premuto)
+ * @param map mappa di gioco
+ */
 _Bool can_move_pacman(Entity entity, Direction direction, char map[MAP_HEIGHT][MAP_WIDTH+1])
 {
     int i;

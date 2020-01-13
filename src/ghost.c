@@ -102,8 +102,8 @@ GhostInfo init_ghost_info()
  * 
  * @param options opzioni di gioco
  * @param info_in informazioni/eventi in arrivo da control
- * @param pos_out invia posizione a control
- * @param bullet_out invia al processo bullet posizione e nuovo poriettile
+ * @param pos_out pipe per inviare posizione a control
+ * @param bullet_out pipe per inviare al processo bullet posizione e nuovo poriettile
  * @param log_out pipe per i log
  */
 void ghost_main(Options options, int info_in, int pos_out, int bullet_out, int log_out)
