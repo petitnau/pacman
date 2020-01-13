@@ -23,20 +23,26 @@ typedef struct
     Position pos;
 }OptionsFruit;
 
+typedef struct
+{
+    int pac_speed;
+    int ghost_speed;
+}OptionsSpeed;
 
 typedef struct{
     OptionsShoot options_shoot;
     OptionsSpawn options_spawn;
     OptionsFruit options_fruit;
+    OptionsSpeed options_speed;
     int time_spawn;
     int lives;
     char map[MAP_HEIGHT][MAP_WIDTH+1];
     _Bool boing;
     int num_ghosts;
+    _Bool spooky;
 }Options;
 
 Options choose_options(int mode);
-Options gunman_options();
 
 
 /*

@@ -11,6 +11,7 @@ typedef struct
 typedef struct
 {
     int id;
+    int move_speed;
     Position p;
     Direction dir;
 } Entity;

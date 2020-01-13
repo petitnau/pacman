@@ -7,7 +7,7 @@
 #include "interface.h"
 
 #define NUM_OPTIONS 5
-#define NUM_SETTINGS 10
+#define NUM_SETTINGS 13
 #define OPTIONS_OFFSET 3 
 #define PREVIEW_OFFSET 2
 #define PREVIEW_WIDTH 30
@@ -76,8 +76,8 @@ char title[TITLE_HEIGHT][MAP_WIDTH+1] = {
     "  XXXXXX  XX  XX  XXXXXX      XXXXXXX  XX  XX  XXXXXXX ",
     "  XXX    XXXXXXXX  XXXXXX     XXXXXXX XXXXXXXX XXXXXXX "};
 
-char* options[NUM_OPTIONS] = {"Play Pacman", "Play Gunman", "Custom settings", "", "Exit"};
-char* settings[NUM_SETTINGS] = {"Lives", "Random Spawn", "Num Ghosts", "Fruit Position", "Bounce", "Respawn Time", "Shooting", "Armor", "Bullets", "Reload Time"};
+char* options[NUM_OPTIONS] = {"Play Pacman", "Play Gunman", "Play Spookman", "Custom settings", "", "Exit"};
+char* settings[NUM_SETTINGS] = {"Lives", "Random Spawn", "Num Ghosts", "Fruit Position", "Bounce", "Respawn Time", "Shooting", "Armor", "Bullets", "Reload Time", "Pacman Speed", "Ghost Speed", "Lightning"};
 char* pointer = "(*<";
 char* PRESS_ENTER = "Press ENTER to start...";
 
@@ -295,17 +295,18 @@ void main_menu(Options* game_options)
     {
         case 0:
         case 1:
+        case 2:
             *game_options = choose_options(c_selection);
             break;
-        case 2:
+        case 3:
             custom_menu(game_options);
             break;
     }
     
-    if(c_selection == 0 || c_selection == 1 || c_selection == 2) //Game 
+    if(c_selection == 0 || c_selection == 1 || c_selection == 2 || c_selection == 3) //Game 
     {
-        if(c_selection == 2)
-            c_selection = 11;
+        if(c_selection == 3)
+            c_selection = NUM_SETTINGS+1;
         pthread_t pacrun_v, delete_v;
         pthread_create(&pacrun_v, NULL, &pacrun_menu, &c_selection);
         pthread_create(&delete_v, NULL, &delete_menu, NULL);
@@ -382,7 +383,7 @@ void custom_menu(Options* options)
 {
     char c;
     int n_selection=0, c_selection=0;
-    *options = gunman_options();
+    *options = choose_options(1);
 
     erase();
     print_title();
@@ -433,7 +434,7 @@ void edit_settings(char c, int c_selection, Options* options)
                     break;
                 case 7:
                     if(options->options_shoot.armor > 0)
-                    options->options_shoot.armor--;
+                        options->options_shoot.armor--;
                     break;
                 case 8:
                     if(options->options_shoot.max_bullets > 0)
@@ -442,6 +443,17 @@ void edit_settings(char c, int c_selection, Options* options)
                 case 9:
                     if(options->options_shoot.shoot_cd > 0)
                         options->options_shoot.shoot_cd = ((options->options_shoot.shoot_cd/100.0)-1)*100;
+                    break;
+                case 10:
+                    if(options->options_speed.pac_speed > 0)
+                        options->options_speed.pac_speed = ((options->options_speed.pac_speed/1000.0)-1)*1000;
+                    break;
+                case 11:
+                    if(options->options_speed.ghost_speed > 0)
+                        options->options_speed.ghost_speed = ((options->options_speed.ghost_speed/1000.0)-1)*1000;
+                    break;
+                case 12:
+                    options->spooky = !options->spooky;
                     break;
             }    
             break;
@@ -477,6 +489,15 @@ void edit_settings(char c, int c_selection, Options* options)
                     break;
                 case 9:
                     options->options_shoot.shoot_cd = ((options->options_shoot.shoot_cd/100.0)+1)*100;
+                    break;
+                case 10:
+                    options->options_speed.pac_speed = ((options->options_speed.pac_speed/1000.0)+1)*1000;
+                    break;
+                case 11:
+                    options->options_speed.ghost_speed = ((options->options_speed.ghost_speed/1000.0)+1)*1000;
+                    break;
+                case 12:
+                    options->spooky = !options->spooky;
                     break;
             }            
             break;
@@ -521,7 +542,16 @@ void print_settings(int num_settings, char* settings_str[num_settings], Options 
                 sprintf(settings_value[i], "%d", settings.options_shoot.max_bullets);
                 break;
             case 9:
-                sprintf(settings_value[i], "%.1f", settings.options_shoot.shoot_cd/1000.0);
+                sprintf(settings_value[i], "%.1f s", settings.options_shoot.shoot_cd/1000.0);
+                break;
+            case 10:
+                sprintf(settings_value[i], "%d ms", settings.options_speed.pac_speed/1000);
+                break;
+            case 11:
+                sprintf(settings_value[i], "%d ms", settings.options_speed.ghost_speed/1000);
+                break;
+            case 12:
+                sprintf(settings_value[i], (settings.spooky)?"SPOOKY":"NORMAL");
                 break;
         }
 
@@ -552,7 +582,7 @@ void print_settings(int num_settings, char* settings_str[num_settings], Options 
 
     }
 
-    mvprintw(OPTIONS_POSY+2*(num_settings+1), 6+strlen(PRESS_ENTER)/2, PRESS_ENTER);
+    mvprintw(OPTIONS_POSY+2*(num_settings+1), 7+strlen(PRESS_ENTER)/2, PRESS_ENTER);
 
     refresh();
 }

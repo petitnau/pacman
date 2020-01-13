@@ -7,9 +7,9 @@
 
 void print_gui_string(int, int, char*); 
 void print_health(CharPacman);
-void print_map_at(WINDOW*, int, int,char[MAP_HEIGHT][MAP_WIDTH+1]);
-void print_map(WINDOW*, char[MAP_HEIGHT][MAP_WIDTH+1]);
-void print_food(WINDOW*, char[MAP_HEIGHT][MAP_WIDTH+1]);
+void print_map_at(WINDOW*, int, int,char[MAP_HEIGHT][MAP_WIDTH+1], int);
+void print_map(WINDOW*, ControlData*);
+void print_food(WINDOW*, ControlData*);
 void print_pacman(WINDOW*, CharPacman);
 void print_ghost(WINDOW*, CharGhost);
 void print_temp_text(WINDOW*, TempText);
@@ -164,12 +164,13 @@ void print_ghost(WINDOW *win, CharGhost ghost)
 void print_ui(WINDOW* win_map, ControlData* cd)
 {    
     int i;
+    Position p;
 
     char scorestr[10];
     char nupstr[10];    
 
-    print_map(win_map, cd->options.map);
-    print_food(win_map, cd->game_food);
+    print_map(win_map, cd);
+    print_food(win_map, cd);
     sprintf(scorestr, "%d", cd->score/10);
     sprintf(nupstr, "1UP");
     print_gui_string(0,11, nupstr);
@@ -182,8 +183,9 @@ void print_ui(WINDOW* win_map, ControlData* cd)
     
     BulletNode* aux = cd->characters.bullets.head;
     while(aux != NULL)
-    {                 
-        print_bullet(win_map, aux->bullet);
+    {            
+        if(!cd->options.spooky || distance(cd->characters.pacman.e.p, aux->bullet.p) < 5 || !aux->bullet.enemy)
+            print_bullet(win_map, aux->bullet);
         aux = aux->next;
     }
     
@@ -191,8 +193,9 @@ void print_ui(WINDOW* win_map, ControlData* cd)
 
     for(i = 0; i < cd->options.num_ghosts; i++)
     {                 
-        if(cd->characters.ghosts[i].mode != M_INACTIVE)
-            print_ghost(win_map, cd->characters.ghosts[i]);
+        if(!cd->options.spooky || distance(cd->characters.pacman.e.p, cd->characters.ghosts[i].e.p) < 5 || cd->characters.ghosts[i].mode == M_FRIGHT || cd->characters.ghosts[i].mode == M_DEAD)
+            if(cd->characters.ghosts[i].mode != M_INACTIVE)
+                print_ghost(win_map, cd->characters.ghosts[i]);
     }
 
     print_temp_text(win_map, cd->temp_text);
@@ -258,7 +261,7 @@ void print_health(CharPacman pacman)
     for(i=0; i<pacman.bullets; i++)
     {
         attron(COLOR_SHIELD);
-        mvprintw(35-i*3, 57, "^^");
+        mvprintw(35-i*3, 57, "/\\");
         attroff(COLOR_SHIELD);
         attron(COLOR_PACMAN);
         mvprintw(36-i*3, 57, "  ");
@@ -305,26 +308,62 @@ void print_health(CharPacman pacman)
     
 }
 
-void print_map_at(WINDOW* win, int x, int y, char map[MAP_HEIGHT][MAP_WIDTH+1])
+void set_map_brightness(WINDOW* win, int brightness)
+{
+    switch(brightness)
+    {
+        case 0:
+            wattron(win, COLOR_MAP);
+            break;
+        case 1:
+            wattron(win, COLOR_MAP_1);
+            break;
+        case 2:
+            wattron(win, COLOR_MAP_2);
+            break;
+        case 3:
+            wattron(win, COLOR_MAP_3);
+            break;
+    }
+}
+
+void unset_map_brightness(WINDOW* win, int brightness)
+{
+    switch(brightness)
+    {
+        case 0:
+            wattroff(win, COLOR_MAP);
+            break;
+        case 1:
+            wattroff(win, COLOR_MAP_1);
+            break;
+        case 2:
+            wattroff(win, COLOR_MAP_2);
+            break;
+        case 3:
+            wattroff(win, COLOR_MAP_3);
+            break;
+    }
+}
+
+void print_map_at(WINDOW* win, int x, int y, char map[MAP_HEIGHT][MAP_WIDTH+1], int brightness)
 {
     char c = map[y][x];
-
-    wattron(win, COLOR_MAP);
 
     if(c=='m' || c=='q' || c=='x' || c=='j' 
      || c=='l' || c=='k' || c=='t' || c=='u' 
      || c=='w' || c=='~' || c=='`')
     {
-        wattron(win, COLOR_MAP);
+        set_map_brightness(win, brightness);
         mvwaddch(win, y, x, NCURSES_ACS(c));
-        wattroff(win, COLOR_MAP);
+        unset_map_brightness(win, brightness);
 
     }
     else if(is_empty_space(c) || c == '@' || c == '[' || c== ']')
     {
-        wattron(win, COLOR_MAP);
+        set_map_brightness(win, brightness);
         mvwaddch(win, y, x, ' ');
-        wattroff(win, COLOR_MAP);
+        unset_map_brightness(win, brightness);
     }
     else if(c == '^' || c =='v')
     {
@@ -345,13 +384,21 @@ void print_map_at(WINDOW* win, int x, int y, char map[MAP_HEIGHT][MAP_WIDTH+1])
         
 }
 
-void print_map(WINDOW* win, char map[MAP_HEIGHT][MAP_WIDTH+1])
+void print_map(WINDOW* win, ControlData* cd)
 {
     int i,j;
+    Position p;
 
     for(i=0; i<MAP_WIDTH; i++)
         for(j=0; j<MAP_HEIGHT; j++)
-           print_map_at(win, i, j, map);
+        {
+            p.y = j;
+            p.x = i;
+            if(!cd->options.spooky || distance(cd->characters.pacman.e.p, p) < 5)
+                print_map_at(win, i, j, cd->options.map, 0);        
+            else
+                print_map_at(win, i, j, cd->options.map, 3);           
+        }
 }
 
 void print_food_at(WINDOW *win, int x, int y, char game_food[MAP_HEIGHT][MAP_WIDTH+1])
@@ -389,11 +436,17 @@ void print_food_at(WINDOW *win, int x, int y, char game_food[MAP_HEIGHT][MAP_WID
     }
 }
 
-void print_food(WINDOW *win, char game_food[MAP_HEIGHT][MAP_WIDTH+1])
+void print_food(WINDOW *win, ControlData* cd)
 {
     int i, j;
+    Position p;
 
     for(i=0; i<MAP_WIDTH; i++)
         for(j=0; j<MAP_HEIGHT; j++)
-            print_food_at(win, i,j, game_food);
+        {
+            p.y = j;
+            p.x = i;
+            if(!cd->options.spooky || distance(cd->characters.pacman.e.p, p) < 5)
+                print_food_at(win, i,j, cd->game_food);   
+        }
 }

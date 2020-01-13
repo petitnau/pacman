@@ -369,7 +369,7 @@ void manage_position_events(GhostShared* ghost_shared, CharGhost* ghost)
 
 void ghost_wait(CharGhost ghost, GhostShared* ghost_shared)
 {
-    int movepause = GHOST_SPEED;
+    int movepause = ghost_shared->options.options_speed.ghost_speed;
 
     if(ghost.e.dir == UP || ghost.e.dir == DOWN) //gestisce la velocità
         movepause *= 2;

@@ -10,7 +10,7 @@
 
 void manage_p_info_in(Options, int, int, CharPacman*, char[MAP_HEIGHT][MAP_WIDTH+1]);
 void switch_direction(CharPacman*, char map[MAP_HEIGHT][MAP_WIDTH+1]);
-void pac_wait(CharPacman);
+void pac_wait(CharPacman, Options);
 _Bool accept_turn(CharPacman, Direction, char[MAP_HEIGHT][MAP_WIDTH+1]);
 void pacman_move(Entity*, char map[MAP_HEIGHT][MAP_WIDTH+1]);
 _Bool can_move_pacman(Entity, Direction, char[MAP_HEIGHT][MAP_WIDTH+1]);
@@ -60,7 +60,7 @@ void pacman_main(Options options, int info_in, int pos_out, int bullet_out, int 
         switch_direction(&pacman, options.map);
         if (!pacman.paused && !pacman.dead) pacman_move(&pacman.e, options.map);
         write(pos_out, &pacman, sizeof(pacman)); //invia la posizione a control
-        pac_wait(pacman);
+        pac_wait(pacman, options);
         manage_p_timers(&pacman, options);
     }
 }
@@ -177,9 +177,9 @@ void switch_direction(CharPacman* pacman, char map[MAP_HEIGHT][MAP_WIDTH+1])
         pacman->e.dir = pacman->next_dir;
 }
 
-void pac_wait(CharPacman pacman)
+void pac_wait(CharPacman pacman, Options options)
 {
-    int movepause = PACMAN_SPEED;
+    int movepause = options.options_speed.pac_speed;
 
     if(pacman.e.dir == UP || pacman.e.dir == DOWN) //gestisce la velocità di pacman
         movepause*=2;
