@@ -74,7 +74,7 @@ int main()
     int menu_choice;
     pid_t p_player, p_pacman, p_ghosts, p_bullet;
     int pacman_ch_pipe[2], pacman_info_pipe[2], ghost_ch_pipe[2], ghost_info_pipe[2], cmd_pipe[2], log_pipe[2], bullet_info [2], bullet_pos[2];
-    init();
+    init(); //Inizializza i valori e i colori
     Options options;
 
     keypad(stdscr, true);
@@ -85,7 +85,7 @@ int main()
         erase();
         main_menu(&options);
 
-        if(menu_choice==MENU_EXIT)
+        if(menu_choice == MENU_EXIT)
             break;
         //print_map();
         //print_food();

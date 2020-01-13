@@ -217,8 +217,6 @@ void manage_g_info_in(int info_in, GhostShared* ghost_shared)
                     
                     if(ghost_shared->options.options_spawn.random)
                         ghost_shared->ghosts[i].e.p = HOME_POSITION;
-                    
-                    ghost_shared->ghosts[i].timers.load = start_timer(i*1e3);
                 }
             } 
             ghost_shared->paused = true;
@@ -231,7 +229,22 @@ void manage_g_info_in(int info_in, GhostShared* ghost_shared)
         }
         if(info.resume)
         {
-            ghost_shared->paused = false;
+            if(ghost_shared->paused)
+            {
+                fprintf(stderr, "ciao come va");
+                if(ghost_shared->options.options_spawn.random)
+                {
+                    for(i=0; i < ghost_shared->num_ghosts; i++)
+                    {
+                        if(ghost_shared->ghosts[i].mode != M_INACTIVE)
+                        {
+                            ghost_shared->ghosts[i].mode = M_IDLE;
+                            ghost_shared->ghosts[i].timers.load = start_timer(i*1e3);
+                        }
+                    } 
+                }
+                ghost_shared->paused = false;
+            }
         }
         if(info.sleeptime > 0)
         {

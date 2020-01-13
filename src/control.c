@@ -87,6 +87,14 @@ void manage_logs(int log_in, MessageList* log_list)
     refresh();
 }
 
+
+/**
+ * Funzione di gioco principale dove vengono gestisti i dati
+ * e utilizzati da altre funzioni.
+ * 
+ * @param pipes Pipe utilizzate per la comunicazione tra i vari processi
+ * @param options Opzioni della partita con cui stabilisco la modalità di gioco
+ */
 void control_main(ControlPipes pipes, Options options)
 {
     ControlData cd; 
@@ -100,14 +108,17 @@ void control_main(ControlPipes pipes, Options options)
 
     while(1)
     {  
+        //Funzioni di gestione dati in arrivo a control ed elaborazione
         manage_cmd_in(&cd);
-        manage_pacman_in(&cd);/* &eaten_dots, &ghost_streak, characters, &ghost_info, game_food, &score, &temp_text, &timers); */
+        manage_pacman_in(&cd);
         manage_ghost_in(&cd);
         manage_bullet_in(&cd);
         manage_timers(&cd);
         collision_handler(&cd);
+        //Funzioni di invio dati alle entità
         send_pacman_info(&cd);
         send_ghost_info(&cd);
+        //Stampa scena
         print_ui(win_map, &cd);
 
         manage_logs(pipes.log_in, &log_list);
@@ -127,7 +138,9 @@ void control_main(ControlPipes pipes, Options options)
     }
     delwin(win_map);
 }
-
+/**
+ * Inserisce il cibo nella mappa attiva di gioco
+ */
 void food_setup(char food[MAP_HEIGHT][MAP_WIDTH+1])
 {
     int i;
@@ -137,6 +150,11 @@ void food_setup(char food[MAP_HEIGHT][MAP_WIDTH+1])
     } 
 }
 
+/**
+ * Gestisce gli input da tastiera
+ * 
+ * @param cd dati di controllo della partita
+ */
 void manage_cmd_in(ControlData* cd)
 {
     _Bool new_pkg = false;
@@ -286,6 +304,13 @@ void send_pacman_info(ControlData* cd)
     }
 }
 
+/**
+ * Gestore del cibo e punteggi, quando pacman passa sopra un pallino
+ * questo viene considerato come mangiato e vengono aggiunti dei punti,
+ * inotre dopo un prestabilito numero di pallini viene spawnato un frutto
+ * 
+ * @param cd dati di controllo della partita
+ */
 void food_handler(ControlData* cd)
 {  
     int i,j ;

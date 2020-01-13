@@ -164,6 +164,7 @@ void menu_print_ent(int oy, int ox, int ny, int nx, char* str, int color)
     attroff(COLOR_PAIR(color));
 }
 
+
 void print_preview(WINDOW* win, int r, int c, char preview[r][c], char colors[r][c])
 {
     int i,j;
