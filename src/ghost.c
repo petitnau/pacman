@@ -15,7 +15,7 @@ void ghost_choose_dir(CharGhost*, GhostShared*);
 void manage_position_events(GhostShared*, CharGhost*);
 void ghost_wait(CharGhost, GhostShared*);
 void ghost_move(CharGhost*, char[MAP_HEIGHT][MAP_WIDTH+1]);
-_Bool is_empty_space_ghost(char);
+_Bool is_empty_space_ghost(char); 
 void* ghost_thread(void*);
 void set_ghost_start(GhostShared*, CharGhost*);
 void init_ghost_map(GhostShared*);
@@ -56,17 +56,23 @@ void init_ghost_char(GhostShared *ghost_shared, int id)
     }
 }
 
+/**
+ * Imposta la posizione dove deve apparire un fantasma
+ * 
+ * @param ghost_shared dati condivisi tra i thread dei fantasmi 
+ * @param ghost fantasma preso in considerazione
+ */
 void set_ghost_start(GhostShared *ghost_shared, CharGhost *ghost)
 {
-    if(ghost->mode == M_RESPAWN)
+    if(ghost->mode == M_RESPAWN) //se il fantasma deve respawnare va nella monsterpit
     {
         ghost->e.p = HOME_POSITION;
     }
-    else if(ghost_shared->options.options_spawn.random)
+    else if(ghost_shared->options.options_spawn.random) //posizione iniziale per spawnare random
     {
         ghost->e.p = ghost_shared->starting_pos[ghost->e.id];
     }
-    else
+    else //posizione iniziale fantasma dentro la monster pit
     {
         ghost->e.p = GHOST_START_POS[ghost->type];
     }
@@ -91,7 +97,16 @@ GhostInfo init_ghost_info()
     return info;
 }
 
-void ghost_main(Options options, int info_in, int pos_out, int bullet_out, int log_out) //int num_fantasmi
+/**
+ * Funzione principale del processo dei fantasmi dove arrivano i dati e vengono gestiti
+ * 
+ * @param options opzioni di gioco
+ * @param info_in informazioni/eventi in arrivo da control
+ * @param pos_out invia posizione a control
+ * @param bullet_out invia al processo bullet posizione e nuovo poriettile
+ * @param log_out pipe per i log
+ */
+void ghost_main(Options options, int info_in, int pos_out, int bullet_out, int log_out)
 {
     int i;
     pthread_t ghost;
@@ -110,8 +125,9 @@ void ghost_main(Options options, int info_in, int pos_out, int bullet_out, int l
     ghost_shared.ghosts = malloc(sizeof(CharGhost)*options.num_ghosts); //alloca puntatori
     ghost_shared.starting_pos = malloc(sizeof(Position)*options.num_ghosts); //alloca puntatori
     
-    init_ghost_map(&ghost_shared);
+    init_ghost_map(&ghost_shared); //Mette i fantasmi nella mappa 
     
+    //Imposto i fantasmi a inattivi inizializzo valori
     for(i = 0; i < options.num_ghosts; i++)
     {
         init_timers(&ghost_shared, i);
@@ -120,6 +136,7 @@ void ghost_main(Options options, int info_in, int pos_out, int bullet_out, int l
         ghost_parameters[i].ghost_shared = &ghost_shared;
         ghost_parameters[i].id = i;
     }     
+    //Se i fantasmi non spawnano random creo subito i loro threads
     if(!options.options_spawn.random)
         for(i = 0; i < options.num_ghosts; i++)
             pthread_create(&ghost, NULL, &ghost_thread, &ghost_parameters[i]);    
@@ -132,6 +149,12 @@ void ghost_main(Options options, int info_in, int pos_out, int bullet_out, int l
     }
 }
 
+/**
+ * Gestisce il respawn dei fantasmi implementato tramite creazione 
+ * di un nuovo thread dopo un tempo prestabilito
+ * 
+ * @param ghost_parameters Array di ghost e id del ghost
+ */
 void manage_respawn(GhostParameters* ghost_parameters)
 {
     GhostShared* ghost_shared = ghost_parameters[0].ghost_shared;
@@ -151,6 +174,11 @@ void manage_respawn(GhostParameters* ghost_parameters)
     }
 }
 
+/**
+ * Thread del ghost quando viene generato, gestisce i movimenti e la lgica del fantasma
+ * 
+ * @param parameters parametri passati al thread
+ */
 void* ghost_thread(void* parameters)
 {
     _Bool end_flag = false;
@@ -159,22 +187,22 @@ void* ghost_thread(void* parameters)
     int id = ((GhostParameters*)parameters)->id;
 
     int i = 0;  
-    //Assegno ad ogni ghost un ghost_id univoco
 
+    //Inizializzo il fantasma del thread
     pthread_mutex_lock(&mutex);
-    init_ghost_char(ghost_shared, id);
+    init_ghost_char(ghost_shared, id); 
     ghost = &ghost_shared->ghosts[id];
     pthread_mutex_unlock(&mutex);
-
 
     do
     {       
         pthread_mutex_lock(&mutex);
         manage_g_timers(ghost_shared, ghost);
         ghost_choose_dir(ghost, ghost_shared); 
+        //Il fantasma si muove
         if(!ghost_shared->paused && ghost->mode != M_IDLE) ghost_move(ghost, ghost_shared->options.map);
         manage_position_events(ghost_shared, ghost);
-        end_flag = (ghost->mode == M_RESPAWN);
+        end_flag = (ghost->mode == M_RESPAWN); //Flag per sapere se il thread è terminato o meno
         write(ghost_shared->pos_out, ghost, sizeof(*ghost)); //invia la posizione a control
         pthread_mutex_unlock(&mutex);
         ghost_wait(*ghost, ghost_shared);
@@ -182,6 +210,12 @@ void* ghost_thread(void* parameters)
     while(!end_flag);
 }
 
+/**
+ * Gestisco i dati in ingresso al fantasma in arrivo da control
+ * 
+ * @param info_in file descriptor pipe ingresso da control
+ * @param ghost_shared dati condivisi tra i thread dei fantasmi 
+ */
 void manage_g_info_in(int info_in, GhostShared* ghost_shared)
 {
     GhostInfo info;
@@ -189,13 +223,14 @@ void manage_g_info_in(int info_in, GhostShared* ghost_shared)
     int k;
         
     pthread_mutex_lock(&mutex);
+    //Legge le info da control 
     while(read(info_in, &info, sizeof(info)) != -1)
     {
-        if(info.death != -1)
+        if(info.death != -1) //Se è diverso da -1 corrisonde all'id del fantasma morto
         {
             ghost_shared->ghosts[info.death].mode = M_DEAD;
         }
-        if(info.fright)
+        if(info.fright) //Manda i fantasmi in fright quando pacman mangia un energizer
         {
             for(i=0; i < ghost_shared->num_ghosts; i++)
             {
@@ -207,13 +242,13 @@ void manage_g_info_in(int info_in, GhostShared* ghost_shared)
                 }
             } 
         }
-        if(info.restart)
+        if(info.restart) //Riavvia i fantasmi
         {
             for(i=0; i < ghost_shared->num_ghosts; i++)
             {
                 if(ghost_shared->ghosts[i].mode != M_INACTIVE)
                 {
-                    init_ghost_char(ghost_shared, i);
+                    init_ghost_char(ghost_shared, i); //esetto il ghost
                     
                     if(ghost_shared->options.options_spawn.random)
                         ghost_shared->ghosts[i].e.p = HOME_POSITION;
@@ -227,15 +262,15 @@ void manage_g_info_in(int info_in, GhostShared* ghost_shared)
         {
             ghost_shared->paused = true;
         }
-        if(info.resume)
+        if(info.resume) //Riattiva i fantasmi quando viene premuto un tasto
         {
             if(ghost_shared->paused)
             {
-                fprintf(stderr, "ciao come va");
                 if(ghost_shared->options.options_spawn.random)
                 {
                     for(i=0; i < ghost_shared->num_ghosts; i++)
                     {
+                        //Se devono respawnare escono dopo qualche secondo dalla monsterpit
                         if(ghost_shared->ghosts[i].mode != M_INACTIVE)
                         {
                             ghost_shared->ghosts[i].mode = M_IDLE;
@@ -246,7 +281,7 @@ void manage_g_info_in(int info_in, GhostShared* ghost_shared)
                 ghost_shared->paused = false;
             }
         }
-        if(info.sleeptime > 0)
+        if(info.sleeptime > 0) //Tempo per cui devono stare fermi
         {
             ghost_shared->paused = true;
             usleep(info.sleeptime);
@@ -258,14 +293,21 @@ void manage_g_info_in(int info_in, GhostShared* ghost_shared)
     pthread_mutex_unlock(&mutex);
 }
 
+/**
+ * Gestisce i timers dei fantasmi
+ * 
+ * @param ghost_shared dati condivisi tra i thread dei fantasmi
+ * @param ghost fantasma preso in considerazione
+ */
 void manage_g_timers(GhostShared* ghost_shared, CharGhost* ghost)
 {
     BulletInfo bullet_info = {};
     int i;
 
-    if(ghost_shared->paused)
+    if(ghost_shared->paused) 
         return;
 
+    //Controllo se il frigh è finito o meno
     if(ghost->timers.fright != 0)
     {
         if(!check_timer(ghost->timers.fright))
@@ -275,6 +317,7 @@ void manage_g_timers(GhostShared* ghost_shared, CharGhost* ghost)
             ghost->timers.fright = 0; 
         }
     }
+    //Controllo se i fantasmi hanno finito di caricare
     if(ghost->timers.load != 0)
     {
         if(!check_timer(ghost->timers.load))
@@ -283,18 +326,20 @@ void manage_g_timers(GhostShared* ghost_shared, CharGhost* ghost)
             ghost->timers.load = 0;
         }
     }
+    //Cooldown degli spari dei fantasmi se sono abilitati, 1s
     if(ghost->timers.shoot != 0 && ghost_shared->options.options_shoot.enabled)
     {
+        //Il ghost può sparare solo fuori dalla monster pit e sesi trova in una posizione pari
         if(!is_in_pen(*ghost) && ghost->e.p.x % 2 == 0 && ghost->mode == M_CHASE && !check_timer(ghost->timers.shoot))
         {
-            for(i = 0; i < 4; i++)
+            for(i = 0; i < 4; i++) //In quante direzioni sparare 
             {
                 bullet_info.create_bullet = true;
                 bullet_info.p = ghost->e.p;
                 bullet_info.dir = i;
                 bullet_info.enemy = true;
 
-                switch(bullet_info.dir)
+                switch(bullet_info.dir) //Controllo la direzione
                 {
                     case UP:
                         bullet_info.p.y--;
@@ -309,18 +354,24 @@ void manage_g_timers(GhostShared* ghost_shared, CharGhost* ghost)
                         bullet_info.p.x+=2;
                         break;
                 }       
-                
+                //Invio la generazione di uno sparo al processo proiettile
                 write(ghost_shared->bullet_out, &bullet_info, sizeof(bullet_info));
             }
-            ghost->timers.shoot = start_timer(1e3); 
+            ghost->timers.shoot = start_timer(1e3); //Resetto cooldown
         }
     }
 }
 
+/**
+ * Funzione usata per stabilire il comportamento dell'IA in bse al tipo 
+ * di fantasma o alla modalità
+ * 
+ * @param ghost_shared dati condivisi tra i thread dei fantasmi
+ * @param ghost fantasma preso in considerazione
+ */
 void ghost_choose_dir(CharGhost* ghost, GhostShared* ghost_shared)
 {
-
-    switch(ghost->mode)
+    switch(ghost->mode) //Controllo la modalità
     {
         case M_FRIGHT:
             ghost->e.dir = choose_direction_random(*ghost, ghost_shared->options.map);
@@ -332,7 +383,7 @@ void ghost_choose_dir(CharGhost* ghost, GhostShared* ghost_shared)
             ghost->e.dir = choose_direction_target(*ghost, SCATTER[ghost->type], ghost_shared->options.map);
             break;
         case M_CHASE:
-            switch(ghost->type)
+            switch(ghost->type) //Se non vi sono modalità particolari controllo il tipo di fantasma
             {
                 case BLINKY: 
                     ghost->e.dir = choose_direction_target(*ghost, blinky_target(ghost_shared->pacman), ghost_shared->options.map);
@@ -351,21 +402,30 @@ void ghost_choose_dir(CharGhost* ghost, GhostShared* ghost_shared)
     }
 }
 
+/**
+ * Gestisce il comportamento dei fantasmi se sono in una posizione particolare
+ * 
+* @param ghost_shared dati condivisi tra i thread dei fantasmi
+ * @param ghost fantasma preso in considerazione
+ */
 void manage_position_events(GhostShared* ghost_shared, CharGhost* ghost)
 {
     int i;
+    //Se sono a casa e morti 
     if(ghost->e.p.x == HOME_POSITION.x && ghost->e.p.y == HOME_POSITION.y && ghost->mode == M_DEAD)
     {
         ghost->mode = M_RESPAWN;
         ghost->timers.respawn = start_timer(ghost_shared->options.time_spawn);
 
     }
+    //Se sono nella stessa posizione di un altro fantasma nella mappa
     if(ghost_shared->options.boing && !is_in_pen(*ghost))
     {
         for(i = 0; i < ghost_shared->num_ghosts; i++)
         {
             if(i != ghost->e.id)
             {            
+                //Rimbalzano solo con direzioni di movimento diverse
                 if(ghost->e.dir != ghost_shared->ghosts[i].e.dir)
                 {
                     if(ghost->e.p.x == ghost_shared->ghosts[i].e.p.x && ghost->e.p.y == ghost_shared->ghosts[i].e.p.y)
@@ -384,18 +444,25 @@ void ghost_wait(CharGhost ghost, GhostShared* ghost_shared)
 {
     int movepause = ghost_shared->options.options_speed.ghost_speed;
 
-    if(ghost.e.dir == UP || ghost.e.dir == DOWN) //gestisce la velocità
+    if(ghost.e.dir == UP || ghost.e.dir == DOWN) //Gestisce la velocità in base alla direzione
         movepause *= 2;
     if(ghost.mode == M_DEAD)
         movepause /= 3;
     else if(ghost.mode == M_FRIGHT)
         movepause *= 2;
 
-    usleep(movepause);
+    usleep(movepause); //Ferma il processo
 }
 
+/**
+ * Muove il fantasma
+ * 
+ * @param ghost fantasma in considerazione
+ * @param map mappa di gioco
+ */
 void ghost_move(CharGhost* ghost, char map[MAP_HEIGHT][MAP_WIDTH+1])
 {         
+    //Controllo possa muoversi
     if(can_move_ghost(*ghost, ghost->e.dir, map))
     {        
         switch(ghost->e.dir)
@@ -422,6 +489,13 @@ _Bool is_empty_space_ghost(char c)
     return is_empty_space(c) || c=='^' || c == 'v' || c=='<' || c=='>' || c=='[' || c==']';
 }
 
+/**
+ * Controllo se il fantasma può muoversi nella nuova direzione 
+ * 
+ * @param ghost fantasma preso in considerazione
+ * @param direction nuova direzione da controllare se vuota/fattibile
+ * @param map mappa di gioco
+ */
 _Bool can_move_ghost(CharGhost ghost, Direction direction, char map[MAP_HEIGHT][MAP_WIDTH+1])
 {
     int i;
@@ -465,28 +539,45 @@ _Bool can_move_ghost(CharGhost ghost, Direction direction, char map[MAP_HEIGHT][
     return true;
 }
 
+/**
+ * Controllo se il fantasma è nella monster pen
+ * 
+ * @param ghost fantasma da controllare
+ */
 _Bool is_in_pen(CharGhost ghost)
 {
     return (ghost.e.p.x >= 20 && ghost.e.p.y >= 12 && ghost.e.p.x <= 34 && ghost.e.p.y <= 16);
 }
 
+/**
+ * In caso i fantasmi spawnino random inserisce i fantasmi nella mappa
+ * 
+ * @param ghost_shared dati condivisi tra i thread dei fantasmi 
+ */
 void init_ghost_map(GhostShared* ghost_shared)
 {
     int n_pos;
-    //numeri a caso per la posizione dei pellet dove andranno i fantasmi
+    //Numeri a caso per la posizione dei pellet dove andranno i fantasmi
     int *rand_nums = malloc(sizeof(int)*(ghost_shared->options.num_ghosts));
     int i,j;
     Position pos;
 
+    //Conta quanti pallini ci sono nella mappa
     n_pos = count_mat_occ(MAP_HEIGHT, MAP_WIDTH, PELLETS, '~');
     get_rand_nums(0, n_pos, ghost_shared->options.num_ghosts, rand_nums);
     for (i = 0; i < ghost_shared->options.num_ghosts; i++)
-    {
+    {   
+        //Trova l'iesima posizione di un carattere e ne restituisce x e y
         pos = get_i_ch_pos(MAP_HEIGHT, MAP_WIDTH, PELLETS, '~', rand_nums[i]);   
         ghost_shared->starting_pos[i] = pos;
     }
 }
 
+/**
+ * Controlla se i fantasmi nascosti debbano spawnare creando un nuovo thread
+ * 
+ * @param ghost_parameters array di fantasmi e id del fantasma
+ */
 void check_ghost_spawn(GhostParameters* ghost_parameters)
 {
     GhostShared* ghost_shared = ghost_parameters[0].ghost_shared;
@@ -496,6 +587,7 @@ void check_ghost_spawn(GhostParameters* ghost_parameters)
 
     for(i = 0; i < num_ghosts; i++)
     {
+        //Controlla se pacman è sopra uno dei fantasmi
         if(ghost_shared->pacman.p.x == ghost_shared->starting_pos[i].x && ghost_shared->pacman.p.y == ghost_shared->starting_pos[i].y && ghost_shared->ghosts[i].mode == M_INACTIVE)
         {        
             pthread_create(&ghost, NULL, &ghost_thread, &ghost_parameters[i]);

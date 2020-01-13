@@ -31,6 +31,13 @@ void food_setup(char[MAP_HEIGHT][MAP_WIDTH+1]);
 void eat_pause(ControlData*, int);
 void create_fruit(ControlData*);
 
+/**
+ * Inizializza i dati di controllo della partita
+ * 
+ * @param cd dati di controllo della partita
+ * @param pipes pipes per la comunicazione tra i processi
+ * @param options opzioni da caricare
+ */
 void init_control_data(ControlData* cd, ControlPipes* pipes, Options options)
 {
     int i;
@@ -138,6 +145,7 @@ void control_main(ControlPipes pipes, Options options)
     }
     delwin(win_map);
 }
+
 /**
  * Inserisce il cibo nella mappa attiva di gioco
  */
@@ -160,6 +168,7 @@ void manage_cmd_in(ControlData* cd)
     _Bool new_pkg = false;
     int c_in;
 
+    //Leggo i dati in arrivo dalla tastiera
     while(read(cd->pipes->cmd_in, &c_in, sizeof(c_in)) != -1)
     {
         switch(c_in)
@@ -204,7 +213,7 @@ void manage_cmd_in(ControlData* cd)
                 break;
             */
         }
-        if(new_pkg)
+        if(new_pkg) //Segnala che ci sta un pacchetto nuovo da mandare e riavvia le entità
         {
             cd->ghost_info.resume = true;
             cd->ghost_info.new = true;
@@ -215,6 +224,11 @@ void manage_cmd_in(ControlData* cd)
     }
 }
 
+/**
+ * Gestico la ricezione dei pacchetti di pacman
+ * 
+ * @param cd dati di controllo della partita
+ */
 void manage_pacman_in(ControlData* cd)
 {
     CharPacman pacman_pkg;
@@ -234,6 +248,11 @@ void manage_pacman_in(ControlData* cd)
     }
 }
 
+/**
+ * Gestico la ricezione dei pacchetti dai fantasmi
+ * 
+ * @param cd dati di controllo della partita
+ */
 void manage_ghost_in(ControlData* cd)
 {
     CharGhost ghost_pkg;
@@ -244,17 +263,22 @@ void manage_ghost_in(ControlData* cd)
     }
 }
 
+/**
+ * Gestico la ricezione dei pacchetti dai proiettili
+ * 
+ * @param cd dati di controllo della partita
+ */
 void manage_bullet_in(ControlData* cd)
 {
     Bullet bullet_pkg;
 
     while(read(cd->pipes->bullet_in, &bullet_pkg, sizeof(bullet_pkg)) != -1)
     {
-        if(!bullet_pkg.dead)
+        if(!bullet_pkg.dead) //Controllo se il proiettile è morto
         {
             b_list_update(&cd->characters.bullets, bullet_pkg);
         }
-        else
+        else //Rimuove il proiettile morto dalla lista dei proiettili
         {
             b_list_remove(&cd->characters.bullets, b_list_search(cd->characters.bullets, bullet_pkg));
         }
@@ -327,7 +351,7 @@ void food_handler(ControlData* cd)
 
         switch(cd->game_food[pe_pos.y][pe_pos.x])
         {
-            case '~':
+            case '~': //Mangio un pallino
                 cd->score += 10;
                 cd->eaten_dots +=1;
                 cd->game_food[pe_pos.y][pe_pos.x] = ' ';
@@ -336,7 +360,7 @@ void food_handler(ControlData* cd)
                     create_fruit(cd);
                 }
                 break;
-            case '`': 
+            case '`': //Mangio un energizer
                 cd->score += 50;
                 cd->ghost_streak = 0;
                 cd->ghost_info.fright = true;
@@ -344,7 +368,7 @@ void food_handler(ControlData* cd)
                 cd->game_food[pe_pos.y][pe_pos.x] = ' ';
                 cd->timers.fright_timer = start_timer(6);
                 break;
-            case '^':
+            case '^': //Mangio un frutto
                 cd->score += 200;
 
                 create_temp_text(&cd->temp_text, pe_pos.x-1, pe_pos.y, "200", 2e3, 13);
@@ -372,8 +396,9 @@ void collision_handler(ControlData* cd)
     {       
         ghost = &cd->characters.ghosts[i];
 
+        //Pacman e ghost sono nella stessa posizione e i fantasmi sono attivi
         if(ghost->mode != M_INACTIVE)
-        {
+        {   
             if(cd->characters.pacman.e.p.x == ghost->e.p.x && cd->characters.pacman.e.p.y == ghost->e.p.y)
             {
                 if(ghost->mode == M_FRIGHT)
@@ -399,7 +424,7 @@ void collision_handler(ControlData* cd)
     {
         if(!aux->bullet.dead)
         {
-            if(!aux->bullet.enemy)
+            if(!aux->bullet.enemy) //Sparo di pacman
             {
                 for(i = 0; i < cd->options.num_ghosts; i++)
                 {
@@ -423,7 +448,7 @@ void collision_handler(ControlData* cd)
                     aux2 = aux2->next;
                 }
             }
-            else
+            else //Sparo da un nemico 
             {
                 if(aux->bullet.p.x == cd->characters.pacman.e.p.x && aux->bullet.p.y == cd->characters.pacman.e.p.y)
                 {               
@@ -437,6 +462,13 @@ void collision_handler(ControlData* cd)
     }
 }
 
+/**
+ * Viene effettuato il reset della partita riportando fantasmi
+ * e pacman alla posizione iniziale, e vengono rimossi tutti gli
+ * spari a schermo.
+ * 
+ * @param cd dati di controllo della partita
+ */
 void reset_game(ControlData* cd)
 {
     BulletNode *aux = cd->characters.bullets.head, *aux2;
@@ -460,6 +492,7 @@ void kill_ghost(ControlData* cd, int i)
     cd->ghost_info.death = i;
     cd->ghost_info.new = true;
 }
+
 void kill_bullet(ControlData* cd, BulletNode* aux)
 {
     BulletInfo bullet_info;
@@ -472,6 +505,12 @@ void kill_bullet(ControlData* cd, BulletNode* aux)
     write(cd->pipes->bullet_out, &bullet_info, sizeof(bullet_info));
 }
 
+/**
+ * Pausa quando viene mangiato un fantasma
+ * 
+ * @param cd dati di controllo della partita
+ * @param points punti ottenuti mangiando il fantasma
+ */
 void eat_pause(ControlData* cd, int points)
 {   
     char points_string[6] = {};     
@@ -483,6 +522,12 @@ void eat_pause(ControlData* cd, int points)
     cd->pacman_info.new = true;
 }
 
+/**
+ * Spawna un frutto sulla mapa in modo random al posto di 
+ * pallini mangiati o in una posizione prestabilita
+ * 
+ * @param cd dati di controllo della partita
+ */
 void create_fruit(ControlData* cd)
 {
     char x_matrix[MAP_HEIGHT][MAP_WIDTH+1];
@@ -492,6 +537,7 @@ void create_fruit(ControlData* cd)
         cd->fruit = cd->options.options_fruit.pos;
     else
     {
+        //Genero una posizione casuale al posto di un puntino mangiato
         diff_matrix(MAP_HEIGHT, MAP_WIDTH, PELLETS, cd->game_food, x_matrix);
         n_pos = count_mat_occ(MAP_HEIGHT, MAP_WIDTH, x_matrix, 'X');
         cd->fruit = get_i_ch_pos(MAP_HEIGHT, MAP_WIDTH, x_matrix, 'X', rand_between(0, n_pos));
@@ -501,6 +547,7 @@ void create_fruit(ControlData* cd)
     cd->game_food[cd->fruit.y][cd->fruit.x] = S_FRUIT[0][1];
     cd->game_food[cd->fruit.y][cd->fruit.x+1] = S_FRUIT[0][2];
 
+    //Avvio il timer di durata della frutta 10s
     cd->timers.fruit_timer = start_timer(10e3);
 }
 
