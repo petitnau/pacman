@@ -126,7 +126,7 @@ char* settings[NUM_SETTINGS] = {"Lives", "Random Spawn", "Num Ghosts", "Fruit Po
 char* pointer = "(*<";
 char* PRESS_ENTER = "Press ENTER to start...";
 
-void menu_print_ent(int, int, int, int, char*, int);
+void menu_print_ent(int, int, int, int, const char*, int);
 void* delete_menu(void*);
 void* pacrun_menu(void*);
 
@@ -195,7 +195,7 @@ void* pacrun_menu(void* parameters)
 
 }
 
-void menu_print_ent(int oy, int ox, int ny, int nx, char* str, int color)
+void  menu_print_ent(int oy, int ox, int ny, int nx, const char* str, int color)
 {
     int i;
 

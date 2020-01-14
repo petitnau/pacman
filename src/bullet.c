@@ -1,6 +1,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <malloc.h>
 
 #include "entity.h"
 #include "utils.h"
@@ -15,6 +16,8 @@ typedef struct
 } BulletThreadPar;
 
 pthread_mutex_t bullet_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+void manage_b_info_in(int, int, BulletList*);
 
 /**
  * Funzione principale processo proiettile

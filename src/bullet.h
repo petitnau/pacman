@@ -25,4 +25,6 @@ typedef struct
     _Bool enemy;
 } Bullet;
 
+int bullet_main(int, int);
+
 #endif

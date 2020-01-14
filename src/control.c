@@ -19,6 +19,7 @@ void init_control_data(ControlData*, ControlPipes*, Options);
 void manage_cmd_in(ControlData*);
 void manage_pacman_in(ControlData*);
 void manage_ghost_in(ControlData*);
+void manage_bullet_in(ControlData*);
 
 void manage_timers(ControlData*);
 
@@ -30,6 +31,9 @@ void food_handler(ControlData*);
 void food_setup(char[MAP_HEIGHT][MAP_WIDTH+1]);
 void eat_pause(ControlData*, int);
 void create_fruit(ControlData*);
+void kill_bullet(ControlData*, BulletNode*);
+void kill_ghost(ControlData*, int);
+void reset_game(ControlData*);
 
 /**
  * Inizializza i dati di controllo della partita

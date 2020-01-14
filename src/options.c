@@ -1,6 +1,7 @@
 #include "options.h"
 #include "interface.h"
 #include <stdio.h>
+#include <string.h>
 
 Options pacman_options();
 Options gunman_options();

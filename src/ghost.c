@@ -19,6 +19,8 @@ _Bool is_empty_space_ghost(char);
 void* ghost_thread(void*);
 void set_ghost_start(GhostShared*, CharGhost*);
 void init_ghost_map(GhostShared*);
+void check_ghost_spawn(GhostParameters*);
+void manage_respawn(GhostParameters*);
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
